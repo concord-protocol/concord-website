@@ -1,0 +1,76 @@
+---
+import { CLIENTS } from '../../data/site';
+---
+
+<section class="border-b border-hairline">
+  <div class="mx-auto max-w-6xl px-5 py-24">
+    <div
+      class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <p class="cx-eyebrow">Supported clients</p>
+        <h2
+          class="mt-4 max-w-2xl text-balance text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl"
+        >
+          Three independent apps, one protocol.
+        </h2>
+        <p class="mt-5 max-w-2xl text-base leading-relaxed text-gray-400">
+          A community created in one client opens in the others. Your identity
+          is a key, not an account, so it travels with you — and if a client
+          ever disappoints you, the community does not go with it.
+        </p>
+      </div>
+      <a href="/clients/" class="cx-btn cx-btn-ghost shrink-0">
+        Compare clients
+      </a>
+    </div>
+
+    <div class="mt-14 grid gap-4 lg:grid-cols-3">
+      {
+        CLIENTS.map((client) => (
+          <div class="cx-card flex flex-col p-7">
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 class="text-xl font-semibold tracking-tight text-white">
+                {client.name}
+              </h3>
+              <span class="font-mono text-[0.65rem] uppercase tracking-wider text-gray-500">
+                {client.author}
+              </span>
+            </div>
+
+            <p class="mt-1.5 text-sm text-mint">{client.tagline}</p>
+
+            <p class="mt-5 flex-1 text-sm leading-relaxed text-gray-400">
+              {client.description}
+            </p>
+
+            <ul class="mt-6 flex flex-wrap gap-1.5">
+              {client.platforms.map((platform) => (
+                <li class="rounded-md border border-hairline px-2 py-1 font-mono text-[0.65rem] text-gray-400">
+                  {platform}
+                </li>
+              ))}
+            </ul>
+
+            <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+              <a
+                href={client.href}
+                rel="noopener"
+                class="text-sm font-medium text-mint transition-opacity hover:opacity-80"
+              >
+                Open {client.name} &rarr;
+              </a>
+              <a
+                href={client.source}
+                rel="noopener"
+                class="text-sm text-gray-400 transition-colors hover:text-gray-100"
+              >
+                Source
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,102 @@
+---
+import Logo from './Logo.astro';
+import { SPEC_REPO } from '../data/site';
+
+const columns = [
+  {
+    title: 'Learn',
+    links: [
+      { label: 'What is Concord?', href: '/learn/what-is-concord/' },
+      { label: 'How it works', href: '/learn/how-it-works/' },
+      { label: 'What a relay sees', href: '/learn/what-a-relay-sees/' },
+      { label: 'Threat model', href: '/learn/threat-model/' },
+      { label: 'Compared to alternatives', href: '/learn/comparison/' },
+    ],
+  },
+  {
+    title: 'Specification',
+    links: [
+      { label: 'All CORD documents', href: '/spec/' },
+      { label: 'CORD-01: Private Streams', href: '/spec/cord-01/' },
+      { label: 'CORD-02: Communities', href: '/spec/cord-02/' },
+      { label: 'CORD-04: Roles', href: '/spec/cord-04/' },
+      { label: 'Event examples', href: '/spec/examples/' },
+    ],
+  },
+  {
+    title: 'Ecosystem',
+    links: [
+      { label: 'Clients', href: '/clients/' },
+      { label: 'Build on Concord', href: '/build/' },
+      { label: 'SDKs and libraries', href: '/build/sdks/' },
+      { label: 'Bots', href: '/build/bots/' },
+      { label: 'Announcement', href: '/announcement/' },
+    ],
+  },
+];
+---
+
+<footer class="border-t border-hairline bg-black">
+  <div class="mx-auto max-w-6xl px-5 py-16">
+    <div class="grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div>
+        <a href="/" class="flex items-center gap-2.5 text-mint">
+          <Logo size={26} />
+          <span class="text-[15px] font-semibold text-gray-100">Concord</span>
+        </a>
+        <p class="mt-4 max-w-xs text-sm leading-relaxed text-gray-400">
+          End-to-end encrypted communities and channels, built on open
+          infrastructure. No company, no central server, no intermediary.
+        </p>
+        <p class="mt-6 font-mono text-xs text-gray-500">
+          MIT licensed &middot; an open specification
+        </p>
+      </div>
+
+      {
+        columns.map((column) => (
+          <div>
+            <h2 class="text-sm font-semibold text-gray-100">{column.title}</h2>
+            <ul class="mt-4 space-y-2.5">
+              {column.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="text-sm text-gray-400 transition-colors hover:text-mint"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-14 flex flex-col gap-4 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p class="font-mono text-xs text-gray-500">
+        Concord is an evolving specification. Contributions and review are
+        welcome.
+      </p>
+      <div class="flex gap-5">
+        <a
+          href={SPEC_REPO}
+          rel="noopener"
+          class="text-sm text-gray-400 transition-colors hover:text-mint"
+        >
+          Specification repository
+        </a>
+        <a
+          href="https://github.com/nostr-protocol/nostr"
+          rel="noopener"
+          class="text-sm text-gray-400 transition-colors hover:text-mint"
+        >
+          Nostr
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,22 @@
+---
+interface Props {
+  /** Pixel size of the square mark. */
+  size?: number;
+  class?: string;
+}
+
+const { size = 28, class: className = '' } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 32 32"
+  fill="none"
+  aria-hidden="true"
+  class={className}
+>
+  <circle cx="16" cy="11.5" r="6" stroke="currentColor" stroke-width="1.75" />
+  <circle cx="11" cy="20" r="6" stroke="currentColor" stroke-width="1.75" opacity="0.72" />
+  <circle cx="21" cy="20" r="6" stroke="currentColor" stroke-width="1.75" opacity="0.72" />
+</svg>

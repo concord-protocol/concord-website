@@ -1,0 +1,86 @@
+---
+const filter = `{
+  "kinds":   [1059],
+  "authors": ["a3f1…9c4e"]
+}`;
+---
+
+<section class="relative overflow-hidden border-b border-hairline">
+  <div class="cx-radial pointer-events-none absolute inset-0"></div>
+  <div class="cx-grid-bg pointer-events-none absolute inset-0"></div>
+
+  <div class="relative mx-auto max-w-6xl px-5 pb-24 pt-20 sm:pt-28">
+    <a
+      href="/announcement/"
+      class="group inline-flex items-center gap-2.5 rounded-full border border-hairline bg-raised/70 px-3.5 py-1.5 text-xs transition-colors hover:border-mint/40"
+    >
+      <span
+        class="rounded-full bg-mint/15 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wider text-mint"
+      >
+        New
+      </span>
+      <span class="text-gray-300">Announcing the Concord Protocol</span>
+      <span
+        class="text-gray-500 transition-transform group-hover:translate-x-0.5"
+        aria-hidden="true">&rarr;</span
+      >
+    </a>
+
+    <h1
+      class="mt-8 max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl"
+    >
+      Delete the computer<br class="hidden sm:inline" />
+      <span class="text-mint">in the middle.</span>
+    </h1>
+
+    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-gray-300">
+      Concord is an open protocol for end-to-end encrypted communities and
+      channels on <a
+        href="https://github.com/nostr-protocol/nostr"
+        rel="noopener"
+        class="text-gray-100 underline decoration-mint/40 underline-offset-4 transition-colors hover:text-mint"
+        >Nostr</a
+      >. You get the familiar shape of Discord — communities, channels, roles,
+      voice — with no company, no central server, and no intermediary holding
+      your messages or deciding who is in charge.
+    </p>
+
+    <div class="mt-10 flex flex-wrap items-center gap-3">
+      <a href="/clients/" class="cx-btn cx-btn-primary">Get a client</a>
+      <a href="/spec/" class="cx-btn cx-btn-ghost">Read the specification</a>
+      <a
+        href="/learn/what-is-concord/"
+        class="px-2 py-2 text-sm text-gray-400 transition-colors hover:text-mint"
+      >
+        How it works
+      </a>
+    </div>
+
+    <!-- The whole client-side view of a community, as a relay query. -->
+    <div class="mt-16 grid gap-4 sm:grid-cols-3">
+      <div class="cx-card p-5 sm:col-span-1">
+        <p class="cx-eyebrow">Subscribe</p>
+        <pre
+          class="mt-3 overflow-x-auto font-mono text-xs leading-relaxed text-gray-300"><code>{filter}</code></pre>
+        <p class="mt-3 text-xs leading-relaxed text-gray-500">
+          A community is a key. Holding it lets you derive the address; not
+          holding it means you cannot even find the room.
+        </p>
+      </div>
+
+      <div class="cx-card p-5 sm:col-span-2">
+        <p class="cx-eyebrow">What comes back</p>
+        <p class="cx-cipher mt-3">
+          AjMSpVv5aPQ0nUyBu2Zt4Rk9dGx7WqLoE1cHfNiXsY6mTgKrbA8vJlDwOePzZ3hC5uIq
+          RtNfXbW1yMoKdSaE7pLgQvHjUcZ0T2nB9rDkAeYxs4iVmJ3wCfOgP6lZtNuHqRbXyKdM
+          eSvA1oJpG8cLnWzTiY5rXkQ2fBdHhUuEmNxCsOaZ0tVgIRjPwlbFyD7q4KMcTnAveSXo
+        </p>
+        <p class="mt-3 text-xs leading-relaxed text-gray-500">
+          Relays, network observers, and non-members see sealed blobs addressed
+          to rotating, meaningless labels — never a member list, a channel name,
+          or a message.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

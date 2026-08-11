@@ -1,0 +1,32 @@
+---
+import { SPEC_REPO } from '../../data/site';
+---
+
+<section class="relative overflow-hidden">
+  <div class="cx-radial pointer-events-none absolute inset-0 rotate-180"></div>
+
+  <div class="relative mx-auto max-w-4xl px-5 py-28 text-center">
+    <blockquote class="mx-auto max-w-2xl">
+      <p class="text-balance text-2xl font-medium leading-snug text-gray-200 sm:text-3xl">
+        Authority is a signature, not a switch.
+      </p>
+      <p class="mt-5 text-base leading-relaxed text-gray-400">
+        A forged ban is simply dropped, because it does not trace to the owner.
+        And removing someone for real means changing the locks: the community
+        rolls to a new key handed only to who is left.
+      </p>
+    </blockquote>
+
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a href="/clients/" class="cx-btn cx-btn-primary">Get a client</a>
+      <a href="/spec/" class="cx-btn cx-btn-ghost">Read the specification</a>
+      <a href={SPEC_REPO} rel="noopener" class="cx-btn cx-btn-ghost">
+        Contribute on GitHub
+      </a>
+    </div>
+
+    <p class="mt-8 font-mono text-xs text-gray-600">
+      MIT licensed &middot; contributions, questions, and review are welcome
+    </p>
+  </div>
+</section>

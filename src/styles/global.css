@@ -1,0 +1,252 @@
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* ---------------------------------------------------------------------------
+   Concord design tokens: near-black surfaces, mint-green signal.
+   The accent + gray scales below are consumed by @astrojs/starlight-tailwind
+   to derive Starlight's own theme variables, so the docs and the marketing
+   pages stay in lockstep.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  /* Mint accent */
+  --color-accent-50: #eafff7;
+  --color-accent-100: #c8ffe9;
+  --color-accent-200: #96ffd6;
+  --color-accent-300: #55f8bd;
+  --color-accent-400: #24e8a3;
+  --color-accent-500: #06cd8a;
+  --color-accent-600: #00a771;
+  --color-accent-700: #00855d;
+  --color-accent-800: #04684b;
+  --color-accent-900: #04553f;
+  --color-accent-950: #002f24;
+
+  /* Green-tinted neutral ramp */
+  --color-gray-50: #f3f8f6;
+  --color-gray-100: #e7f1ec;
+  --color-gray-200: #cbdbd3;
+  --color-gray-300: #9fb3aa;
+  --color-gray-400: #6a8177;
+  --color-gray-500: #43574e;
+  --color-gray-600: #2d3d36;
+  --color-gray-700: #1d2a25;
+  --color-gray-800: #121a16;
+  --color-gray-900: #0a100d;
+  --color-gray-950: #050807;
+
+  /* Semantic aliases used by the marketing pages */
+  --color-ink: #000000;
+  --color-surface: #080d0b;
+  --color-raised: #0e1512;
+  --color-hairline: #1b2621;
+  --color-mint: #24e8a3;
+  --color-mint-soft: #96ffd6;
+}
+
+:root {
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+  --sl-nav-height: 4rem;
+  --concord-glow: 0 0 60px -12px rgba(36, 232, 163, 0.45);
+  --concord-grid: rgba(36, 232, 163, 0.06);
+}
+
+/* Push the dark theme all the way to black rather than Starlight's default. */
+:root[data-theme='dark'] {
+  --sl-color-bg: #050807;
+  --sl-color-bg-nav: rgba(5, 8, 7, 0.82);
+  --sl-color-bg-sidebar: #050807;
+  --sl-color-bg-inline-code: #121a16;
+  --sl-color-hairline: #16201c;
+  --sl-color-hairline-light: #1d2a25;
+  --sl-color-hairline-shade: #101815;
+  --sl-color-text-accent: var(--color-accent-300);
+  --sl-color-white: #e7f1ec;
+}
+
+:root[data-theme='light'] {
+  --sl-color-bg: #ffffff;
+  --sl-color-text-accent: var(--color-accent-700);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+-------------------------------------------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+::selection {
+  background: rgba(36, 232, 163, 0.28);
+  color: #eafff7;
+}
+
+/* --------------------------------------------------------------------------
+   Marketing-page primitives (used outside Starlight)
+-------------------------------------------------------------------------- */
+
+.cx-page {
+  background-color: var(--color-ink);
+  color: var(--color-gray-100);
+}
+
+/* Faint mint grid, the "infrastructure" texture */
+.cx-grid-bg {
+  background-image:
+    linear-gradient(to right, var(--concord-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--concord-grid) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+.cx-radial {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% -10%,
+    rgba(36, 232, 163, 0.18),
+    transparent 70%
+  );
+}
+
+.cx-hairline {
+  border-color: var(--color-hairline);
+}
+
+/* Card with a hairline border and a mint wash on hover */
+.cx-card {
+  background: linear-gradient(180deg, rgba(14, 21, 18, 0.9), rgba(8, 13, 11, 0.9));
+  border: 1px solid var(--color-hairline);
+  border-radius: 0.875rem;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.cx-card:hover {
+  border-color: rgba(36, 232, 163, 0.35);
+  box-shadow: 0 0 0 1px rgba(36, 232, 163, 0.08), 0 18px 50px -24px rgba(36, 232, 163, 0.35);
+}
+
+.cx-card-link:hover {
+  transform: translateY(-2px);
+}
+
+/* Small uppercase mint label */
+.cx-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-mint);
+}
+
+/* Primary / secondary buttons */
+.cx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.6rem;
+  padding: 0.7rem 1.25rem;
+  font-size: 0.925rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.cx-btn-primary {
+  background: var(--color-mint);
+  color: #00160f;
+  box-shadow: var(--concord-glow);
+}
+
+.cx-btn-primary:hover {
+  background: var(--color-mint-soft);
+}
+
+.cx-btn-ghost {
+  border: 1px solid var(--color-hairline);
+  color: var(--color-gray-100);
+}
+
+.cx-btn-ghost:hover {
+  border-color: rgba(36, 232, 163, 0.45);
+  color: var(--color-mint-soft);
+}
+
+/* Gradient rule used between sections */
+.cx-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(36, 232, 163, 0.28),
+    transparent
+  );
+}
+
+/* Monospace ciphertext blocks */
+.cx-cipher {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: rgba(106, 129, 119, 0.85);
+  word-break: break-all;
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   Starlight tweaks
+-------------------------------------------------------------------------- */
+
+:root[data-theme='dark'] .sl-markdown-content code:not(pre code) {
+  color: var(--color-accent-200);
+}
+
+:root[data-theme='dark'] .sl-markdown-content blockquote {
+  border-inline-start-color: var(--color-accent-700);
+}
+
+/* Spec pages are dense tables of derivations; keep them readable. */
+.sl-markdown-content table {
+  font-size: 0.9rem;
+}
+
+.sl-markdown-content th {
+  white-space: nowrap;
+}

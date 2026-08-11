@@ -1,0 +1,83 @@
+---
+/**
+ * Starlight `SiteTitle` override.
+ *
+ * Starlight has no built-in top-level nav, so the site links ride here. This
+ * keeps the docs header consistent with the marketing pages.
+ */
+import Logo from '../Logo.astro';
+import { NAV } from '../../data/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path.startsWith(href);
+---
+
+<div class="concord-site-title">
+  <a href="/" class="concord-brand">
+    <Logo size={24} />
+    <span>Concord</span>
+  </a>
+
+  <nav class="concord-top-nav" aria-label="Site">
+    {
+      NAV.map((item) => (
+        <a href={item.href} data-active={isActive(item.href) ? 'true' : undefined}>
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<style>
+  .concord-site-title {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .concord-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-mint, #24e8a3);
+    font-size: var(--sl-text-lg);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .concord-brand span {
+    color: var(--sl-color-white);
+  }
+
+  .concord-top-nav {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .concord-top-nav a {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.375rem;
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .concord-top-nav a:hover,
+  .concord-top-nav a[data-active] {
+    color: var(--color-mint, #24e8a3);
+  }
+
+  /* Only show the inline nav where the header has room for it. */
+  @media (min-width: 72rem) {
+    .concord-top-nav {
+      display: flex;
+    }
+  }
+</style>

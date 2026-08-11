@@ -1,0 +1,89 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
+
+// TODO: point this at the real production domain before deploying.
+const SITE = 'https://concordprotocol.org';
+
+export default defineConfig({
+  site: SITE,
+  vite: {
+    plugins: [tailwindcss()],
+  },
+  integrations: [
+    sitemap(),
+    starlight({
+      title: 'Concord',
+      description:
+        'A protocol for end-to-end encrypted, Discord-style communities on Nostr. No company, no central server, no intermediary.',
+      favicon: '/favicon.svg',
+      customCss: ['./src/styles/global.css'],
+      // The marketing 404 in src/pages owns this route.
+      disable404Route: true,
+      components: {
+        SiteTitle: './src/components/starlight/SiteTitle.astro',
+      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/concord-protocol/concord',
+        },
+      ],
+      editLink: {
+        baseUrl: 'https://github.com/concord-protocol/concord-website/edit/main/',
+      },
+      sidebar: [
+        {
+          label: 'Start here',
+          items: [
+            { label: 'What is Concord?', slug: 'learn/what-is-concord' },
+            { label: 'How it works', slug: 'learn/how-it-works' },
+            { label: 'What a relay sees', slug: 'learn/what-a-relay-sees' },
+            { label: 'Threat model', slug: 'learn/threat-model' },
+            { label: 'Compared to alternatives', slug: 'learn/comparison' },
+            { label: 'Glossary', slug: 'learn/glossary' },
+          ],
+        },
+        {
+          label: 'Concepts',
+          items: [
+            { label: 'Communities', slug: 'concepts/communities' },
+            { label: 'Channels', slug: 'concepts/channels' },
+            { label: 'Roles and moderation', slug: 'concepts/roles' },
+            { label: 'Invites and joining', slug: 'concepts/invites' },
+            { label: 'Removal and rotation', slug: 'concepts/removal' },
+            { label: 'Voice and video', slug: 'concepts/voice' },
+            { label: 'Disappearing messages', slug: 'concepts/disappearing-messages' },
+          ],
+        },
+        {
+          label: 'Specification',
+          items: [
+            { label: 'The CORD documents', slug: 'spec' },
+            { label: 'CORD-01: Private Streams', slug: 'spec/cord-01' },
+            { label: 'CORD-02: Communities', slug: 'spec/cord-02' },
+            { label: 'CORD-03: Channels', slug: 'spec/cord-03' },
+            { label: 'CORD-04: Roles', slug: 'spec/cord-04' },
+            { label: 'CORD-05: Invites', slug: 'spec/cord-05' },
+            { label: 'CORD-06: Rekeys and Refoundings', slug: 'spec/cord-06' },
+            { label: 'CORD-07: Audio/Video', slug: 'spec/cord-07' },
+            { label: 'CORD-08: Disappearing Messages', slug: 'spec/cord-08' },
+            { label: 'Event examples', slug: 'spec/examples' },
+          ],
+        },
+        {
+          label: 'Build',
+          items: [
+            { label: 'Overview', slug: 'build' },
+            { label: 'SDKs and libraries', slug: 'build/sdks' },
+            { label: 'Bots', slug: 'build/bots' },
+            { label: 'Implementer checklist', slug: 'build/checklist' },
+          ],
+        },
+      ],
+    }),
+  ],
+});

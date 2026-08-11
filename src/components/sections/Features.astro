@@ -1,0 +1,85 @@
+---
+const features = [
+  {
+    title: 'Communities and channels',
+    body: 'One membership and authority model over any number of channels. Public channels derive their key from the community root; private channels carry an independent key, so a leak exposes exactly one room.',
+    spec: 'CORD-02 · CORD-03',
+    href: '/concepts/channels/',
+  },
+  {
+    title: 'Roles that verify themselves',
+    body: 'Ranked permissions — admin, mod, or anything you define — rooted in the owner’s key. Every client folds the same chain and reaches the same verdict. An action that does not trace to the owner is dropped, not obeyed.',
+    spec: 'CORD-04',
+    href: '/concepts/roles/',
+  },
+  {
+    title: 'Invites that revoke',
+    body: 'A link carries only a locator and an off-network unlock token; the keys live in an encrypted bundle on relays. Retire a link and the coordinate becomes a tombstone — no re-keying the whole community.',
+    spec: 'CORD-05',
+    href: '/concepts/invites/',
+  },
+  {
+    title: 'Removal that actually removes',
+    body: 'Ban silences instantly and for free. Then the community rolls to a new key handed only to who is left, so everything after the rotation is unreadable to the removed member. No cooperation required.',
+    spec: 'CORD-06',
+    href: '/concepts/removal/',
+  },
+  {
+    title: 'Voice, video, and screenshare',
+    body: 'Any channel is callable. A blind broker mints tokens without learning which community it serves, and the SFU only ever forwards ciphertext under per-sender media keys.',
+    spec: 'CORD-07',
+    href: '/concepts/voice/',
+  },
+  {
+    title: 'Disappearing messages',
+    body: 'One staff-set timer per community. Messages expire via NIP-40 — hidden by clients, purged from local stores, and deleted from relays, so a future key compromise recovers nothing.',
+    spec: 'CORD-08',
+    href: '/concepts/disappearing-messages/',
+  },
+  {
+    title: 'Pins that carry proof',
+    body: 'A pin does not quote a message, it proves one: a signed seal plus a narrow key disclosure that opens exactly that message and nothing else. It survives every rotation and reaches members who never held the old keys.',
+    spec: 'CORD-04 §7',
+    href: '/spec/cord-04/',
+  },
+  {
+    title: 'Your memberships, everywhere',
+    body: 'A self-encrypted community list syncs your memberships across devices and across clients. Two different apps can serve one identity, and a fresh device reconstructs everything without an epoch-by-epoch walk.',
+    spec: 'CORD-02 §8',
+    href: '/spec/cord-02/',
+  },
+];
+---
+
+<section class="border-b border-hairline">
+  <div class="mx-auto max-w-6xl px-5 py-24">
+    <p class="cx-eyebrow">Capabilities</p>
+    <h2
+      class="mt-4 max-w-3xl text-balance text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl"
+    >
+      Everything a community needs, and nothing that needs a host.
+    </h2>
+    <p class="mt-5 max-w-2xl text-base leading-relaxed text-gray-400">
+      Concord is defined by a series of CORD documents. Like Nostr's NIPs, each
+      is a small, self-contained piece that composes into the whole.
+    </p>
+
+    <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        features.map((feature) => (
+          <a href={feature.href} class="cx-card cx-card-link group flex flex-col p-6">
+            <h3 class="text-base font-semibold leading-snug text-white">
+              {feature.title}
+            </h3>
+            <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-400">
+              {feature.body}
+            </p>
+            <p class="mt-5 font-mono text-[0.65rem] uppercase tracking-wider text-gray-600 transition-colors group-hover:text-mint">
+              {feature.spec}
+            </p>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>

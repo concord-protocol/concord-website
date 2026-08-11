@@ -1,0 +1,355 @@
+---
+import Marketing from '../layouts/Marketing.astro';
+import { CLIENTS } from '../data/site';
+
+const published = '2026-08-11';
+const displayDate = 'August 11, 2026';
+---
+
+<Marketing
+  title="Announcing Concord — encrypted communities on open infrastructure"
+  description="Concord is a new open protocol for end-to-end encrypted, Discord-style communities on Nostr. Three independent clients ship today: Armada, Vector, and Accordion."
+>
+  <article>
+    <header class="relative overflow-hidden border-b border-hairline">
+      <div class="cx-radial pointer-events-none absolute inset-0"></div>
+      <div class="cx-grid-bg pointer-events-none absolute inset-0"></div>
+
+      <div class="relative mx-auto max-w-3xl px-5 py-20 sm:py-24">
+        <p class="cx-eyebrow">Announcement</p>
+        <h1
+          class="mt-5 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl"
+        >
+          Announcing Concord
+        </h1>
+        <p class="mt-6 text-xl leading-relaxed text-gray-300">
+          An open protocol for end-to-end encrypted communities and channels,
+          built on infrastructure nobody owns. Three independent clients speak it
+          today.
+        </p>
+        <p class="mt-8 font-mono text-xs text-gray-500">
+          <time datetime={published}>{displayDate}</time>
+        </p>
+      </div>
+    </header>
+
+    <div class="cx-prose mx-auto max-w-3xl px-5 py-16">
+      <p class="lede">
+        Every group chat you have ever used has a computer in the middle. It
+        holds every message, knows every member, and is the final authority on
+        who can do what. You trust it to stay online, to keep your data private,
+        and to never turn on you.
+      </p>
+
+      <p>
+        It can be subpoenaed, hacked, sold, or switched off. And when it is, your
+        community dies with it — not just the history, but the room itself: the
+        member list, the roles, the shared context that made it a place rather
+        than a group of contacts.
+      </p>
+
+      <p>
+        The usual decentralised answer is to let people run their own copy of
+        that computer. This helps with <em>whose</em> computer it is, and not at
+        all with the fact that there is one. The operator still reads every
+        message, still holds the member list, and still decides who is an admin.
+        You have not removed the trusted party; you have only changed which one
+        you are trusting.
+      </p>
+
+      <h2>Concord deletes that computer</h2>
+
+      <p>
+        Concord is a protocol for running communities and channels over
+        <a href="https://github.com/nostr-protocol/nostr" rel="noopener">Nostr</a
+        >, with no company, no central server, and no intermediary. It takes the
+        three jobs a central server does and splits them into pieces that need to
+        trust nobody.
+      </p>
+
+      <p>
+        <strong>Storage and delivery</strong> become dumb, interchangeable
+        relays. They only ever see encrypted blobs addressed to rotating,
+        meaningless labels. A relay carrying ten Concord communities cannot
+        partition its own storage by community, let alone read one. If one relay
+        misbehaves, you use the others.
+      </p>
+
+      <p>
+        <strong>Membership</strong> becomes key possession. If you can decrypt
+        the room, you are in it. There is no list to enforce, to leak, or to be
+        compelled to produce — and no request that anyone can deny.
+      </p>
+
+      <p>
+        <strong>Authority</strong> becomes a signed roster rooted in the owner's
+        own key. Every grant and every ban chains back to an identity the
+        community's id commits to by construction. Each client folds that chain
+        independently and reaches the same verdict.
+      </p>
+
+      <p>
+        The result is full Discord-style moderation — owners, admins, roles,
+        kicks, and bans — where authority is a signed list everyone can verify,
+        and messages are sealed so that relays, network observers, and
+        non-members see only noise.
+      </p>
+
+      <h2>Enforcement by rejection</h2>
+
+      <p>
+        The idea that makes this work is worth stating plainly, because it
+        inverts an assumption most software is built on. There is no server to
+        stop anyone from publishing anything. Instead, everyone else
+        <em>drops</em> what does not qualify.
+      </p>
+
+      <p>
+        A forged ban is not blocked at the door. It is published, propagated,
+        and then discarded by every honest client, because it does not trace back
+        to the owner. A demoted admin's action is dropped the moment a verifier
+        holds the demotion that superseded their grant. A removed member can
+        construct a perfectly well-formed key rotation, and every member opens
+        the seal, folds the roster, and throws it away.
+      </p>
+
+      <p>
+        This sounds weaker than server enforcement, and in one narrow way it is:
+        a misbehaving member can generate noise. It is stronger in every other
+        way, because there is no privileged party who can be compelled, bribed,
+        or breached into granting authority the owner never signed.
+      </p>
+
+      <h2>Removal that actually removes</h2>
+
+      <p>
+        Most encrypted group chats are vague about what happens when you throw
+        someone out. Concord is specific, because it separates three things that
+        usually get conflated.
+      </p>
+
+      <p>
+        <strong>Stripping a role</strong> revokes authority. The person is still
+        a member. <strong>A kick</strong> asks their client to leave — and
+        <em>cooperative</em> is the honest word for it, because a defiant client
+        still holds every key. Only <strong>rotating the keys</strong> enforces
+        anything: the community rolls to a new key handed to whoever is left, and
+        everything afterward is unreadable to the person removed.
+      </p>
+
+      <p>
+        Because a community's identity is a commitment to its owner rather than
+        to its keys, it can change all its locks without becoming a different
+        community. Bans, in Concord, are all three layers in the order their
+        guarantees arrive: silence first because that is instant and free,
+        severance last because it is heavy and asynchronous. A partially
+        propagated removal degrades to a weaker removal, never to a broken one.
+      </p>
+
+      <h2>What ships today</h2>
+
+      <p>
+        A protocol with one implementation is a format. Concord launches with
+        three, built by separate teams against the same specification.
+      </p>
+
+      <div class="not-prose my-10 grid gap-4 sm:grid-cols-3">
+        {
+          CLIENTS.map((client) => (
+            <a
+              href={client.href}
+              rel="noopener"
+              class="cx-card cx-card-link block p-6"
+            >
+              <p class="text-lg font-semibold text-white">{client.name}</p>
+              <p class="mt-1 text-sm text-mint">{client.tagline}</p>
+              <p class="mt-3 text-xs text-gray-500">by {client.author}</p>
+            </a>
+          ))
+        }
+      </div>
+
+      <p>
+        <strong>Armada</strong>, by Soapbox, is the full Discord-shaped client:
+        threads, voice and video, custom emoji and themes, roles, and a Discord
+        bridge that mirrors a channel both ways so nobody has to move all at
+        once. It speaks Concord alongside other community protocols, so one key
+        carries you across the ecosystem.
+      </p>
+
+      <p>
+        <strong>Vector</strong>, by Vector Privacy, is a native messenger built
+        around a privacy-by-principle philosophy — no KYC, encrypted local
+        storage, an optional Tor transport, and in-chat mini-apps. Vector
+        co-authored the specification.
+      </p>
+
+      <p>
+        <strong>Accordion</strong>, by hzrd149, runs entirely in the browser with
+        no backend, built on the applesauce toolkit. It is the smallest of the
+        three and the best answer to "how hard is this to implement?"
+      </p>
+
+      <h2>And things built on top</h2>
+
+      <p>
+        The tooling arrived alongside. The
+        <a href="https://crates.io/crates/vector_sdk" rel="noopener"
+          ><code>vector_sdk</code></a
+        > crate handles keys, relays, streams, and encryption so you write handlers
+        instead of cryptography. Derek Ross has shipped
+        <a href="https://github.com/derekross/shanty" rel="noopener">Shanty</a>,
+        a 24/7 generative lo-fi radio bot for live channels with a Wavlake and
+        Fountain jukebox; an
+        <a href="https://github.com/derekross/concord-automod" rel="noopener"
+          >auto-moderation bot</a
+        >; and
+        <a
+          href="https://github.com/derekross/concord-private-events"
+          rel="noopener">Private Events</a
+        >, a full application using Concord as private, serverless application
+        infrastructure rather than as a messenger.
+      </p>
+
+      <p>
+        Bots on Concord are worth a sentence of their own, because the shape is
+        genuinely different. There is no API to be granted, no token to be
+        revoked, and no webhook to register. A bot holds a key like any member
+        and moderates with exactly the rank its role gives it. Nothing in the
+        protocol privileges a human over a program — and nothing lets a platform
+        cut your bot off, because there is no platform.
+      </p>
+
+      <h2>The honest limits</h2>
+
+      <p>
+        Concord's specification names its own weaknesses, and so should its
+        announcement.
+      </p>
+
+      <p>
+        It is <strong>not ratcheted</strong>. If someone obtains a channel key
+        for an epoch, every message in that epoch is readable to them. Rotation
+        protects the future, not the past. This is a deliberate trade: MLS and
+        the Double Ratchet advance in lockstep, which is the right design for six
+        people planning something sensitive and the wrong one for six hundred
+        people with channels and moderators, half of them offline at any moment.
+        If your group is the former, use
+        <a href="https://github.com/marmot-protocol/marmot" rel="noopener"
+          >Marmot</a
+        >.
+      </p>
+
+      <p>
+        Expiry and kicks are <strong>cooperative</strong>. A member who could
+        read something could always have copied it, and no protocol changes that.
+        Disappearing messages are hygiene against a seized device, a compromised
+        key, or an archived relay — not protection from the people in the room
+        with you.
+      </p>
+
+      <p>
+        There is <strong>no succession</strong>. Binding a community's identity
+        to its owner's key makes ownership unforgeable and also makes it
+        unrecoverable. A lost owner key cannot be replaced. The clean exit is
+        dissolution.
+      </p>
+
+      <p>
+        And traffic analysis is real. Relays see volume, size, and timing, and a
+        channel's address is stable until somebody is removed. Concord hides what
+        you say and who is in the room; it does not hide that you connected.
+      </p>
+
+      <h2>Read it, then take it apart</h2>
+
+      <p>
+        Concord is eight short documents, MIT licensed, and readable in an
+        evening. They are the source of truth, and they are where design
+        questions get settled — in the open, in a repository anyone can file an
+        issue against.
+      </p>
+
+      <p>
+        If you want to understand it, start with
+        <a href="/learn/how-it-works/">how it works</a>. If you want to trust it,
+        start with the <a href="/learn/threat-model/">threat model</a>. If you
+        want to build on it, start with the
+        <a href="/build/checklist/">implementer checklist</a>, which collects the
+        requirements that bite.
+      </p>
+
+      <p>
+        And if you just want to use it, pick a client. That is rather the point:
+        the community is yours either way.
+      </p>
+    </div>
+
+    <div class="mx-auto max-w-3xl px-5 pb-24">
+      <div class="cx-rule"></div>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/clients/" class="cx-btn cx-btn-primary">Get a client</a>
+        <a href="/spec/" class="cx-btn cx-btn-ghost">Read the specification</a>
+      </div>
+    </div>
+  </article>
+</Marketing>
+
+<style>
+  .cx-prose {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-gray-300, #9fb3aa);
+  }
+
+  .cx-prose > p {
+    margin-block: 1.5rem;
+  }
+
+  .cx-prose .lede {
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--color-gray-200, #cbdbd3);
+  }
+
+  .cx-prose h2 {
+    margin-block: 3.25rem 1.25rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+  }
+
+  .cx-prose strong {
+    font-weight: 600;
+    color: var(--color-gray-100, #e7f1ec);
+  }
+
+  .cx-prose em {
+    font-style: italic;
+    color: var(--color-gray-200, #cbdbd3);
+  }
+
+  .cx-prose code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--color-mint-soft, #96ffd6);
+  }
+
+  .cx-prose a:not(.cx-card-link) {
+    color: var(--color-mint, #24e8a3);
+    text-decoration: underline;
+    text-decoration-color: rgba(36, 232, 163, 0.35);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  .cx-prose a:not(.cx-card-link):hover {
+    text-decoration-color: var(--color-mint, #24e8a3);
+  }
+
+  .cx-prose .not-prose a {
+    text-decoration: none;
+  }
+</style>
