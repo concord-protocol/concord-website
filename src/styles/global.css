@@ -113,6 +113,113 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Marketing base reset
+
+   Starlight ships its own reset for docs routes, and @astrojs/starlight-tailwind
+   deliberately omits Tailwind's preflight so the two never fight. Pages under
+   src/pages get neither, so without this they fall back to browser defaults:
+   underlined links, list bullets, heading margins, content-box sizing, and
+   `border-*` utilities setting a width against a `none` border-style.
+
+   Two deliberate constraints:
+     - Scoped to .cx-page, which the marketing layout sets on <html>, so this
+       can never reach a Starlight route.
+     - Inside `layer(base)`, the lowest layer, so every utility, component, and
+       unlayered rule still wins over it. Unscoped it would beat the layered
+       Tailwind utilities and, for example, strip colour off every link.
+-------------------------------------------------------------------------- */
+
+@layer base {
+  .cx-page,
+  .cx-page *,
+  .cx-page *::before,
+  .cx-page *::after {
+    box-sizing: border-box;
+    /* Width 0 with a real style, so `border-b` only has to set a width. */
+    border: 0 solid var(--color-hairline);
+  }
+
+  .cx-page :where(h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .cx-page :where(p, blockquote, figure, pre, dl, dd, fieldset) {
+    margin: 0;
+  }
+
+  .cx-page :where(ul, ol, menu) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cx-page :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  .cx-page :where(b, strong) {
+    font-weight: bolder;
+  }
+
+  .cx-page :where(code, kbd, samp, pre) {
+    font-family: var(--font-mono);
+    font-size: 1em;
+  }
+
+  .cx-page :where(small) {
+    font-size: 80%;
+  }
+
+  .cx-page :where(table) {
+    border-color: inherit;
+    border-collapse: collapse;
+    text-indent: 0;
+  }
+
+  .cx-page :where(th, td) {
+    padding: 0;
+    text-align: inherit;
+    font-weight: inherit;
+  }
+
+  .cx-page :where(button, input, optgroup, select, textarea) {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    background: transparent;
+  }
+
+  .cx-page :where(button) {
+    cursor: pointer;
+  }
+
+  .cx-page :where(img, svg, video, canvas, audio, iframe, embed, object) {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .cx-page :where(img, video) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .cx-page :where(hr) {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  .cx-page :where([hidden]) {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Marketing-page primitives (used outside Starlight)
 -------------------------------------------------------------------------- */
 
