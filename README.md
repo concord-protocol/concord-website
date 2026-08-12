@@ -90,6 +90,34 @@ marketing pages stay in lockstep.
 > Under Tailwind v4 the latter emits `border-color: --color-hairline`, which is
 > invalid CSS and fails silently.
 
+## The logo
+
+The mark is an open "C" ring with a mint inner ring, defined as inline SVG in
+[`src/components/Logo.astro`](src/components/Logo.astro) and again in
+[`public/favicon.svg`](public/favicon.svg).
+
+> [!NOTE]
+> The source artwork, kept at `src/assets/concord-logo-source.png` for
+> provenance, **cannot be used directly on this site.** Its "C" opening is
+> filled with *opaque white* rather than transparency — invisible on a white
+> page, a glaring white crescent on a black one.
+
+The SVG is a measured trace of that raster rather than a redraw: centre 63.5,
+outer ring r49 stroke 12, inner ring r27.3 stroke 12.5, opening from +56° to
+−56.5°, colours `#1DA57A` and `#5AFDB2` sampled from the source. The parameters
+were fitted by rendering candidates and maximising pixel overlap against the
+original, reaching an IoU of 0.948 — the remainder being antialiasing at the
+coverage threshold.
+
+`public/apple-touch-icon.png` is generated from `public/favicon.svg`:
+
+```sh
+node -e "require('sharp')('public/favicon.svg').resize(180,180).png().toFile('public/apple-touch-icon.png')"
+```
+
+The mark carries fixed brand colours rather than `currentColor`, so it does not
+inherit text colour from its container.
+
 ## Checking links
 
 The build has no link checker wired in. To verify internal links resolve against

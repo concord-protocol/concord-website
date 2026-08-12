@@ -19,6 +19,12 @@ export default defineConfig({
       description:
         'A protocol for end-to-end encrypted, Discord-style communities on Nostr. No company, no central server, no intermediary.',
       favicon: '/favicon.svg',
+      head: [
+        {
+          tag: 'link',
+          attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+        },
+      ],
       customCss: ['./src/styles/global.css'],
       // The marketing 404 in src/pages owns this route.
       disable404Route: true,
