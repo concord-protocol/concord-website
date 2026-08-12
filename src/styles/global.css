@@ -237,12 +237,44 @@ body {
   mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
+/* Full-height hero: both textures bloom from the middle of the screen rather
+   than from the top edge, so the lockup sits inside the glow. */
+.cx-grid-bg.cx-grid-bg-center {
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 15%, transparent 80%);
+}
+
 .cx-radial {
   background: radial-gradient(
     ellipse 70% 55% at 50% -10%,
     rgba(36, 232, 163, 0.18),
     transparent 70%
   );
+}
+
+.cx-radial.cx-radial-center {
+  background: radial-gradient(
+    ellipse 65% 55% at 50% 44%,
+    rgba(36, 232, 163, 0.17),
+    transparent 72%
+  );
+}
+
+.cx-logo-glow {
+  filter: drop-shadow(0 0 42px rgba(36, 232, 163, 0.4));
+}
+
+.cx-scroll-cue {
+  animation: cx-scroll-cue 2.4s ease-in-out infinite;
+}
+
+@keyframes cx-scroll-cue {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
 }
 
 .cx-hairline {

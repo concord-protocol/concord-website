@@ -1,62 +1,58 @@
 ---
+import Logo from '../Logo.astro';
+
 const filter = `{
   "kinds":   [1059],
   "authors": ["a3f1…9c4e"]
 }`;
 ---
 
-<section class="relative overflow-hidden border-b border-hairline">
-  <div class="cx-radial pointer-events-none absolute inset-0"></div>
-  <div class="cx-grid-bg pointer-events-none absolute inset-0"></div>
+{/*
+  The opening screen is deliberately a single full-height statement: mark,
+  wordmark, tagline. Its height subtracts the nav, which is sticky and so
+  occupies flow space above — 4rem on md+, plus the ~2.25rem mobile nav row
+  below it on smaller screens.
+*/}
+<section class="relative overflow-hidden">
+  <div class="cx-radial cx-radial-center pointer-events-none absolute inset-0">
+  </div>
+  <div class="cx-grid-bg cx-grid-bg-center pointer-events-none absolute inset-0">
+  </div>
 
-  <div class="relative mx-auto max-w-6xl px-5 pb-24 pt-20 sm:pt-28">
-    <a
-      href="/announcement/"
-      class="group inline-flex items-center gap-2.5 rounded-full border border-hairline bg-raised/70 px-3.5 py-1.5 text-xs transition-colors hover:border-mint/40"
-    >
-      <span
-        class="rounded-full bg-mint/15 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wider text-mint"
-      >
-        New
-      </span>
-      <span class="text-gray-300">Announcing the Concord Protocol</span>
-      <span
-        class="text-gray-500 transition-transform group-hover:translate-x-0.5"
-        aria-hidden="true">&rarr;</span
-      >
-    </a>
-
+  <div
+    class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-4xl flex-col items-center justify-center px-5 py-16 text-center md:min-h-[calc(100svh-4rem)]"
+  >
     <h1
-      class="mt-8 max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl"
+      class="flex items-center justify-center gap-4 text-5xl font-semibold tracking-[-0.035em] text-white sm:gap-6 sm:text-7xl lg:text-8xl"
     >
-      {/* The explicit space survives compressHTML, which strips the whitespace
-      around the <br>. Without it the two sentences run together on mobile,
-      where the <br> is hidden. It sits at end-of-line on sm+, so it is
-      invisible there. */}
-      Sealed rooms.{' '}<br class="hidden sm:inline" /><span class="text-mint"
-        >Open protocol.</span
-      >
+      <Logo class="cx-logo-glow h-14 w-14 shrink-0 sm:h-20 sm:w-20 lg:h-24 lg:w-24" />
+      Concord
     </h1>
 
+    <p
+      class="mt-7 text-balance text-2xl font-medium leading-snug tracking-tight text-gray-200 sm:text-3xl"
+    >
+      Sealed rooms. <span class="text-mint">Open protocol.</span>
+    </p>
+
     <!--
-      Three sentences, in priority order: encryption, then the honest relay
+      Three claims, in priority order: encryption, then the honest relay
       concession carrying the benefit that used to be called decentralization,
       then open-and-ungatekept — evidenced by shipping clients rather than
       asserted.
     -->
-    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-gray-300">
+    <p class="mt-7 max-w-2xl text-base leading-relaxed text-gray-400">
       Every message is sealed on your device before it leaves. Ordinary <a
         href="https://github.com/nostr-protocol/nostr"
         rel="noopener"
-        class="text-gray-100 underline decoration-mint/40 underline-offset-4 transition-colors hover:text-mint"
+        class="text-gray-200 underline decoration-mint/40 underline-offset-4 transition-colors hover:text-mint"
         >Nostr</a
       > relays carry it, but a relay cannot read a message, produce a member list,
-      or decide who is in charge — so there is no operator to trust, subpoena, or
-      switch off. Concord is an open specification: three independent apps already
-      speak it, and nothing is stopping a fourth.
+      or decide who is in charge. Three independent apps already speak the protocol
+      — and nothing is stopping a fourth.
     </p>
 
-    <div class="mt-10 flex flex-wrap items-center gap-3">
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
       <a href="/clients/" class="cx-btn cx-btn-primary">Get a client</a>
       <a href="/spec/" class="cx-btn cx-btn-ghost">Read the specification</a>
       <a
@@ -66,9 +62,28 @@ const filter = `{
         How it works
       </a>
     </div>
+  </div>
 
-    <!-- The whole client-side view of a community, as a relay query. -->
-    <div class="mt-16 grid gap-4 sm:grid-cols-3">
+  <a
+    href="#what-a-relay-sees"
+    class="absolute inset-x-0 bottom-6 mx-auto hidden w-fit flex-col items-center gap-2 text-gray-500 transition-colors hover:text-mint sm:flex"
+  >
+    <span class="font-mono text-[0.65rem] uppercase tracking-[0.18em]"
+      >What a relay sees</span
+    >
+    <span class="cx-scroll-cue text-lg leading-none" aria-hidden="true"
+      >&darr;</span
+    >
+  </a>
+</section>
+
+<!-- The whole client-side view of a community, as a relay query. -->
+<section
+  id="what-a-relay-sees"
+  class="relative border-b border-hairline scroll-mt-20"
+>
+  <div class="mx-auto max-w-6xl px-5 py-20">
+    <div class="grid gap-4 sm:grid-cols-3">
       <div class="cx-card p-5 sm:col-span-1">
         <p class="cx-eyebrow">Subscribe</p>
         <pre
