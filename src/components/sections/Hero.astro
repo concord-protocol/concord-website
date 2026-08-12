@@ -29,20 +29,31 @@ const filter = `{
     <h1
       class="mt-8 max-w-4xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl"
     >
-      Delete the computer<br class="hidden sm:inline" />
-      <span class="text-mint">in the middle.</span>
+      {/* The explicit space survives compressHTML, which strips the whitespace
+      around the <br>. Without it the two sentences run together on mobile,
+      where the <br> is hidden. It sits at end-of-line on sm+, so it is
+      invisible there. */}
+      Sealed rooms.{' '}<br class="hidden sm:inline" /><span class="text-mint"
+        >Open protocol.</span
+      >
     </h1>
 
+    <!--
+      Three sentences, in priority order: encryption, then the honest relay
+      concession carrying the benefit that used to be called decentralization,
+      then open-and-ungatekept — evidenced by shipping clients rather than
+      asserted.
+    -->
     <p class="mt-7 max-w-2xl text-lg leading-relaxed text-gray-300">
-      Concord is an open protocol for end-to-end encrypted communities and
-      channels on <a
+      Every message is sealed on your device before it leaves. Ordinary <a
         href="https://github.com/nostr-protocol/nostr"
         rel="noopener"
         class="text-gray-100 underline decoration-mint/40 underline-offset-4 transition-colors hover:text-mint"
         >Nostr</a
-      >. You get the familiar shape of Discord — communities, channels, roles,
-      voice — with no company, no central server, and no intermediary holding
-      your messages or deciding who is in charge.
+      > relays carry it, but a relay cannot read a message, produce a member list,
+      or decide who is in charge — so there is no operator to trust, subpoena, or
+      switch off. Concord is an open specification: three independent apps already
+      speak it, and nothing is stopping a fourth.
     </p>
 
     <div class="mt-10 flex flex-wrap items-center gap-3">

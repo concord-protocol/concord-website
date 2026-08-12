@@ -29,8 +29,11 @@ list, and still decides who is an admin.
 
 ## The approach
 
-Concord deletes that computer. The three jobs a central server does get split
-into pieces that need to trust nobody.
+Concord deletes that computer — not literally, since ordinary Nostr relays still
+carry every message, but in every way that counts. What goes away is the computer
+that could read your messages, hold your member list, and decide who is in
+charge. The three jobs it used to do get split into pieces that need to trust
+nobody.
 
 ### Storage and delivery become dumb relays
 
