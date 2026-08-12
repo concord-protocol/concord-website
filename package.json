@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Marketing and documentation site for the Concord Protocol",
   "type": "module",
-  "license": "MIT",
+  "license": "CC-BY-SA-4.0",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

@@ -125,4 +125,5 @@ the built output, walk `dist/` and compare `href`s to the generated pages.
 
 ## License
 
-MIT, matching the specification.
+[CC BY-SA 4.0](LICENSE). Reuse it, including commercially, as long as you give
+attribution and share derivative work under the same terms.
