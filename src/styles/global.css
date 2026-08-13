@@ -304,9 +304,15 @@ body {
 }
 
 /* A stroke inking itself in. Paired with `pathLength="1"` on the element, so
-   the dash pattern is normalized and one rule drives both shapes. */
+   the dash pattern is normalized and one rule drives both shapes.
+
+   The dash is 1.01 rather than 1 so that it overlaps itself by a hair. A
+   <circle>'s path begins at (cx + r, cy) — its rightmost point — and a dash of
+   exactly the path length ends precisely where it started, leaving a 1px seam
+   there once drawn. The overlap costs nothing: it is a solid stroke painting
+   over itself, and it falls outside the open arc's path entirely. */
 .cx-mark-stroke {
-  stroke-dasharray: 1;
+  stroke-dasharray: 1.01;
   stroke-dashoffset: 0;
   animation: cx-mark-draw 0.95s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
 }
@@ -317,8 +323,9 @@ body {
 }
 
 @keyframes cx-mark-draw {
+  /* Matching the dash length, so the shape starts fully undrawn. */
   from {
-    stroke-dashoffset: 1;
+    stroke-dashoffset: 1.01;
   }
   to {
     stroke-dashoffset: 0;
