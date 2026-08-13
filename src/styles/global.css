@@ -249,13 +249,14 @@ body {
    the glow into a cell too. The lines move to `mask-size` instead, and the two
    of them union because `mask-composite` is `add` by default.
 
-   The alpha runs far higher than the old wash's 0.17 for the same apparent
-   brightness: a wash covers every pixel, whereas this covers 1px in every 72. */
+   The peak alpha reads as far more than the wash's 0.17 did at the same number:
+   a wash spreads it over every pixel, whereas here all of it lands on 1px in
+   every 72, against black. */
 .cx-grid-bg.cx-grid-bg-center {
   background-image: radial-gradient(
     ellipse 65% 55% at 50% 44%,
-    rgba(36, 232, 163, 0.34),
-    rgba(36, 232, 163, 0.1) 55%,
+    rgba(36, 232, 163, 0.18),
+    rgba(36, 232, 163, 0.055) 55%,
     transparent 80%
   );
   background-size: 100% 100%;
