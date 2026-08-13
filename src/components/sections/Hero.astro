@@ -25,10 +25,15 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
   paragraph and the buttons that used to follow them are gone; the page still
   makes its case in ThreeJobs and still asks for the click in CTA.
 
-  The lockup sits high rather than centred: at this size, centring pushed it
-  into the lower half of tall viewports and left a dead band above it. Its
-  height subtracts the nav, which is sticky and so occupies flow space above —
-  4rem on md+, plus the ~2.25rem mobile nav row below it on smaller screens.
+  The lockup is centred, but on uneven padding, so it lands roughly 3% of the
+  screen above the true middle. Dead centre sits low once the scroll cue is
+  counted, and a flat offset from the top swung between too high and too low as
+  the viewport changed height; in svh the lift tracks the screen. It comes out
+  under the 5svh the padding implies, because the ink sits a little low in its
+  own box — the mark's viewBox is inset at the top and the tagline carries
+  descender space at the bottom. Its height subtracts the
+  nav, which is sticky and so occupies flow space above — 4rem on md+, plus the
+  ~2.25rem mobile nav row below it on smaller screens.
 */}
 <section class="relative overflow-hidden">
   <div class="cx-radial cx-radial-center pointer-events-none absolute inset-0">
@@ -37,7 +42,7 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
   </div>
 
   <div
-    class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-5xl flex-col items-center px-5 pb-16 pt-[9svh] text-center sm:pt-[11svh] md:min-h-[calc(100svh-4rem)]"
+    class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-5xl flex-col items-center justify-center px-5 pb-[16svh] pt-[6svh] text-center md:min-h-[calc(100svh-4rem)]"
   >
     {/*
       Stacked: the mark is the statement and the title is its caption, so the
