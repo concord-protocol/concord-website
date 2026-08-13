@@ -3,7 +3,10 @@
   "relays": [
     "wss://relay.ditto.pub",
     "wss://relay.primal.net",
-    "wss://nos.lol"
+    "wss://nos.lol",
+    "wss://relay.damus.io",
+    "wss://relay.snort.social",
+    "wss://offchain.pub"
   ],
   "servers": [
     "https://nostr.download",
