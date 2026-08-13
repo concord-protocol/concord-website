@@ -9,8 +9,8 @@
     "https://nostr.download",
     "https://blossom.primal.net"
   ],
-  "publishRelayList": true,
-  "publishServerList": true,
+  "publishRelayList": false,
+  "publishServerList": false,
   "publishProfile": false,
   "fallback": "/404.html"
 }
