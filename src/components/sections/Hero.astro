@@ -31,8 +31,10 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
   ~2.25rem mobile nav row below it on smaller screens.
 */}
 <section class="relative overflow-hidden">
-  <div class="cx-radial cx-radial-center pointer-events-none absolute inset-0">
-  </div>
+  {/*
+    One layer, not two: on the hero the glow is not painted behind the grid, it
+    is painted *into* it. See `.cx-grid-bg-center`.
+  */}
   <div class="cx-grid-bg cx-grid-bg-center pointer-events-none absolute inset-0">
   </div>
 

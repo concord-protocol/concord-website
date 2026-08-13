@@ -239,10 +239,30 @@ body {
   mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
-/* Full-height hero: both textures bloom from the middle of the screen rather
-   than from the top edge, so the lockup sits inside the glow. */
+/* Full-height hero: the gradient stops being a wash behind the grid and becomes
+   the grid's own colour. The background is the glow, the mask is the lines, so
+   the only mint on screen is the lines themselves — brightest under the lockup,
+   gone by the edges, and pure black in between.
+
+   `background-size` has to be reset: the base rule sizes the background to one
+   72px cell, which is right for a tiling pair of line gradients and would tile
+   the glow into a cell too. The lines move to `mask-size` instead, and the two
+   of them union because `mask-composite` is `add` by default.
+
+   The alpha runs far higher than the old wash's 0.17 for the same apparent
+   brightness: a wash covers every pixel, whereas this covers 1px in every 72. */
 .cx-grid-bg.cx-grid-bg-center {
-  mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, #000 15%, transparent 80%);
+  background-image: radial-gradient(
+    ellipse 65% 55% at 50% 44%,
+    rgba(36, 232, 163, 0.34),
+    rgba(36, 232, 163, 0.1) 55%,
+    transparent 80%
+  );
+  background-size: 100% 100%;
+  mask-image:
+    linear-gradient(to right, #000 1px, transparent 1px),
+    linear-gradient(to bottom, #000 1px, transparent 1px);
+  mask-size: 72px 72px;
 }
 
 .cx-radial {
@@ -250,14 +270,6 @@ body {
     ellipse 70% 55% at 50% -10%,
     rgba(36, 232, 163, 0.18),
     transparent 70%
-  );
-}
-
-.cx-radial.cx-radial-center {
-  background: radial-gradient(
-    ellipse 65% 55% at 50% 44%,
-    rgba(36, 232, 163, 0.17),
-    transparent 72%
   );
 }
 
