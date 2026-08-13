@@ -266,6 +266,19 @@ body {
   mask-size: 72px 72px;
 }
 
+/* The cursor's trail through the grid, painted by the script in Hero.astro.
+   Masked to roughly the glow's own footprint so a lit tile can't strand itself
+   out where the grid has faded to black — but to a floor rather than to
+   nothing, so the corners still answer the cursor, dimly, instead of going
+   dead. */
+.cx-grid-spark {
+  mask-image: radial-gradient(
+    ellipse 85% 75% at 50% 44%,
+    #000 45%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+}
+
 .cx-radial {
   background: radial-gradient(
     ellipse 70% 55% at 50% -10%,
@@ -421,6 +434,41 @@ body {
     opacity: 0;
     transform: scale(1.4);
   }
+}
+
+/* --------------------------------------------------------------------------
+   The mark, once it has landed
+
+   Three nested boxes, one job each, so the entrance keyframes above and the
+   cursor below never contend for the same `transform`. Only the hover lift is
+   CSS; the angle is set by the script in Hero.astro and the click's turn is a
+   Web Animation on the innermost box.
+-------------------------------------------------------------------------- */
+
+/* The pointer target, and the only one of the three that holds still. Set by
+   the script, so a mark that nothing is listening to doesn't claim to be
+   clickable. */
+.cx-mark-hit[data-live] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cx-mark-tilt,
+.cx-mark-spin {
+  display: block;
+}
+
+/* The lean. The transition is doing more than smoothing here: the angle is
+   written on every pointer move, so what's on screen is always chasing the
+   cursor a few frames behind, which is what makes it feel weighted rather than
+   welded to the mouse. */
+.cx-mark-tilt {
+  transform: rotate(var(--cx-tilt, 0deg)) scale(var(--cx-mark-lift, 1));
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cx-mark-hit:hover .cx-mark-tilt {
+  --cx-mark-lift: 1.05;
 }
 
 /*
