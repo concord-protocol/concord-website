@@ -394,27 +394,42 @@ body {
  */
 .cx-wordmark {
   display: inline-flex;
+  /* The word gap, which a collapsed space can't supply. Letter-spacing adds its
+     own trailing sliver to the word before it, hence a little under a quarter em
+     rather than the usual quarter. */
+  gap: 0.22em;
+  /* Letter-spacing trails the last letter too, which would otherwise carry the
+     whole word off-centre by half of it, under the mark. */
+  margin-inline-end: -0.08em;
   /* Orbitron: squared and geometric, so it reads as a mark rather than as a
-     sentence sitting next to one. It is already wide, and unlike Inter it wants
-     no tracking pulled out of it. */
+     sentence. Set small and beneath the mark it is a caption, which is the one
+     place this already-wide face takes letterspacing well. */
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: 0;
+  letter-spacing: 0.08em;
   /* In em, so the bloom keeps its proportions across the three type sizes. */
   filter: drop-shadow(0 0 0.08em rgba(36, 232, 163, 0.55))
     drop-shadow(0 0 0.55em rgba(36, 232, 163, 0.35));
 }
 
+.cx-wordmark-word {
+  display: inline-flex;
+}
+
 .cx-wordmark-letter {
   display: inline-block;
   animation: cx-word-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
-  /* --cx-i is the letter's index, set inline by the lockup. */
-  animation-delay: calc(0.55s + var(--cx-i) * 0.055s);
+  /* --cx-i is the letter's index across the whole title, set inline by the
+     lockup. Tighter than it was at seven letters: sixteen of them on the old
+     beat left the last one still arriving well after everything else. */
+  animation-delay: calc(0.55s + var(--cx-i) * 0.035s);
 }
 
 @supports (-webkit-text-stroke: 1px currentColor) {
   .cx-wordmark-letter {
-    -webkit-text-stroke: 0.02em #24e8a3;
+    /* Proportionally heavier than the old side-by-side wordmark, which was set
+       three times this size: the same 0.02em came out under a pixel here. */
+    -webkit-text-stroke: 0.03em #24e8a3;
     -webkit-text-fill-color: transparent;
   }
 }

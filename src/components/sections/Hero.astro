@@ -6,11 +6,18 @@ const filter = `{
   "authors": ["a3f1…9c4e"]
 }`;
 
+const title = 'Concord Protocol';
+
 /*
- * The wordmark is split so each letter can land on its own beat. The <h1> is
- * labelled, so assistive tech gets the word rather than a spelling-out of it.
+ * The wordmark is split so each letter can land on its own beat, but grouped by
+ * word: a lone space between two flex items collapses to nothing, so the gap
+ * between the words has to be a real gap. The stagger index runs across the
+ * whole title so the second word carries on from the first rather than
+ * restarting. The <h1> is labelled, so assistive tech gets the title rather
+ * than a spelling-out of it.
  */
-const wordmark = [...'Concord'];
+let letters = 0;
+const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char, i: letters++ })));
 ---
 
 {/*
@@ -30,27 +37,38 @@ const wordmark = [...'Concord'];
     class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-4xl flex-col items-center justify-center px-5 py-16 text-center md:min-h-[calc(100svh-4rem)]"
   >
     {/*
-      The mark leads and the word labels it, so the mark is set well larger
-      than the cap height rather than matching it.
-
-      The two are spaced optically rather than geometrically, which is why the
-      mark carries a negative margin instead of the pair carrying a gap: the
-      "C" opens toward the word, leaving the right quarter of its viewBox
-      blank, and any real gap on top of that void reads as a hole.
+      Stacked: the mark is the statement and the title is its caption, so the
+      mark is set large and the words sit under it, small and letterspaced.
+      Unlike the side-by-side lockup this needs no optical fudge — the ring is
+      inked all the way to the bottom of its viewBox, so the gap here is a real
+      one.
     */}
     <h1
-      aria-label="Concord"
-      class="flex items-center justify-center text-4xl text-white sm:text-6xl lg:text-7xl"
+      aria-label={title}
+      class="flex flex-col items-center gap-5 text-2xl text-white sm:gap-6 sm:text-4xl lg:text-5xl"
     >
+      {/*
+        Nudged right by 8.8% of its own width. The ring is cut away on its right
+        for the "C", so its ink spans 8.5–97 of a 128 viewBox and its optical
+        centre sits left of the box's — invisible in the nav at 22px, but a
+        clear misalignment against a wordmark centred beneath it.
+
+        The margins are twice that 8.8%, because `items-center` centres the box
+        *including* its margins and so splits the value between the two sides.
+      */}
       <Logo
         animate
-        class="-me-2.5 h-20 w-20 shrink-0 sm:-me-3 sm:h-28 sm:w-28 lg:-me-3.5 lg:h-32 lg:w-32"
+        class="ms-5 h-28 w-28 shrink-0 sm:ms-7 sm:h-40 sm:w-40 lg:ms-8 lg:h-48 lg:w-48"
       />
       <span class="cx-wordmark">
         {
-          wordmark.map((char, i) => (
-            <span class="cx-wordmark-letter" style={`--cx-i:${i}`}>
-              {char}
+          wordmark.map((word) => (
+            <span class="cx-wordmark-word">
+              {word.map(({ char, i }) => (
+                <span class="cx-wordmark-letter" style={`--cx-i:${i}`}>
+                  {char}
+                </span>
+              ))}
             </span>
           ))
         }
