@@ -1,5 +1,6 @@
 {
   "bunkerPubkey": "4c632054e3f4ff3595004bf1bd52c3f8beab686c619a106800c6a9fbcbbe8a16",
+  "id": "concord",
   "relays": [
     "wss://relay.ditto.pub",
     "wss://relay.primal.net",
