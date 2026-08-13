@@ -277,6 +277,7 @@ body {
      | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
      | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
      | 1.05 – 1.90 | a ring of light expands out of the "C" and fades         |
+     | 1.45 – 2.35 | the tagline rises in under the last letters to land      |
      | 2.20 –  ∞   | the halo breathes, slowly, so the lockup isn't inert     |
 
    Every animated element's *static* state is its resting state, with the
@@ -445,6 +446,25 @@ body {
   }
 }
 
+/* The tagline follows the lockup in, overlapping the last few letters rather
+   than queuing behind them — a clean handoff reads as a pause. One fade for the
+   whole line: splitting it at the mint clause was a second beat too many on a
+   screen this bare. */
+.cx-tagline {
+  animation: cx-tagline-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.45s both;
+}
+
+@keyframes cx-tagline-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* The global reduce block neutralizes durations but not delays, which would
    leave the lockup blank for its first half-second and then snap it in. Since
    every static state here is the resting state, dropping the animations
@@ -455,7 +475,8 @@ body {
   .cx-mark-flash,
   .cx-mark-breathe,
   .cx-mark-wave,
-  .cx-wordmark-letter {
+  .cx-wordmark-letter,
+  .cx-tagline {
     animation: none !important;
   }
 }
