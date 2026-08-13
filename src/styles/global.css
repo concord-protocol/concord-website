@@ -7,7 +7,7 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 /* Display face, loaded for the hero lockup alone — see .cx-wordmark. */
-@import '@fontsource-variable/orbitron';
+@import '@fontsource/audiowide';
 
 /* ---------------------------------------------------------------------------
    Concord design tokens: near-black surfaces, mint-green signal.
@@ -19,7 +19,7 @@
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
-  --font-display: 'Orbitron Variable', var(--font-sans);
+  --font-display: 'Audiowide', var(--font-sans);
 
   /* Mint accent */
   --color-accent-50: #eafff7;
@@ -407,14 +407,16 @@ body {
      rather than the usual quarter. */
   gap: 0.22em;
   /* Letter-spacing trails the last letter too, which would otherwise carry the
-     whole word off-centre by half of it, under the mark. */
-  margin-inline-end: -0.08em;
-  /* Orbitron: squared and geometric, so it reads as a mark rather than as a
-     sentence. Set small and beneath the mark it is a caption, which is the one
-     place this already-wide face takes letterspacing well. */
+     whole word off-centre by half of it, under the mark. Keep in step with the
+     letter-spacing below. */
+  margin-inline-end: -0.05em;
+  /* Audiowide: squared and geometric, so it reads as a mark rather than as a
+     sentence. It ships one weight only, so this must stay 400 — anything
+     heavier is synthesised, and faux bold on an outlined face thickens the
+     stroke unevenly. Wider than Orbitron, so it takes less letterspacing. */
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 400;
+  letter-spacing: 0.05em;
   /* In em, so the bloom keeps its proportions across the three type sizes. */
   filter: drop-shadow(0 0 0.08em rgba(36, 232, 163, 0.55))
     drop-shadow(0 0 0.55em rgba(36, 232, 163, 0.35));
