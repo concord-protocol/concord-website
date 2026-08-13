@@ -17,6 +17,8 @@ export const NAV = [
 export interface Client {
   name: string;
   tagline: string;
+  /** One line, for the homepage card. `description` is for /clients/. */
+  summary: string;
   description: string;
   href: string;
   source: string;
@@ -31,6 +33,8 @@ export const CLIENTS: Client[] = [
     name: 'Armada',
     tagline: 'The full Discord-shaped client',
     author: 'Soapbox',
+    summary:
+      'Channels, threads, roles, voice and video, custom emoji — plus a Discord bridge and server import.',
     description:
       'Communities, channels, threads, roles, voice and video, custom emoji and themes, plus a Discord bridge and server import. Armada speaks Concord alongside NIP-29 and Buzz communities, so one key carries you across the ecosystem.',
     href: 'https://armada.buzz',
@@ -51,6 +55,8 @@ export const CLIENTS: Client[] = [
     name: 'Vector',
     tagline: 'Privacy-first messenger, natively encrypted',
     author: 'Vector Privacy',
+    summary:
+      'A standalone Rust desktop messenger: no KYC, encrypted storage, optional Tor. Co-authored Concord.',
     description:
       'A standalone Rust and Tauri messenger built on a Privacy by Principle philosophy: no KYC, no metadata collection, encrypted storage, optional Tor transport, and in-chat mini-apps. Vector co-authored Concord and ships the reference relay dictionary.',
     href: 'https://vectorapp.io',
@@ -70,6 +76,8 @@ export const CLIENTS: Client[] = [
     name: 'Accordion',
     tagline: 'A lightweight web client',
     author: 'hzrd149',
+    summary:
+      'A compact browser client with no backend — proof of how little you need to speak the protocol.',
     description:
       'A Concord community app built on the applesauce Nostr toolkit — a compact, independent implementation that demonstrates how little you need to speak the protocol. Runs entirely in the browser with no backend.',
     href: 'https://accordion.chat',
@@ -99,7 +107,7 @@ export const TOOLS: Tool[] = [
     author: 'JSKitty',
     language: 'Rust',
     description:
-      'An ergonomic Rust SDK for building bots and clients on top of vector-core. Handles keys, relays, streams, and encryption so you write handlers instead of cryptography.',
+      'Keys, relays, streams, and encryption handled, so you write handlers instead of cryptography.',
     href: 'https://crates.io/crates/vector_sdk',
   },
   {
@@ -108,7 +116,7 @@ export const TOOLS: Tool[] = [
     author: 'Derek Ross',
     language: 'Python',
     description:
-      'A 24/7 generative lo-fi radio bot for Concord live channels, with a Wavlake and Fountain jukebox. Proof that a Concord channel is a place a service can live in, not just a chat log.',
+      'A 24/7 generative lo-fi radio bot for live channels, with a Wavlake and Fountain jukebox.',
     href: 'https://github.com/derekross/shanty',
   },
   {
@@ -117,7 +125,7 @@ export const TOOLS: Tool[] = [
     author: 'Derek Ross',
     language: 'Rust',
     description:
-      'A standalone auto-moderation bot for Concord communities. Because authority is a signed roster, a bot moderates with exactly the rank its Grant gives it — no special server privileges exist to hand out.',
+      'Auto-moderation with exactly the rank its Grant gives it — there are no server privileges to hand out.',
     href: 'https://github.com/derekross/concord-automod',
   },
   {
@@ -126,7 +134,7 @@ export const TOOLS: Tool[] = [
     author: 'Derek Ross',
     language: 'TypeScript',
     description:
-      'Private event coordination over Concord: event details, sign-up boards, and encrypted group chat, packaged as an installable PWA.',
+      'Event details, sign-up boards, and encrypted group chat, packaged as an installable PWA.',
     href: 'https://github.com/derekross/concord-private-events',
   },
   {
@@ -135,7 +143,7 @@ export const TOOLS: Tool[] = [
     author: 'JSKitty',
     language: 'Rust',
     description:
-      'Per-coin price, charts, and market stats, built on the vector_sdk crate. A compact worked example of the SDK’s command handling.',
+      'Per-coin price, charts, and market stats — a compact worked example of the SDK’s command handling.',
     href: 'https://github.com/JSKitty/price-bot',
   },
 ];

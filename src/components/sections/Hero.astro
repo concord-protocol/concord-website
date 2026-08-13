@@ -1,11 +1,6 @@
 ---
 import Logo from '../Logo.astro';
 
-const filter = `{
-  "kinds":   [1059],
-  "authors": ["a3f1…9c4e"]
-}`;
-
 const title = 'Concord Protocol';
 
 /*
@@ -83,10 +78,26 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
       </span>
     </h1>
 
+    {/*
+      The tagline arrives as ciphertext and decodes left to right, the way
+      Armada's landing page resolves its heading. Both spans hold their real
+      text in the markup, so no-JS, reduced motion, and every crawler get the
+      finished line; the script below is what garbles it.
+
+      The space belongs to the first span, and is written as an expression:
+      Astro's compressHTML strips whitespace *between* elements outright (a
+      plain newline there produced "communities.Open") and would trim a literal
+      trailing one. Inside the span it is a character the decode can garble like
+      any other, which is the point — a gap left standing in the ciphertext
+      shows the shape of the sentence underneath it.
+    */}
     <p
       class="cx-tagline mt-8 text-balance text-xl font-medium leading-snug tracking-tight text-gray-200 sm:mt-10 sm:text-3xl"
     >
-      Private communities. <span class="text-mint">Open protocol.</span>
+      <span data-decode>{'Private communities. '}</span><span
+        class="text-mint"
+        data-decode>Open protocol.</span
+      >
     </p>
   </div>
 
@@ -106,36 +117,177 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
   </a>
 </section>
 
-<!-- The whole client-side view of a community, as a relay query. -->
-<section
-  id="what-a-relay-sees"
-  class="relative border-b border-hairline scroll-mt-20"
->
-  <div class="mx-auto max-w-6xl px-5 py-20">
-    <div class="grid gap-4 sm:grid-cols-3">
-      <div class="cx-card p-5 sm:col-span-1">
-        <p class="cx-eyebrow">Subscribe</p>
-        <pre
-          class="mt-3 overflow-x-auto font-mono text-xs leading-relaxed text-gray-300"><code>{filter}</code></pre>
-        <p class="mt-3 text-xs leading-relaxed text-gray-500">
-          A community is a key. Holding it lets you derive the address; not
-          holding it means you cannot even find the room.
-        </p>
-      </div>
+<script>
+  /*
+   * The tagline, decrypting.
+   *
+   * Ported from Armada's landing page, where the heading arrives as hex and
+   * resolves left to right. Armada's is a dozen lines because that heading is
+   * `font-mono whitespace-nowrap`: every glyph is the same width, so it can
+   * swap a plain string and nothing can reflow. This one is set in a
+   * proportional face, so the widths have to be managed by hand — everything
+   * below is that, and nothing else. The behaviour is Armada's, including
+   * garbling the spaces: a gap left standing in the ciphertext draws the shape
+   * of the sentence hiding under it.
+   */
+  const GLYPHS = '0123456789abcdef';
+  const TICK_MS = 40;
 
-      <div class="cx-card p-5 sm:col-span-2">
-        <p class="cx-eyebrow">What comes back</p>
-        <p class="cx-cipher mt-3">
-          AjMSpVv5aPQ0nUyBu2Zt4Rk9dGx7WqLoE1cHfNiXsY6mTgKrbA8vJlDwOePzZ3hC5uIq
-          RtNfXbW1yMoKdSaE7pLgQvHjUcZ0T2nB9rDkAeYxs4iVmJ3wCfOgP6lZtNuHqRbXyKdM
-          eSvA1oJpG8cLnWzTiY5rXkQ2fBdHhUuEmNxCsOaZ0tVgIRjPwlbFyD7q4KMcTnAveSXo
-        </p>
-        <p class="mt-3 text-xs leading-relaxed text-gray-500">
-          Relays, network observers, and non-members see sealed blobs addressed
-          to rotating, meaningless labels — never a member list, a channel name,
-          or a message.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
+  const noise = () => GLYPHS[(Math.random() * GLYPHS.length) | 0];
+
+  /** One character: the box on screen, what it will become, and how wide that is. */
+  type Cell = { el: HTMLElement; ch: string; advance: number };
+
+  /**
+   * A left-to-right resolve taking `durationMs`, beginning at `startMs`.
+   *
+   * Before `startMs` the cells sit on noise. That hold is deliberately short —
+   * long enough to register as ciphertext, not long enough to read as a stall.
+   *
+   * A settled cell gets its own advance and the unsettled ones split whatever
+   * width is left, evenly. Those two always sum to the run's natural width, so
+   * the line never changes width and a centred one never moves — and while it
+   * is still noise the cells are uniform, which is what makes it read as a
+   * block of cipher rather than as words with the letters swapped.
+   */
+  function decode(
+    cells: Cell[],
+    t0: number,
+    startMs: number,
+    durationMs: number,
+    restore: () => void,
+  ) {
+    const layout = (settled: number) => {
+      let rest = 0;
+      for (let i = settled; i < cells.length; i++) rest += cells[i].advance;
+      const uniform = rest / Math.max(1, cells.length - settled);
+      cells.forEach((cell, i) => {
+        cell.el.style.width = `${i < settled ? cell.advance : uniform}px`;
+      });
+    };
+
+    for (const cell of cells) cell.el.textContent = noise();
+    layout(0);
+
+    let settled = 0;
+
+    const timer = setInterval(() => {
+      const elapsed = performance.now() - t0 - startMs;
+      const target =
+        elapsed <= 0 ? 0 : Math.round((elapsed / durationMs) * cells.length);
+
+      if (target >= cells.length) {
+        clearInterval(timer);
+        restore();
+        return;
+      }
+
+      for (; settled < target; settled++) {
+        cells[settled].el.textContent = cells[settled].ch;
+      }
+      for (let i = target; i < cells.length; i++) {
+        cells[i].el.textContent = noise();
+      }
+      layout(target);
+    }, TICK_MS);
+  }
+
+  /*
+   * Anchored here, next to where the CSS animations start, but nothing is
+   * measured until the webfonts are in. Measuring against the fallback face
+   * pinned every box about 10% too wide — the tagline came out 522px instead of
+   * 474 — and the line then snapped narrower the moment it resolved. Keeping t0
+   * out here means a slow font shortens the decode rather than sliding it out
+   * of step with the fade it is supposed to arrive under.
+   */
+  const t0 = performance.now();
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    await document.fonts.ready;
+
+    /*
+     * The tagline, and only the tagline: the wordmark draws itself in and a
+     * decode over the top of that was one flourish too many on the same beat.
+     * Both spans hold their real text in the markup, so this is the only thing
+     * that ever garbles it.
+     */
+    const segments = [
+      ...document.querySelectorAll<HTMLElement>('.cx-tagline [data-decode]'),
+    ];
+
+    const original = segments.map((el) => el.textContent ?? '');
+    const cells: Cell[] = [];
+    const range = document.createRange();
+
+    segments.forEach((el, s) => {
+      const text = original[s];
+      const source = el.firstChild;
+      if (!source) return;
+
+      /*
+       * A character's width has to be its advance in this particular line, the
+       * tracking and the kerning included, and neither a one-character span nor
+       * a one-character Range reports that — both give the bare glyph box, and
+       * measured that way the sentence came out 41px wider garbled than
+       * resolved. So the Range grows from the start of the text and each
+       * advance is the difference between two prefix widths. Those telescope:
+       * they sum to the width of the whole run by construction.
+       *
+       * Every read happens here, while the text node being measured is still
+       * the one on screen; the replacement is built detached and swapped in
+       * afterwards.
+       */
+      const advance: number[] = [];
+      let prefix = 0;
+      range.setStart(source, 0);
+      for (let i = 0; i < text.length; i++) {
+        range.setEnd(source, i + 1);
+        const width = range.getBoundingClientRect().width;
+        advance.push(width - prefix);
+        prefix = width;
+      }
+
+      const frag = document.createDocumentFragment();
+      let word: HTMLElement | null = null;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const cell = document.createElement('span');
+        cell.className = 'cx-dc-char';
+
+        if (/\s/.test(ch)) {
+          /* A space gets a box like any other character, but sits outside the
+             words: adjacent inline-blocks are a break opportunity and the
+             insides of a word are not, so the line still wraps where the plain
+             text did. */
+          frag.append(cell);
+          word = null;
+        } else {
+          if (!word) {
+            word = document.createElement('span');
+            word.className = 'cx-dc-word';
+            frag.append(word);
+          }
+          word.append(cell);
+        }
+
+        cells.push({ el: cell, ch, advance: advance[i] });
+      }
+
+      el.replaceChildren(frag);
+    });
+
+    if (cells.length) {
+      /* 1450ms is `.cx-tagline`'s animation-delay, so the line is visible from
+         then on. It holds on noise for a fifth of a second past that, long
+         enough to be read as ciphertext, and then resolves. */
+      decode(cells, t0, 1450 + 200, 950, () => {
+        /* Back to plain text nodes: the pinned widths would survive a resize
+           and a font swap, and neither is theirs to survive. */
+        segments.forEach((el, s) => {
+          el.textContent = original[s];
+        });
+      });
+    }
+  }
+</script>

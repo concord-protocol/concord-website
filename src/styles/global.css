@@ -494,6 +494,23 @@ body {
   }
 }
 
+/* The tagline's decode, mid-flight. Both classes exist only while the script in
+   Hero.astro is running; it restores plain text nodes when the line resolves.
+   Each character is pinned to its own measured width and the noise glyph is
+   centred in it, so a proportional face can churn without the line twitching;
+   the words stay unbreakable so it wraps where the plain text did. */
+.cx-dc-word {
+  white-space: nowrap;
+}
+
+.cx-dc-char {
+  display: inline-block;
+  text-align: center;
+  /* Spaces are garbled too, so a cell has to be able to hold one and keep its
+     box once it settles back to a space. */
+  white-space: pre;
+}
+
 /* The global reduce block neutralizes durations but not delays, which would
    leave the lockup blank for its first half-second and then snap it in. Since
    every static state here is the resting state, dropping the animations
@@ -555,6 +572,13 @@ body {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-mint);
+}
+
+/* Same label, for the side of a comparison that is *not* ours. Mint reads as
+   "yours" everywhere else on the page, so the relay's half of a split has to
+   drop out of it. */
+.cx-eyebrow-muted {
+  color: var(--color-gray-500);
 }
 
 /* Primary / secondary buttons */

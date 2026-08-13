@@ -1,23 +1,25 @@
 ---
+import Topology from '../diagrams/Topology.astro';
+
 const jobs = [
   {
     job: 'Storage & delivery',
     answer: 'Dumb, interchangeable relays',
-    body: 'Relays only ever see encrypted blobs addressed to rotating, meaningless labels. They cannot read a message, enumerate a membership, or tell two communities apart. One misbehaves? Use the others.',
+    body: 'Sealed blobs addressed to rotating labels. One misbehaves? Use the others.',
     detail: 'CORD-01',
     href: '/spec/cord-01/',
   },
   {
     job: 'Who is a member?',
     answer: 'Key possession',
-    body: 'If you can decrypt the room, you are in it. There is no list for a server to enforce, leak, or be subpoenaed for — and no request anyone can deny.',
+    body: 'Decrypt the room and you are in it. No list to leak, subpoena, or deny.',
     detail: 'CORD-02',
     href: '/spec/cord-02/',
   },
   {
     job: 'Who is in charge?',
     answer: 'A signed roster',
-    body: 'Every grant and ban traces back to the owner’s own key. Authority is math each member re-checks for themselves, not a power a server grants. A forged ban is simply dropped.',
+    body: 'Every ban traces to the owner’s key. A forged one is dropped, not obeyed.',
     detail: 'CORD-04',
     href: '/spec/cord-04/',
   },
@@ -32,18 +34,51 @@ const jobs = [
     >
       Every group chat you have ever used has a computer in the middle.
     </h2>
-    <p class="mt-5 max-w-2xl text-base leading-relaxed text-gray-400">
-      It holds every message, knows every member, and is the final authority on
-      who can do what. You trust it to stay online, keep your data private, and
-      never turn on you. It can be subpoenaed, hacked, sold, or switched off —
-      and when it is, your community dies with it.
-    </p>
-    <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-300">
+
+    {/*
+      The pair carries the argument the three paragraphs here used to. Same six
+      members in the same ring on both sides, so the only thing that changes
+      between the pictures is the middle — and the palette says which one is
+      yours before a word is read.
+    */}
+    <div class="mt-12 grid gap-4 lg:grid-cols-2">
+      <div class="rounded-xl border border-hairline bg-raised/40 p-6 sm:p-8">
+        <p class="cx-eyebrow cx-eyebrow-muted">Every other group chat</p>
+        <Topology
+          variant="hosted"
+          class="mt-6"
+          label="Six members, every one of them connected to a single central server that all their messages pass through."
+        />
+        <p class="mt-6 text-sm leading-relaxed text-gray-400">
+          One computer holds every message, knows every member, and is the final
+          say on who can do what. It can be subpoenaed, hacked, sold, or
+          switched off — and your community goes with it.
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-mint/20 bg-raised/40 p-6 sm:p-8">
+        <p class="cx-eyebrow">Concord</p>
+        <Topology
+          variant="concord"
+          class="mt-6"
+          label="The same six members, each connected to two of three interchangeable relays, with sealed packets on every wire and nothing at the centre."
+        />
+        <p class="mt-6 text-sm leading-relaxed text-gray-300">
+          Nothing in the middle. Relays are interchangeable and carry only
+          sealed packets, so losing one costs you nothing and trusting one buys
+          you nothing.
+        </p>
+      </div>
+    </div>
+
+    <p
+      class="mt-16 max-w-2xl text-base leading-relaxed text-gray-300 sm:text-lg"
+    >
       Concord splits that computer's three jobs into pieces that need to trust
       nobody.
     </p>
 
-    <div class="mt-14 grid gap-4 lg:grid-cols-3">
+    <div class="mt-8 grid gap-4 lg:grid-cols-3">
       {
         jobs.map((job, index) => (
           <a href={job.href} class="cx-card cx-card-link group block p-7">
@@ -70,14 +105,5 @@ const jobs = [
         ))
       }
     </div>
-
-    <p
-      class="mt-12 max-w-3xl border-l-2 border-mint/40 pl-5 text-base leading-relaxed text-gray-300"
-    >
-      The result is full Discord-style moderation — owners, admins, roles,
-      kicks, and bans — where authority is a signed list everyone can verify,
-      and messages are sealed so that relays, network observers, and non-members
-      see only noise.
-    </p>
   </div>
 </section>

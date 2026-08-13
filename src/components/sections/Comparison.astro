@@ -1,38 +1,75 @@
 ---
-const alternatives = [
+/*
+ * Four paragraphs of caveats, as a matrix.
+ *
+ * Each column is a plain question with a plain answer, so the shape of the
+ * comparison lands before any of it is read: the others each go dark somewhere,
+ * and where they go dark is the whole point. The prose that used to say this
+ * moved to /learn/comparison/, which is linked below.
+ */
+type Support = 'yes' | 'part' | 'no';
+
+const columns = [
+  'End-to-end encrypted',
+  'No server to run',
+  'Large rooms',
+  'Roles & bans',
+];
+
+const rows: {
+  name: string;
+  subtitle: string;
+  href?: string;
+  builtFor: string;
+  support: Support[];
+  us?: boolean;
+}[] = [
   {
     name: 'NIP-17',
     subtitle: 'Private DMs',
     href: 'https://github.com/nostr-protocol/nips/blob/master/17.md',
     builtFor: 'One-to-one messages',
-    limitation:
-      'Cannot do communities. Multi-member rooms are an afterthought, and it is vulnerable to denial-of-service issues.',
+    support: ['yes', 'yes', 'no', 'no'],
   },
   {
     name: 'NIP-29',
     subtitle: 'Relay-based groups',
     href: 'https://github.com/nostr-protocol/nips/blob/master/29.md',
     builtFor: 'Hosted group chat',
-    limitation:
-      'You self-host an entire server just to start a community, and messages are not end-to-end encrypted. The relay is the authority.',
+    /* Moderation is real, but the relay is the one enforcing it — which is
+       exactly what the second column is asking about. */
+    support: ['no', 'no', 'yes', 'yes'],
   },
   {
     name: 'Marmot',
     subtitle: 'MLS on Nostr',
     href: 'https://github.com/marmot-protocol/marmot',
     builtFor: 'Small, high-stakes groups',
-    limitation:
-      'MLS advances in lockstep — ordered commits, per-device key packages, logarithmic cost per change — which is heavy for large, casual, high-churn rooms.',
+    /* MLS scales, but in lockstep: ordered commits and per-device key packages
+       are heavy for a large, casual, high-churn room. */
+    support: ['yes', 'yes', 'part', 'no'],
   },
   {
     name: 'Iris Chat',
     subtitle: 'Double Ratchet chats',
     href: 'https://irischat.org/',
     builtFor: 'Pairwise ratcheted chat',
-    limitation:
-      'Aims to replace Signal more than Discord: pairwise ratcheted conversations rather than owner-rooted communities.',
+    support: ['yes', 'yes', 'no', 'no'],
+  },
+  {
+    name: 'Concord',
+    subtitle: 'Encrypted communities',
+    builtFor: 'Large, high-churn communities',
+    support: ['yes', 'yes', 'yes', 'yes'],
+    us: true,
   },
 ];
+
+const MARKS: Record<Support, { label: string; path: string; class: string }> = {
+  yes: { label: 'Yes', path: 'm5 12.5 4.5 4.5L19 7.5', class: 'text-mint' },
+  part: { label: 'Partly', path: 'M6 12h12', class: 'text-gray-400' },
+  no: { label: 'No', path: 'M7 7l10 10M17 7 7 17', class: 'text-gray-600' },
+};
 ---
 
 <section class="border-b border-hairline">
@@ -44,13 +81,13 @@ const alternatives = [
       Concord is not the only way to do private messaging on Nostr.
     </h2>
     <p class="mt-5 max-w-2xl text-base leading-relaxed text-gray-400">
-      It is built for one specific shape — large, Discord-style communities —
-      that the others do not target. Each of these is good at something Concord
+      It is built for one shape the others do not target — large,
+      Discord-style communities. Each of them is better at something Concord
       deliberately trades away.
     </p>
 
-    <div class="mt-14 overflow-hidden rounded-xl border border-hairline">
-      <table class="w-full border-collapse text-left text-sm">
+    <div class="mt-14 overflow-x-auto rounded-xl border border-hairline">
+      <table class="w-full min-w-[44rem] border-collapse text-left text-sm">
         <thead>
           <tr class="border-b border-hairline bg-raised">
             <th scope="col" class="px-5 py-4 font-semibold text-gray-100">
@@ -58,69 +95,93 @@ const alternatives = [
             </th>
             <th
               scope="col"
-              class="hidden px-5 py-4 font-semibold text-gray-100 sm:table-cell"
+              class="hidden px-5 py-4 font-semibold text-gray-100 md:table-cell"
             >
               Built for
             </th>
-            <th scope="col" class="px-5 py-4 font-semibold text-gray-100">
-              Why not for a public community
-            </th>
+            {
+              columns.map((column) => (
+                <th
+                  scope="col"
+                  class="w-28 px-3 py-4 text-center align-bottom text-xs font-semibold leading-tight text-gray-300"
+                >
+                  {column}
+                </th>
+              ))
+            }
           </tr>
         </thead>
+
         <tbody>
           {
-            alternatives.map((item) => (
-              <tr class="border-b border-hairline">
+            rows.map((row) => (
+              <tr
+                class:list={[
+                  'border-b border-hairline last:border-0',
+                  row.us && 'bg-mint/[0.04]',
+                ]}
+              >
                 <th scope="row" class="px-5 py-5 align-top font-medium">
-                  <a
-                    href={item.href}
-                    rel="noopener"
-                    class="text-gray-100 transition-colors hover:text-mint"
-                  >
-                    {item.name}
-                  </a>
+                  {row.href ? (
+                    <a
+                      href={row.href}
+                      rel="noopener"
+                      class="text-gray-100 transition-colors hover:text-mint"
+                    >
+                      {row.name}
+                    </a>
+                  ) : (
+                    <span class="text-mint">{row.name}</span>
+                  )}
                   <span class="mt-1 block text-xs font-normal text-gray-500">
-                    {item.subtitle}
+                    {row.subtitle}
                   </span>
                 </th>
-                <td class="hidden px-5 py-5 align-top text-gray-400 sm:table-cell">
-                  {item.builtFor}
+
+                <td
+                  class:list={[
+                    'hidden px-5 py-5 align-top md:table-cell',
+                    row.us ? 'text-gray-300' : 'text-gray-400',
+                  ]}
+                >
+                  {row.builtFor}
                 </td>
-                <td class="px-5 py-5 align-top leading-relaxed text-gray-400">
-                  {item.limitation}
-                </td>
+
+                {row.support.map((support, i) => (
+                  <td class="px-3 py-5 text-center align-middle">
+                    <span class="sr-only">
+                      {columns[i]}: {MARKS[support].label}
+                    </span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class:list={['mx-auto', MARKS[support].class]}
+                      aria-hidden="true"
+                    >
+                      <path d={MARKS[support].path} />
+                    </svg>
+                  </td>
+                ))}
               </tr>
             ))
           }
-          <tr class="bg-mint/[0.04]">
-            <th scope="row" class="px-5 py-5 align-top font-medium">
-              <span class="text-mint">Concord</span>
-              <span class="mt-1 block text-xs font-normal text-gray-500">
-                Encrypted communities
-              </span>
-            </th>
-            <td
-              class="hidden px-5 py-5 align-top text-gray-300 sm:table-cell"
-            >
-              Large, high-churn communities
-            </td>
-            <td class="px-5 py-5 align-top leading-relaxed text-gray-300">
-              Trades ratcheting guarantees for asynchronous, fold-anytime state
-              that scales to a public community — no server, no lockstep
-              commits, and authority every member re-verifies.
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>
 
-    <p class="mt-8 max-w-3xl text-sm leading-relaxed text-gray-500">
-      In short: NIP-17 is for DMs, NIP-29 trusts the relay, and Marmot and Iris
-      Chat secure the small ratcheted group. Concord is built for the scale and
-      shape of a public community.
+    <p class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[0.65rem] uppercase tracking-wider text-gray-600">
+      <span><span class="text-mint">&check;</span> yes</span>
+      <span><span class="text-gray-400">&mdash;</span> partly</span>
+      <span><span class="text-gray-600">&times;</span> no</span>
       <a
         href="/learn/comparison/"
-        class="text-mint transition-opacity hover:opacity-80"
+        class="normal-case tracking-normal text-mint transition-opacity hover:opacity-80"
         >Read the long version &rarr;</a
       >
     </p>

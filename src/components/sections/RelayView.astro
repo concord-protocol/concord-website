@@ -1,0 +1,178 @@
+---
+/**
+ * The same four seconds of a channel, twice — the members' view on the left and
+ * the relay's on the right, row for row.
+ *
+ * The argument is the alignment: every row on the left has exactly one row
+ * opposite it, so the eye reads them as the same four events rather than as two
+ * unrelated pictures. Both panels are therefore driven off one array, and rows
+ * are a fixed height on both sides.
+ */
+
+const messages = [
+  { who: 'alice', text: 'venue’s booked for the 14th' },
+  { who: 'jskitty', text: 'nice. sending the deposit now' },
+  { who: 'derek', text: 'who’s handling the door list?' },
+  { who: 'alice', text: 'me — I’ll post it here tomorrow' },
+];
+
+/*
+ * Filler that has to look like ciphertext without being any. A seeded LCG
+ * rather than Math.random, so a rebuild doesn't churn the committed HTML.
+ */
+let seed = 0x5eed1e;
+const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+const pick = (set: string, n: number) =>
+  Array.from({ length: n }, () => set[(rand() * set.length) | 0]).join('');
+
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const HEX = '0123456789abcdef';
+
+const events = messages.map(() => ({
+  /* Giftwraps are signed by a throwaway key, so this is different every row. */
+  author: `${pick(HEX, 4)}…${pick(HEX, 4)}`,
+  payload: pick(B64, 96),
+}));
+---
+
+<section
+  id="what-a-relay-sees"
+  class="scroll-mt-20 border-b border-hairline"
+>
+  <div class="mx-auto max-w-6xl px-5 py-24">
+    <p class="cx-eyebrow">End-to-end encrypted</p>
+    <h2
+      class="mt-4 max-w-3xl text-balance text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl"
+    >
+      Relays carry your community. They cannot read it.
+    </h2>
+
+    <div
+      {/*
+        Every track is `minmax(0, 1fr)`, at both breakpoints, because the
+        ciphertext is one unbroken run with an enormous min-content width and an
+        `auto` track sizes to it. Plain `1fr` is really `minmax(auto, 1fr)`, so
+        it does not help; on desktop that blew the relay's column out to twice
+        the client's, and at one column it pushed the whole page 700px wide on a
+        phone. Pinned to zero the run overflows instead, and the card clips it
+        to the ellipsis it is meant to end in.
+      */}
+      class="mt-14 grid grid-cols-[minmax(0,1fr)] items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4"
+    >
+      {/*
+        `min-w-0` on both columns, not just the relay's: at one column the grid
+        sizes it `auto`, and a grid item's automatic minimum is its content's
+        min-content width — which for an unbroken base64 run is the whole
+        string. Without this the panel pushes the page 700px wide on a phone.
+      */}
+      <div class="min-w-0">
+        <p class="cx-eyebrow">In your client</p>
+
+        <div class="cx-card mt-3 overflow-hidden">
+          <div
+            class="flex h-11 items-center justify-between gap-3 border-b border-hairline px-4"
+          >
+            <p class="font-mono text-xs text-gray-200">#&nbsp;general</p>
+            <p class="font-mono text-[0.65rem] text-gray-600">48 members</p>
+          </div>
+
+          <div class="divide-y divide-hairline">
+            {
+              messages.map((message) => (
+                <div class="flex h-16 items-center gap-3 px-4">
+                  <span
+                    class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-mint/10 font-mono text-[0.7rem] uppercase text-mint"
+                    aria-hidden="true"
+                  >
+                    {message.who[0]}
+                  </span>
+                  <span class="shrink-0 text-sm font-medium text-gray-200">
+                    {message.who}
+                  </span>
+                  <span class="min-w-0 truncate text-sm text-gray-400">
+                    {message.text}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <p class="mt-3 text-xs leading-relaxed text-gray-500">
+          You hold the key, so your client renders the room.
+        </p>
+      </div>
+
+      {/*
+        The seal, between the two. It sits in the middle column on wide screens
+        and drops into the seam between the stacked panels on narrow ones, which
+        is the same place in the reading order either way.
+      */}
+      <div class="flex flex-col items-center gap-2 lg:px-6">
+        <span
+          class="grid h-11 w-11 place-items-center rounded-full border border-mint/30 bg-mint/[0.06] text-mint"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            width="19"
+            height="19"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6.25 8.75V6.5a3.75 3.75 0 1 1 7.5 0v2.25"></path>
+            <rect x="4.25" y="8.75" width="11.5" height="7.75" rx="1.75"></rect>
+          </svg>
+        </span>
+        <span
+          class="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-gray-600"
+        >
+          Sealed
+        </span>
+      </div>
+
+      <div>
+        <p class="cx-eyebrow cx-eyebrow-muted">On the relay</p>
+
+        <div class="cx-card mt-3 overflow-hidden">
+          <div
+            class="flex h-11 items-center justify-between gap-3 border-b border-hairline px-4"
+          >
+            <p class="truncate font-mono text-xs text-gray-500">
+              wss://relay.example
+            </p>
+            <p class="shrink-0 font-mono text-[0.65rem] text-gray-600">
+              4 events
+            </p>
+          </div>
+
+          <div class="divide-y divide-hairline">
+            {
+              events.map((event) => (
+                <div class="flex h-16 flex-col justify-center gap-1.5 px-4">
+                  <p class="flex items-center gap-2 font-mono text-[0.65rem]">
+                    <span class="rounded border border-hairline px-1.5 py-0.5 text-gray-500">
+                      kind 1059
+                    </span>
+                    <span class="truncate text-gray-600">
+                      by {event.author}
+                    </span>
+                  </p>
+                  <p class="cx-cipher truncate">{event.payload}</p>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <p class="mt-3 text-xs leading-relaxed text-gray-500">
+          Relays, network observers, and non-members get this. No member list,
+          no channel name, no message.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
