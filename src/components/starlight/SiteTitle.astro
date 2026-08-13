@@ -48,8 +48,14 @@ const isActive = (href: string) => path.startsWith(href);
     white-space: nowrap;
   }
 
+  /* The display face, matching the marketing nav. One weight only, so this
+     overrides the 600 above rather than letting it be synthesised. */
   .concord-brand span {
     color: var(--sl-color-white);
+    font-family: var(--font-display);
+    font-size: var(--sl-text-base);
+    font-weight: 400;
+    letter-spacing: 0.02em;
   }
 
   .concord-top-nav {
