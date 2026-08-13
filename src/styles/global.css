@@ -405,20 +405,41 @@ body {
      own trailing sliver to the word before it, hence a little under a quarter em
      rather than the usual quarter. */
   gap: 0.22em;
-  /* Letter-spacing trails the last letter too, which would otherwise carry the
-     whole word off-centre by half of it, under the mark. Keep in step with the
-     letter-spacing below. */
-  margin-inline-end: -0.05em;
-  /* Audiowide: squared and geometric, so it reads as a mark rather than as a
+  /* Were there any letter-spacing, its trailing sliver after the last letter
+     would carry the whole word off-centre by half of it, under the mark. */
+  margin-inline-end: 0;
+  /* Bruno Ace: squared and geometric, so it reads as a mark rather than as a
      sentence. It ships one weight only, so this must stay 400 — anything
      heavier is synthesised, and faux bold on an outlined face thickens the
-     stroke unevenly. Wider than Orbitron, so it takes less letterspacing. */
+     stroke unevenly. It is wide enough already to want no tracking at all. */
   font-family: var(--font-display);
   font-weight: 400;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   /* In em, so the bloom keeps its proportions across the three type sizes. */
   filter: drop-shadow(0 0 0.08em rgba(36, 232, 163, 0.55))
     drop-shadow(0 0 0.55em rgba(36, 232, 163, 0.35));
+}
+
+/*
+ * Bruno Ace runs wide, and the width is in the glyphs rather than in the space
+ * between them: pulling all the tracking out only bought about 6%, so the rest
+ * is a horizontal scale. It is a fake condensed, with the usual cost — the
+ * vertical strokes come out thinner than the horizontals — but at 0.93 that is
+ * a fraction of a pixel on a 0.03em outline, and the round letters still read
+ * as circles. Around 0.88 they visibly turn into ovals.
+ *
+ * One rule for both brand settings so the hero and the navs can't drift apart.
+ * The scale is about the centre, and it doesn't touch layout, so the centring
+ * either side of it survives untouched.
+ */
+.cx-wordmark,
+.cx-brand-word {
+  transform: scaleX(0.93);
+}
+
+/* Transforms need a block-ish box; .cx-wordmark is already an inline-flex. */
+.cx-brand-word {
+  display: inline-block;
 }
 
 .cx-wordmark-word {
