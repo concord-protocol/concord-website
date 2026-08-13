@@ -284,7 +284,7 @@ body {
      |-------------|---------------------------------------------------------|
      | 0.00 – 0.90 | the mark fades up, unwinding a quarter turn as it grows  |
      | 0.10 – 1.05 | the "C" draws itself from its top terminal              |
-     | 0.32 – 1.12 | the inner ring closes behind it                         |
+     | 0.10 – 0.90 | the inner ring closes alongside it, the same way round  |
      | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
      | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
      | 1.05 – 1.90 | a ring of light expands out of the "C" and fades         |
@@ -328,15 +328,39 @@ body {
   animation: cx-mark-draw 0.95s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
 }
 
+/* The inner ring draws the other way round, so it runs with the "C" over the
+   top of the mark rather than against it. A <circle> is drawn clockwise from
+   its 3 o'clock point, and the open arc is authored counter-clockwise from its
+   top terminal; a negative offset shifts the dash the other way and the ring
+   grows counter-clockwise from the same 3 o'clock start, following the outer
+   curve up and over instead of meeting it head-on. */
 .cx-mark-stroke-inner {
+  animation-name: cx-mark-draw-back;
+  /* Same start as the "C", a shorter run: the two rings set off together and
+     the smaller one, having less to cover, closes first. */
   animation-duration: 0.8s;
-  animation-delay: 0.32s;
+  /* And from the same place. A <circle>'s path begins at 3 o'clock, while the
+     "C" begins at its top terminal, 56 degrees above that; rotating the circle
+     moves where the dash starts without moving anything visible, since a circle
+     is the same shape at every angle. User units, as the transform-box is the
+     view box. */
+  transform-origin: 63.5px 63.5px;
+  transform: rotate(-56deg);
 }
 
 @keyframes cx-mark-draw {
   /* Matching the dash length, so the shape starts fully undrawn. */
   from {
     stroke-dashoffset: 1.01;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes cx-mark-draw-back {
+  from {
+    stroke-dashoffset: -1.01;
   }
   to {
     stroke-dashoffset: 0;
