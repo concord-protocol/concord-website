@@ -21,11 +21,14 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
 ---
 
 {/*
-  The opening screen holds the lockup and nothing else — no tagline, no copy,
-  no buttons. Everything that used to share it now waits one scroll down, in
-  #the-case. Its height subtracts the nav, which is sticky and so occupies flow
-  space above — 4rem on md+, plus the ~2.25rem mobile nav row below it on
-  smaller screens.
+  The opening screen holds the lockup and the tagline, and nothing else — the
+  paragraph and the buttons that used to follow them are gone; the page still
+  makes its case in ThreeJobs and still asks for the click in CTA.
+
+  The lockup sits high rather than centred: at this size, centring pushed it
+  into the lower half of tall viewports and left a dead band above it. Its
+  height subtracts the nav, which is sticky and so occupies flow space above —
+  4rem on md+, plus the ~2.25rem mobile nav row below it on smaller screens.
 */}
 <section class="relative overflow-hidden">
   <div class="cx-radial cx-radial-center pointer-events-none absolute inset-0">
@@ -34,7 +37,7 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
   </div>
 
   <div
-    class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-4xl flex-col items-center justify-center px-5 py-16 text-center md:min-h-[calc(100svh-4rem)]"
+    class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-5xl flex-col items-center px-5 pb-16 pt-[9svh] text-center sm:pt-[11svh] md:min-h-[calc(100svh-4rem)]"
   >
     {/*
       Stacked: the mark is the statement and the title is its caption, so the
@@ -45,7 +48,7 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
     */}
     <h1
       aria-label={title}
-      class="flex flex-col items-center gap-5 text-2xl text-white sm:gap-6 sm:text-4xl lg:text-5xl"
+      class="flex flex-col items-center gap-6 text-[1.6rem] text-white sm:gap-8 sm:text-5xl lg:text-6xl"
     >
       {/*
         Nudged right by 8.8% of its own width. The ring is cut away on its right
@@ -58,7 +61,7 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
       */}
       <Logo
         animate
-        class="ms-5 h-28 w-28 shrink-0 sm:ms-7 sm:h-40 sm:w-40 lg:ms-8 lg:h-48 lg:w-48"
+        class="ms-6 h-36 w-36 shrink-0 sm:ms-9 sm:h-52 sm:w-52 lg:ms-11 lg:h-64 lg:w-64"
       />
       <span class="cx-wordmark">
         {
@@ -75,16 +78,20 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
       </span>
     </h1>
 
+    <p
+      class="mt-8 text-balance text-xl font-medium leading-snug tracking-tight text-gray-200 sm:mt-10 sm:text-3xl"
+    >
+      Private communities. <span class="text-mint">Open protocol.</span>
+    </p>
   </div>
 
   {/*
-    With nothing else on the screen the cue carries the whole burden of saying
-    there is more, so it loses its label — a caption would be the second thing
-    on a screen meant to hold one — and gains the small viewports it used to
-    skip.
+    The cue carries most of the burden of saying there is more, so it keeps the
+    small viewports it used to skip. It stays unlabelled: the tagline is already
+    the second thing on the screen, and a caption would make it the third.
   */}
   <a
-    href="#the-case"
+    href="#what-a-relay-sees"
     aria-label="Scroll down"
     class="absolute inset-x-0 bottom-6 mx-auto flex w-fit flex-col items-center gap-2 text-gray-500 transition-colors hover:text-mint"
   >
@@ -92,45 +99,6 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
       >&darr;</span
     >
   </a>
-</section>
-
-<!-- The pitch the opening screen used to carry. -->
-<section id="the-case" class="relative scroll-mt-20">
-  <div class="mx-auto max-w-4xl px-5 py-24 text-center sm:py-28">
-    <p
-      class="text-balance text-2xl font-medium leading-snug tracking-tight text-gray-200 sm:text-3xl"
-    >
-      Private communities. <span class="text-mint">Open protocol.</span>
-    </p>
-
-    <!--
-      Three claims, in priority order: encryption, then the honest relay
-      concession carrying the benefit that used to be called decentralization,
-      then open-and-ungatekept — evidenced by shipping clients rather than
-      asserted.
-    -->
-    <p class="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-gray-400">
-      Every message is sealed on your device before it leaves. Ordinary <a
-        href="https://github.com/nostr-protocol/nostr"
-        rel="noopener"
-        class="text-gray-200 underline decoration-mint/40 underline-offset-4 transition-colors hover:text-mint"
-        >Nostr</a
-      > relays carry it, but a relay cannot read a message, produce a member list,
-      or decide who is in charge. Three independent apps already speak the protocol
-      — and nothing is stopping a fourth.
-    </p>
-
-    <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-      <a href="/clients/" class="cx-btn cx-btn-primary">Get a client</a>
-      <a href="/spec/" class="cx-btn cx-btn-ghost">Read the specification</a>
-      <a
-        href="/learn/what-is-concord/"
-        class="px-2 py-2 text-sm text-gray-400 transition-colors hover:text-mint"
-      >
-        How it works
-      </a>
-    </div>
-  </div>
 </section>
 
 <!-- The whole client-side view of a community, as a relay query. -->
