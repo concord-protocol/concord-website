@@ -7,18 +7,18 @@ const filter = `{
 }`;
 
 /*
- * The wordmark is split so each letter can land on its own beat and carry its
- * own copy of the specular sweep. The <h1> is labelled, so assistive tech gets
- * the word rather than a spelling-out of it or the duplicated `data-char`s.
+ * The wordmark is split so each letter can land on its own beat. The <h1> is
+ * labelled, so assistive tech gets the word rather than a spelling-out of it.
  */
 const wordmark = [...'Concord'];
 ---
 
 {/*
-  The opening screen is deliberately a single full-height statement: mark,
-  wordmark, tagline. Its height subtracts the nav, which is sticky and so
-  occupies flow space above — 4rem on md+, plus the ~2.25rem mobile nav row
-  below it on smaller screens.
+  The opening screen holds the lockup and nothing else — no tagline, no copy,
+  no buttons. Everything that used to share it now waits one scroll down, in
+  #the-case. Its height subtracts the nav, which is sticky and so occupies flow
+  space above — 4rem on md+, plus the ~2.25rem mobile nav row below it on
+  smaller screens.
 */}
 <section class="relative overflow-hidden">
   <div class="cx-radial cx-radial-center pointer-events-none absolute inset-0">
@@ -31,19 +31,25 @@ const wordmark = [...'Concord'];
   >
     {/*
       The mark leads and the word labels it, so the mark is set well larger
-      than the cap height rather than matching it. The gap is tighter than it
-      looks like it wants to be: the "C" opens toward the word, and that void
-      reads as space of its own.
+      than the cap height rather than matching it.
+
+      The two are spaced optically rather than geometrically, which is why the
+      mark carries a negative margin instead of the pair carrying a gap: the
+      "C" opens toward the word, leaving the right quarter of its viewBox
+      blank, and any real gap on top of that void reads as a hole.
     */}
     <h1
       aria-label="Concord"
-      class="flex items-center justify-center gap-3 text-4xl text-white sm:gap-4 sm:text-6xl lg:text-7xl"
+      class="flex items-center justify-center text-4xl text-white sm:text-6xl lg:text-7xl"
     >
-      <Logo animate class="h-20 w-20 shrink-0 sm:h-28 sm:w-28 lg:h-32 lg:w-32" />
+      <Logo
+        animate
+        class="-me-2.5 h-20 w-20 shrink-0 sm:-me-3 sm:h-28 sm:w-28 lg:-me-3.5 lg:h-32 lg:w-32"
+      />
       <span class="cx-wordmark">
         {
           wordmark.map((char, i) => (
-            <span class="cx-wordmark-letter" data-char={char} style={`--cx-i:${i}`}>
+            <span class="cx-wordmark-letter" style={`--cx-i:${i}`}>
               {char}
             </span>
           ))
@@ -51,8 +57,30 @@ const wordmark = [...'Concord'];
       </span>
     </h1>
 
+  </div>
+
+  {/*
+    With nothing else on the screen the cue carries the whole burden of saying
+    there is more, so it loses its label — a caption would be the second thing
+    on a screen meant to hold one — and gains the small viewports it used to
+    skip.
+  */}
+  <a
+    href="#the-case"
+    aria-label="Scroll down"
+    class="absolute inset-x-0 bottom-6 mx-auto flex w-fit flex-col items-center gap-2 text-gray-500 transition-colors hover:text-mint"
+  >
+    <span class="cx-scroll-cue text-2xl leading-none" aria-hidden="true"
+      >&darr;</span
+    >
+  </a>
+</section>
+
+<!-- The pitch the opening screen used to carry. -->
+<section id="the-case" class="relative scroll-mt-20">
+  <div class="mx-auto max-w-4xl px-5 py-24 text-center sm:py-28">
     <p
-      class="mt-7 text-balance text-2xl font-medium leading-snug tracking-tight text-gray-200 sm:text-3xl"
+      class="text-balance text-2xl font-medium leading-snug tracking-tight text-gray-200 sm:text-3xl"
     >
       Private communities. <span class="text-mint">Open protocol.</span>
     </p>
@@ -63,7 +91,7 @@ const wordmark = [...'Concord'];
       then open-and-ungatekept — evidenced by shipping clients rather than
       asserted.
     -->
-    <p class="mt-7 max-w-2xl text-base leading-relaxed text-gray-400">
+    <p class="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-gray-400">
       Every message is sealed on your device before it leaves. Ordinary <a
         href="https://github.com/nostr-protocol/nostr"
         rel="noopener"
@@ -85,18 +113,6 @@ const wordmark = [...'Concord'];
       </a>
     </div>
   </div>
-
-  <a
-    href="#what-a-relay-sees"
-    class="absolute inset-x-0 bottom-6 mx-auto hidden w-fit flex-col items-center gap-2 text-gray-500 transition-colors hover:text-mint sm:flex"
-  >
-    <span class="font-mono text-[0.65rem] uppercase tracking-[0.18em]"
-      >What a relay sees</span
-    >
-    <span class="cx-scroll-cue text-lg leading-none" aria-hidden="true"
-      >&darr;</span
-    >
-  </a>
 </section>
 
 <!-- The whole client-side view of a community, as a relay query. -->

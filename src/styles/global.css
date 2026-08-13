@@ -6,6 +6,8 @@
 
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
+/* Display face, loaded for the hero lockup alone — see .cx-wordmark. */
+@import '@fontsource-variable/orbitron';
 
 /* ---------------------------------------------------------------------------
    Concord design tokens: near-black surfaces, mint-green signal.
@@ -17,6 +19,7 @@
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+  --font-display: 'Orbitron Variable', var(--font-sans);
 
   /* Mint accent */
   --color-accent-50: #eafff7;
@@ -262,9 +265,9 @@ body {
 /* --------------------------------------------------------------------------
    The hero lockup, drawn
 
-   A one-shot ~2.6s entrance, ported from Armada's crest. The mark inks itself
+   A one-shot ~2.2s entrance, ported from Armada's crest. The mark inks itself
    in, a halo crosses it, a ring of light leaves, and the wordmark lands letter
-   by letter under a travelling specular sweep:
+   by letter:
 
      | t (s)       | what                                                    |
      |-------------|---------------------------------------------------------|
@@ -273,8 +276,7 @@ body {
      | 0.32 – 1.12 | the inner ring closes behind it                         |
      | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
      | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
-     | 1.05 – 1.90 | a ring of light expands out of the "C" and fades        |
-     | 1.40 – 2.42 | a glint runs along the wordmark, letter by letter        |
+     | 1.05 – 1.90 | a ring of light expands out of the "C" and fades         |
      | 2.20 –  ∞   | the halo breathes, slowly, so the lockup isn't inert     |
 
    Every animated element's *static* state is its resting state, with the
@@ -392,18 +394,18 @@ body {
  */
 .cx-wordmark {
   display: inline-flex;
-  /* Heavier and tighter than body Inter, which read as a sentence sitting next
-     to the mark rather than as part of it — but not heavier still: an outline
-     doubles every contour, and at 800 the bowls of the o, c and d close up. */
-  font-weight: 700;
-  letter-spacing: -0.045em;
+  /* Orbitron: squared and geometric, so it reads as a mark rather than as a
+     sentence sitting next to one. It is already wide, and unlike Inter it wants
+     no tracking pulled out of it. */
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0;
   /* In em, so the bloom keeps its proportions across the three type sizes. */
   filter: drop-shadow(0 0 0.08em rgba(36, 232, 163, 0.55))
     drop-shadow(0 0 0.55em rgba(36, 232, 163, 0.35));
 }
 
 .cx-wordmark-letter {
-  position: relative;
   display: inline-block;
   animation: cx-word-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
   /* --cx-i is the letter's index, set inline by the lockup. */
@@ -412,13 +414,7 @@ body {
 
 @supports (-webkit-text-stroke: 1px currentColor) {
   .cx-wordmark-letter {
-    -webkit-text-stroke: 0.032em #24e8a3;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* The glint, brighter and a shade heavier than the letter under it. */
-  .cx-wordmark-letter::after {
-    -webkit-text-stroke: 0.036em #eafff7;
+    -webkit-text-stroke: 0.02em #24e8a3;
     -webkit-text-fill-color: transparent;
   }
 }
@@ -434,40 +430,6 @@ body {
   }
 }
 
-/*
- * The glint: a second copy of the letter, drawn from `data-char` and pinned
- * over the original so the two can never drift out of register, whose brighter
- * outline flares and fades. It picks up where the mark's halo peaks, so one
- * light appears to cross the whole lockup.
- *
- * A highlight *band* travelling within each glyph, which is what the fill
- * version did, has no equivalent here: `background-clip: text` clips to the
- * glyph's fill area, and these glyphs have no fill. So the travel is carried
- * entirely by the stagger, and the stagger therefore has to stay a large
- * fraction of the duration — otherwise all seven fire at once and the word
- * simply blinks.
- */
-.cx-wordmark-letter::after {
-  content: attr(data-char);
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  animation: cx-word-sheen 0.42s ease-out both;
-  animation-delay: calc(1.4s + var(--cx-i) * 0.1s);
-}
-
-@keyframes cx-word-sheen {
-  from {
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 /* The global reduce block neutralizes durations but not delays, which would
    leave the lockup blank for its first half-second and then snap it in. Since
    every static state here is the resting state, dropping the animations
@@ -478,8 +440,7 @@ body {
   .cx-mark-flash,
   .cx-mark-breathe,
   .cx-mark-wave,
-  .cx-wordmark-letter,
-  .cx-wordmark-letter::after {
+  .cx-wordmark-letter {
     animation: none !important;
   }
 }
