@@ -16,9 +16,23 @@ interface Props {
   class?: string;
   /** Set when the mark is the only content of a link or button. */
   title?: string;
+  /**
+   * Draw the mark on load rather than painting it outright: the ring and the
+   * "C" ink themselves in, a halo crosses them, and a ring of light leaves.
+   * See the `.cx-mark-*` block in global.css. Hero lockup only — the nav and
+   * footer marks are furniture and stay still.
+   */
+  animate?: boolean;
 }
 
-const { size = 28, class: className = '', title } = Astro.props;
+const { size = 28, class: className = '', title, animate = false } = Astro.props;
+
+/*
+ * The geometry, hoisted: when animating, a second copy of both shapes sits
+ * underneath as the halo layer, and it has to trace the same mark exactly.
+ */
+const OUTER = 'M 90.90 22.88 A 49 49 0 1 0 90.54 104.36';
+const INNER = { cx: '63.5', cy: '63.5', r: '27.3' };
 ---
 
 <svg
@@ -26,23 +40,57 @@ const { size = 28, class: className = '', title } = Astro.props;
   height={size}
   viewBox="0 0 128 128"
   fill="none"
-  class={className}
+  class:list={[animate && 'cx-mark', className]}
   role={title ? 'img' : undefined}
   aria-label={title}
   aria-hidden={title ? undefined : 'true'}
 >
+  {
+    animate && (
+      <>
+        {/*
+          The halo. A copy of the mark carrying a *static* drop-shadow, whose
+          opacity is what animates: an animated filter re-runs the blur every
+          frame, whereas fading a filter rasterized once is compositor-only.
+          Only the glow shows, since the solid strokes sit directly on top.
+        */}
+        <g class="cx-mark-breathe">
+          <g class="cx-mark-glow cx-mark-flash">
+            <circle {...INNER} stroke="#5AFDB2" stroke-width="12.5" />
+            <path d={OUTER} stroke="#1DA57A" stroke-width="12" />
+          </g>
+        </g>
+        {/* One ring of light leaving the mark as it lands. */}
+        <circle
+          cx="63.5"
+          cy="63.5"
+          r="49"
+          stroke="#24e8a3"
+          stroke-width="2"
+          class="cx-mark-wave"
+        />
+      </>
+    )
+  }
+
+  {/*
+    `pathLength="1"` puts the dash pattern in normalized units, so one set of
+    keyframes draws both shapes regardless of their real perimeters.
+  */}
   <circle
-    cx="63.5"
-    cy="63.5"
-    r="27.3"
+    {...INNER}
     fill="none"
     stroke="#5AFDB2"
     stroke-width="12.5"
+    pathLength={animate ? '1' : undefined}
+    class:list={[animate && 'cx-mark-stroke cx-mark-stroke-inner']}
   />
   <path
-    d="M 90.90 22.88 A 49 49 0 1 0 90.54 104.36"
+    d={OUTER}
     fill="none"
     stroke="#1DA57A"
     stroke-width="12"
+    pathLength={animate ? '1' : undefined}
+    class:list={[animate && 'cx-mark-stroke']}
   />
 </svg>

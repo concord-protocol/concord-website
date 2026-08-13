@@ -259,8 +259,258 @@ body {
   );
 }
 
-.cx-logo-glow {
-  filter: drop-shadow(0 0 42px rgba(36, 232, 163, 0.4));
+/* --------------------------------------------------------------------------
+   The hero lockup, drawn
+
+   A one-shot ~2.6s entrance, ported from Armada's crest. The mark inks itself
+   in, a halo crosses it, a ring of light leaves, and the wordmark lands letter
+   by letter under a travelling specular sweep:
+
+     | t (s)       | what                                                    |
+     |-------------|---------------------------------------------------------|
+     | 0.00 – 0.90 | the mark fades up, unwinding a quarter turn as it grows  |
+     | 0.10 – 1.05 | the "C" draws itself from its top terminal              |
+     | 0.32 – 1.12 | the inner ring closes behind it                         |
+     | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
+     | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
+     | 1.05 – 1.90 | a ring of light expands out of the "C" and fades        |
+     | 1.40 – 2.42 | a highlight sweeps across the wordmark, letter by letter |
+     | 2.20 –  ∞   | the halo breathes, slowly, so the lockup isn't inert     |
+
+   Every animated element's *static* state is its resting state, with the
+   keyframes supplying only the entrance — which is what lets the reduced-motion
+   block at the bottom kill the animations outright and land on the finished
+   lockup rather than a half-drawn one.
+-------------------------------------------------------------------------- */
+
+.cx-mark {
+  /* The halo and the departing ring both paint outside the 128px viewBox. */
+  overflow: visible;
+  animation: cx-mark-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cx-mark-in {
+  from {
+    opacity: 0;
+    transform: scale(0.84) rotate(-28deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* A stroke inking itself in. Paired with `pathLength="1"` on the element, so
+   the dash pattern is normalized and one rule drives both shapes. */
+.cx-mark-stroke {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: cx-mark-draw 0.95s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
+}
+
+.cx-mark-stroke-inner {
+  animation-duration: 0.8s;
+  animation-delay: 0.32s;
+}
+
+@keyframes cx-mark-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Rasterized once; only the opacity above it ever animates. */
+.cx-mark-glow {
+  filter: drop-shadow(0 0 10px rgba(36, 232, 163, 0.85))
+    drop-shadow(0 0 34px rgba(36, 232, 163, 0.45));
+}
+
+.cx-mark-flash {
+  opacity: 0.24;
+  animation: cx-mark-flash 0.9s ease-in-out 0.95s both;
+}
+
+@keyframes cx-mark-flash {
+  from {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.24;
+  }
+}
+
+.cx-mark-breathe {
+  animation: cx-mark-breathe 5.5s ease-in-out 2.2s infinite;
+}
+
+@keyframes cx-mark-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+.cx-mark-wave {
+  opacity: 0;
+  /* User units: an SVG element's transform-box is the view box by default. */
+  transform-origin: 63.5px 63.5px;
+  animation: cx-mark-wave 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both;
+}
+
+@keyframes cx-mark-wave {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+/*
+ * The wordmark: chrome, near enough to WordArt to be a joke about it.
+ *
+ * The bevel is a hard value step at the midline of a vertical gradient clipped
+ * to the glyphs, and the extrusion is a stack of hard-edged drop-shadows on the
+ * container — `text-shadow` can't do it, because a shadow paints in front of
+ * the element's own background and would sit on top of the clipped gradient
+ * rather than behind the letters.
+ *
+ * The filter is static, but its subtree animates during the entrance, so it
+ * re-rasterizes for those frames. That's affordable precisely because it's
+ * one-shot: nothing here loops.
+ */
+.cx-wordmark {
+  display: inline-flex;
+  /* Weighted heavier and tighter than body Inter: at semibold the word read as
+     a sentence sitting next to the mark rather than as part of it. */
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  /* In em, so the bevel keeps its proportions across the three type sizes. */
+  filter: drop-shadow(0 0.015em 0 #04553f) drop-shadow(0 0.045em 0 #002f24)
+    drop-shadow(0 0.14em 0.3em rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 0.5em rgba(36, 232, 163, 0.3));
+}
+
+.cx-wordmark-letter {
+  position: relative;
+  display: inline-block;
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #c8ffe9 22%,
+    #5afdb2 44%,
+    #06cd8a 52%,
+    #24e8a3 60%,
+    #96ffd6 84%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0.018em rgba(0, 22, 15, 0.5);
+  animation: cx-word-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* --cx-i is the letter's index, set inline by the lockup. */
+  animation-delay: calc(0.55s + var(--cx-i) * 0.055s);
+}
+
+/* The letters are painted entirely by the clipped gradient, so knocking the
+   glyph fill out is only safe where that clip actually works. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .cx-wordmark-letter,
+  .cx-wordmark-letter::after {
+    color: transparent;
+  }
+}
+
+@keyframes cx-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * The specular sweep: a second copy of the letter, drawn from `data-char` and
+ * pinned over the original so the two can never drift out of register, filled
+ * with a moving highlight band. It picks up where the mark's halo peaks, so one
+ * light appears to cross the whole lockup.
+ *
+ * The stagger has to stay a large fraction of the duration — at 60ms against
+ * 0.8s all seven letters were lit at once and the word just flashed. Roughly
+ * a quarter of the letters glinting at any moment is what reads as travel.
+ */
+.cx-wordmark-letter::after {
+  content: attr(data-char);
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    100deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.95) 50%,
+    transparent 66%
+  );
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* Inherited from the letter, and it would muddy the highlight. */
+  -webkit-text-stroke-width: 0;
+  opacity: 0;
+  /* Linear: a glint crossing a letter has no reason to accelerate. */
+  animation: cx-word-sheen 0.42s linear both;
+  animation-delay: calc(1.4s + var(--cx-i) * 0.1s);
+}
+
+/*
+ * Mind the percentages. A percentage `background-position` resolves against
+ * (positioning area − image), which is *negative* here, the band being 280% of
+ * the letter's width — so the usable range runs backwards and is much narrower
+ * than it looks: only about 100% → 0% keeps the highlight anywhere over the
+ * glyph, and it travels left-to-right as that value *falls*. Anything outside
+ * parks the gradient off the letter entirely, where it paints nothing at all.
+ */
+@keyframes cx-word-sheen {
+  from {
+    opacity: 0;
+    background-position: 100% 0;
+  }
+  /* Measured: the band sits squarely over the glyph around here. */
+  55% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    background-position: 0% 0;
+  }
+}
+
+/* The global reduce block neutralizes durations but not delays, which would
+   leave the lockup blank for its first half-second and then snap it in. Since
+   every static state here is the resting state, dropping the animations
+   altogether is both calmer and more correct. */
+@media (prefers-reduced-motion: reduce) {
+  .cx-mark,
+  .cx-mark-stroke,
+  .cx-mark-flash,
+  .cx-mark-breathe,
+  .cx-mark-wave,
+  .cx-wordmark-letter,
+  .cx-wordmark-letter::after {
+    animation: none !important;
+  }
 }
 
 .cx-scroll-cue {

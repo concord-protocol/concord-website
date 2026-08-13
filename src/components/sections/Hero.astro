@@ -5,6 +5,13 @@ const filter = `{
   "kinds":   [1059],
   "authors": ["a3f1…9c4e"]
 }`;
+
+/*
+ * The wordmark is split so each letter can land on its own beat and carry its
+ * own copy of the specular sweep. The <h1> is labelled, so assistive tech gets
+ * the word rather than a spelling-out of it or the duplicated `data-char`s.
+ */
+const wordmark = [...'Concord'];
 ---
 
 {/*
@@ -22,11 +29,26 @@ const filter = `{
   <div
     class="relative mx-auto flex min-h-[calc(100svh-6.25rem)] max-w-4xl flex-col items-center justify-center px-5 py-16 text-center md:min-h-[calc(100svh-4rem)]"
   >
+    {/*
+      The mark leads and the word labels it, so the mark is set well larger
+      than the cap height rather than matching it. The gap is tighter than it
+      looks like it wants to be: the "C" opens toward the word, and that void
+      reads as space of its own.
+    */}
     <h1
-      class="flex items-center justify-center gap-4 text-5xl font-semibold tracking-[-0.035em] text-white sm:gap-6 sm:text-7xl lg:text-8xl"
+      aria-label="Concord"
+      class="flex items-center justify-center gap-3 text-4xl text-white sm:gap-4 sm:text-6xl lg:text-7xl"
     >
-      <Logo class="cx-logo-glow h-14 w-14 shrink-0 sm:h-20 sm:w-20 lg:h-24 lg:w-24" />
-      Concord
+      <Logo animate class="h-20 w-20 shrink-0 sm:h-28 sm:w-28 lg:h-32 lg:w-32" />
+      <span class="cx-wordmark">
+        {
+          wordmark.map((char, i) => (
+            <span class="cx-wordmark-letter" data-char={char} style={`--cx-i:${i}`}>
+              {char}
+            </span>
+          ))
+        }
+      </span>
     </h1>
 
     <p
