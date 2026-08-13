@@ -4,9 +4,9 @@
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/ibm-plex-sans';
 @import '@fontsource-variable/jetbrains-mono';
-/* Display face, loaded for the hero lockup alone — see .cx-wordmark. */
+/* Display face, for the hero lockup and the brand word in the nav. */
 @import '@fontsource/bruno-ace';
 
 /* ---------------------------------------------------------------------------
@@ -17,7 +17,7 @@
 --------------------------------------------------------------------------- */
 
 @theme {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
   --font-display: 'Bruno Ace', var(--font-sans);
 
@@ -107,7 +107,6 @@ html {
 
 body {
   font-family: var(--font-sans);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 ::selection {
