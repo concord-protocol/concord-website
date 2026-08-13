@@ -16,9 +16,15 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5"
     aria-label="Primary"
   >
+    {/*
+      Near enough to no gap at all, because the pair is spaced optically: the
+      "C" opens toward the word and leaves the right quarter of the mark's
+      viewBox empty, which together with the wordmark's own sidebearing already
+      comes to about 8px. Any real gap on top of that reads as a hole.
+    */}
     <a
       href="/"
-      class="flex items-center gap-2.5 transition-opacity hover:opacity-80"
+      class="flex items-center gap-px transition-opacity hover:opacity-80"
     >
       <Logo size={22} />
       {/*

@@ -41,7 +41,10 @@ const isActive = (href: string) => path.startsWith(href);
   .concord-brand {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    /* No gap: the mark's "C" opens toward the word and leaves the right quarter
+       of its viewBox empty, which with the wordmark's sidebearing already comes
+       to ~9px of daylight. Matches the marketing nav. */
+    gap: 0;
     font-size: var(--sl-text-lg);
     font-weight: 600;
     text-decoration: none;
