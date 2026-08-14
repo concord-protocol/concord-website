@@ -1,14 +1,15 @@
 ---
 /**
- * The Concord mark: an open "C" ring with a mint inner ring.
+ * The Concord mark: a broken outer ring — a long green "C" and a short white
+ * segment facing it — around a mint inner ring.
  *
- * Traced from the source artwork at src/assets/concord-logo-source.png, which
- * is a 128px raster whose "C" opening is filled with *opaque white* rather than
- * transparency — invisible on a white page, a glaring white crescent on this
- * site's black. This vector version reproduces the measured geometry (centre
- * 63.5, outer ring r49 w12, inner ring r27.3 w12.5, opening from +56 deg to
- * -56.5 deg) with a genuinely transparent opening, and stays crisp at the small
- * sizes the nav and favicon need.
+ * Traced from the source artwork at src/assets/concord-logo-source.png, a 128px
+ * raster. The white segment is easy to miss there, being white on white; it is
+ * part of the mark, not a filled opening, and sits in the same ring band as the
+ * "C" (both measure to mean radius 49.5, width 12.3) separated from it by a gap
+ * at each end. This vector version reproduces the measured geometry: centre
+ * 63.5, outer ring r49 w12 with the "C" from +56 deg to -56.5 deg and the
+ * segment from +43.5 deg to -43.5 deg, inner ring r27.3 w12.5.
  */
 interface Props {
   /** Rendered size in pixels; the mark is square. */
@@ -32,6 +33,10 @@ const { size = 28, class: className = '', title, animate = false } = Astro.props
  * underneath as the halo layer, and it has to trace the same mark exactly.
  */
 const OUTER = 'M 90.90 22.88 A 49 49 0 1 0 90.54 104.36';
+/* Authored from its *lower* terminal so that drawing the dash forward sweeps
+   it counter-clockwise — the same way round as the "C", which is why the two
+   read as one hand travelling round the ring rather than two. */
+const SEGMENT = 'M 99.04 97.23 A 49 49 0 0 0 99.04 29.77';
 const INNER = { cx: '63.5', cy: '63.5', r: '27.3' };
 ---
 
@@ -58,6 +63,7 @@ const INNER = { cx: '63.5', cy: '63.5', r: '27.3' };
           <g class="cx-mark-glow cx-mark-flash">
             <circle {...INNER} stroke="#5AFDB2" stroke-width="12.5" />
             <path d={OUTER} stroke="#1DA57A" stroke-width="12" />
+            <path d={SEGMENT} stroke="#FFFFFF" stroke-width="12" />
           </g>
         </g>
         {/* One ring of light leaving the mark as it lands. */}
@@ -92,5 +98,13 @@ const INNER = { cx: '63.5', cy: '63.5', r: '27.3' };
     stroke-width="12"
     pathLength={animate ? '1' : undefined}
     class:list={[animate && 'cx-mark-stroke']}
+  />
+  <path
+    d={SEGMENT}
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="12"
+    pathLength={animate ? '1' : undefined}
+    class:list={[animate && 'cx-mark-stroke cx-mark-stroke-segment']}
   />
 </svg>

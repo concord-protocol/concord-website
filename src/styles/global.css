@@ -300,6 +300,7 @@ body {
      | 0.10 – 1.05 | the "C" draws itself from its top terminal              |
      | 0.10 – 0.90 | the inner ring closes alongside it, the same way round  |
      | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
+     | 0.60 – 1.05 | the white segment chases the "C" up the right-hand side |
      | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
      | 1.05 – 1.90 | a ring of light expands out of the "C" and fades         |
      | 1.45 – 2.35 | the tagline rises in under the last letters to land      |
@@ -360,6 +361,16 @@ body {
      view box. */
   transform-origin: 63.5px 63.5px;
   transform: rotate(-56deg);
+}
+
+/* The white segment: the same draw, started late and run short. It sets off
+   from its lower terminal, the same way round as the "C" and just behind it, so
+   the two heads travel up the right-hand side one after the other. Both runs
+   end together at 1.05s — the eased "C" is all but home by then, which leaves
+   the segment as the beat that closes the mark. */
+.cx-mark-stroke-segment {
+  animation-duration: 0.45s;
+  animation-delay: 0.6s;
 }
 
 @keyframes cx-mark-draw {

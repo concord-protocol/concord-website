@@ -92,22 +92,27 @@ marketing pages stay in lockstep.
 
 ## The logo
 
-The mark is an open "C" ring with a mint inner ring, defined as inline SVG in
+The mark is a broken outer ring — a long green "C" and a short white segment
+facing it — around a mint inner ring, defined as inline SVG in
 [`src/components/Logo.astro`](src/components/Logo.astro) and again in
 [`public/favicon.svg`](public/favicon.svg).
 
 > [!NOTE]
-> The source artwork, kept at `src/assets/concord-logo-source.png` for
-> provenance, **cannot be used directly on this site.** Its "C" opening is
-> filled with *opaque white* rather than transparency — invisible on a white
-> page, a glaring white crescent on a black one.
+> **The white segment is part of the mark.** In the source artwork, kept at
+> `src/assets/concord-logo-source.png` for provenance, it is white on white and
+> so invisible; it was missed on the first trace and read as a filled opening.
+> It is not — it sits in the same ring band as the "C", with a real gap at each
+> end. Anything that puts the mark on a light background loses it.
 
 The SVG is a measured trace of that raster rather than a redraw: centre 63.5,
-outer ring r49 stroke 12, inner ring r27.3 stroke 12.5, opening from +56° to
-−56.5°, colours `#1DA57A` and `#5AFDB2` sampled from the source. The parameters
-were fitted by rendering candidates and maximising pixel overlap against the
-original, reaching an IoU of 0.948 — the remainder being antialiasing at the
-coverage threshold.
+outer ring r49 stroke 12 with the "C" running from +56° to −56.5° and the white
+segment from +43.5° to −43.5°, inner ring r27.3 stroke 12.5, colours `#1DA57A`,
+`#5AFDB2` and `#FFFFFF` sampled from the source. The parameters were fitted by
+rendering candidates and maximising pixel overlap against the original, reaching
+an IoU of 0.936 over the whole mark — the remainder being antialiasing at the
+coverage threshold. The two outer arcs measure to the same ring (mean radius
+49.5, width 12.3) and are drawn with identical `r` and `stroke-width`, which is
+worth more than fitting each one separately.
 
 `public/apple-touch-icon.png` is generated from `public/favicon.svg`:
 
