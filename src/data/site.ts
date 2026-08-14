@@ -39,7 +39,7 @@ export const CLIENTS: Client[] = [
       'Communities, channels, threads, roles, voice and video, custom emoji and themes, plus a Discord bridge and server import. Armada speaks Concord alongside NIP-29 and Buzz communities, so one key carries you across the ecosystem.',
     href: 'https://armada.buzz',
     source: 'https://gitworkshop.dev/soapbox.pub/armada',
-    platforms: ['Web', 'Android', 'Linux', 'Windows'],
+    platforms: ['Web', 'Android', 'Linux', 'Windows', 'macOS'],
     accent: 'from-emerald-400/20',
     links: [
       { label: 'Open Armada', href: 'https://armada.buzz' },

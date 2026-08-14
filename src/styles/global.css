@@ -650,6 +650,17 @@ body {
   transform: translateY(-2px);
 }
 
+/* A card already wearing the state the others only reach under the cursor.
+   For a row of cards that is not a menu of equals — the pair under the hero is
+   two apps, and this is how the page says which one to press without a line of
+   copy saying it. Sparingly: it only reads as emphasis while it is rare. */
+.cx-card-lit {
+  border-color: rgba(36, 232, 163, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(36, 232, 163, 0.08),
+    0 18px 50px -24px rgba(36, 232, 163, 0.35);
+}
+
 /* Small uppercase mint label */
 .cx-eyebrow {
   font-family: var(--font-mono);
