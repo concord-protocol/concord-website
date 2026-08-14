@@ -290,21 +290,21 @@ body {
 /* --------------------------------------------------------------------------
    The hero lockup, drawn
 
-   A one-shot ~2.2s entrance, ported from Armada's crest. The mark inks itself
+   A one-shot ~2.5s entrance, ported from Armada's crest. The mark inks itself
    in, a halo crosses it, a ring of light leaves, and the wordmark lands letter
    by letter:
 
      | t (s)       | what                                                    |
      |-------------|---------------------------------------------------------|
      | 0.00 – 0.90 | the mark fades up, unwinding a quarter turn as it grows  |
-     | 0.10 – 1.05 | the "C" draws itself from its top terminal              |
+     | 0.10 – 0.86 | the "C" draws itself from its top terminal              |
      | 0.10 – 0.90 | the inner ring closes alongside it, the same way round  |
      | 0.55 – 1.55 | the letters rise in, 55ms apart                         |
-     | 0.60 – 1.05 | the white segment chases the "C" up the right-hand side |
-     | 0.95 – 1.85 | one halo pass over the mark, settling to a resting glow |
-     | 1.05 – 1.90 | a ring of light expands out of the "C" and fades         |
+     | 0.86 – 1.38 | the same stroke carries on into the white segment       |
+     | 1.28 – 2.18 | one halo pass over the mark, settling to a resting glow |
+     | 1.38 – 2.23 | a ring of light expands out of the mark and fades       |
      | 1.45 – 2.35 | the tagline rises in under the last letters to land      |
-     | 2.20 –  ∞   | the halo breathes, slowly, so the lockup isn't inert     |
+     | 2.55 –  ∞   | the halo breathes, slowly, so the lockup isn't inert     |
 
    Every animated element's *static* state is its resting state, with the
    keyframes supplying only the entrance — which is what lets the reduced-motion
@@ -336,11 +336,14 @@ body {
    <circle>'s path begins at (cx + r, cy) — its rightmost point — and a dash of
    exactly the path length ends precisely where it started, leaving a 1px seam
    there once drawn. The overlap costs nothing: it is a solid stroke painting
-   over itself, and it falls outside the open arc's path entirely. */
+   over itself, and it falls outside the open arc's path entirely.
+
+   The timing here is the "C"'s share of one longer draw — see the segment
+   below — which is why it is not the plain ease-in-out the inner ring uses. */
 .cx-mark-stroke {
   stroke-dasharray: 1.01;
   stroke-dashoffset: 0;
-  animation: cx-mark-draw 0.95s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
+  animation: cx-mark-draw 0.76s cubic-bezier(0.727, 0, 0.746, 0.6) 0.1s both;
 }
 
 /* The inner ring draws the other way round, so it runs with the "C" over the
@@ -352,8 +355,10 @@ body {
 .cx-mark-stroke-inner {
   animation-name: cx-mark-draw-back;
   /* Same start as the "C", a shorter run: the two rings set off together and
-     the smaller one, having less to cover, closes first. */
+     the smaller one, having less to cover, closes first. It begins and ends on
+     its own, so unlike the outer ring it keeps a whole ease-in-out. */
   animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
   /* And from the same place. A <circle>'s path begins at 3 o'clock, while the
      "C" begins at its top terminal, 56 degrees above that; rotating the circle
      moves where the dash starts without moving anything visible, since a circle
@@ -363,14 +368,26 @@ body {
   transform: rotate(-56deg);
 }
 
-/* The white segment: the same draw, started late and run short. It sets off
-   from its lower terminal, the same way round as the "C" and just behind it, so
-   the two heads travel up the right-hand side one after the other. Both runs
-   end together at 1.05s — the eased "C" is all but home by then, which leaves
-   the segment as the beat that closes the mark. */
+/* The white segment, which is the *same stroke* as the "C" carrying on across
+   the gap rather than a second one starting up: it sets off from its lower
+   terminal at the instant the "C" reaches its own, and at the speed the "C"
+   was travelling.
+
+   Getting that handoff clean takes more than lining the times up, since two
+   ease-in-outs would have the pen stop dead at the gap and set off again. So
+   the pair share one curve: cubic-bezier(0.65, 0, 0.35, 1) run over the whole
+   335 degrees of outer ring, split at the point where the drawn distance
+   reaches the "C"'s 248 of them, each half renormalized to its own box. The
+   split falls at 59.6% of the time for 74% of the distance, hence 0.76s here
+   against 0.52s below for a quarter of the arc: what looks like a slow tail is
+   the ease-out, which now lands on the segment because that is where the
+   stroke ends. Peak pen speed is unchanged — there is simply more line, so the
+   draw runs 1.28s rather than 0.95s, and the halo and the departing ring below
+   wait accordingly. */
 .cx-mark-stroke-segment {
-  animation-duration: 0.45s;
-  animation-delay: 0.6s;
+  animation-duration: 0.52s;
+  animation-delay: 0.86s;
+  animation-timing-function: cubic-bezier(0.188, 0.571, 0.463, 1);
 }
 
 @keyframes cx-mark-draw {
@@ -400,7 +417,9 @@ body {
 
 .cx-mark-flash {
   opacity: 0.24;
-  animation: cx-mark-flash 0.9s ease-in-out 0.95s both;
+  /* Set off just before the stroke lands, so the halo is already rising as the
+     segment closes the ring. */
+  animation: cx-mark-flash 0.9s ease-in-out 1.28s both;
 }
 
 @keyframes cx-mark-flash {
@@ -416,7 +435,7 @@ body {
 }
 
 .cx-mark-breathe {
-  animation: cx-mark-breathe 5.5s ease-in-out 2.2s infinite;
+  animation: cx-mark-breathe 5.5s ease-in-out 2.55s infinite;
 }
 
 @keyframes cx-mark-breathe {
@@ -433,7 +452,7 @@ body {
   opacity: 0;
   /* User units: an SVG element's transform-box is the view box by default. */
   transform-origin: 63.5px 63.5px;
-  animation: cx-mark-wave 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1.05s both;
+  animation: cx-mark-wave 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1.38s both;
 }
 
 @keyframes cx-mark-wave {
