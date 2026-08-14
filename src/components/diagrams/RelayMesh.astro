@@ -1,0 +1,505 @@
+---
+/**
+ * One community, many relays, and ciphertext on every wire.
+ *
+ * Adapted from the constellation on soapbox.pub/armada — same arrangement,
+ * same idea of a mesh you can watch a node drop out of — with the argument
+ * shifted to the thing Concord is actually for. Armada's diagram is about
+ * where a community lives; this one has to say that *and* that nothing out
+ * there can read it, because decentralisation on its own is a weaker claim
+ * and the one people care about less.
+ *
+ * So the readable message sits at the centre, in the one place it exists in
+ * the clear, and what travels the arcs is base64. Nothing labels the packets
+ * as encrypted: they are unreadable on the screen, which is the same
+ * information delivered by the picture instead of by a caption.
+ *
+ * A relay goes dark on a cycle. It is drawn as an ordinary state rather than
+ * an alarm — greyed and struck through, no red — because that is the point:
+ * losing one is not a failure, and the other arcs do not change.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+/**
+ * The relays are real, and deliberately a mix: three of the busiest public
+ * ones, two smaller, and one of your own. Coordinates are hand-placed inside
+ * the 1000×470 viewBox so no label collides with an arc.
+ */
+const RELAYS = [
+  { name: 'relay.damus.io', x: 150, y: 85 },
+  { name: 'nos.lol', x: 400, y: 45 },
+  { name: 'relay.primal.net', x: 700, y: 60 },
+  { name: 'relay.nostr.band', x: 895, y: 140 },
+  { name: 'relay.ditto.pub', x: 110, y: 320 },
+  { name: 'relay.dreamith.to', x: 330, y: 415 },
+  { name: 'your relay', x: 760, y: 395, self: true },
+];
+
+const CENTER = { x: 500, y: 235 };
+
+/** Gently curved path from the community out to a relay. */
+function meshPath(x: number, y: number): string {
+  const dx = x - CENTER.x;
+  const dy = y - CENTER.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const bend = 0.14;
+  const qx = (CENTER.x + x) / 2 - dy * bend;
+  const qy = (CENTER.y + y) / 2 + dx * bend;
+  return `M ${CENTER.x} ${CENTER.y} Q ${qx.toFixed(0)} ${qy.toFixed(0)} ${x} ${y}`;
+}
+
+/*
+ * Ciphertext that has to look like ciphertext without being any. A seeded LCG
+ * rather than Math.random, so a rebuild doesn't churn the committed HTML.
+ */
+let seed = 0x5eed1e;
+const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const cipher = (n: number) =>
+  Array.from({ length: n }, () => B64[(rand() * B64.length) | 0]).join('');
+
+const relays = RELAYS.map((relay, index) => ({
+  ...relay,
+  path: meshPath(relay.x, relay.y),
+  /* On the wire, and again where it comes to rest. */
+  out: `${cipher(5)}…`,
+  back: `${cipher(5)}…`,
+  stored: `${cipher(11)}…`,
+  /* Staggered so the mesh reads as traffic rather than as a metronome. */
+  delay: index * 0.28,
+  duration: 2.2 + (index % 4) * 0.35,
+}));
+
+/** The room, in the one place it is legible. */
+const MESSAGE = { who: 'alice', text: 'venue’s booked for the 14th' };
+
+/*
+ * Whichever relay is dark before the script takes over — and the one it stays
+ * on for anybody who has turned motion off. Never the self-hosted one: the
+ * point of that node is that it is the one you control.
+ */
+const INITIAL_DOWN = 'relay.dreamith.to';
+---
+
+<div class:list={[className]}>
+  {/*
+    The wide constellation, which needs the width to keep seven labels apart.
+    The stacked version below carries the same argument on a phone.
+  */}
+  <svg
+    viewBox="0 0 1000 470"
+    class="hidden w-full md:block"
+    role="img"
+    aria-label="One community at the centre, its message readable there and nowhere else, publishing encrypted packets out to seven independent relays at once. One relay is dark, and every other arc carries on unchanged."
+  >
+    {
+      relays.map((relay) => (
+        <g
+          class="cx-arc"
+          data-relay={relay.name}
+          data-self={relay.self ? '' : undefined}
+          data-down={relay.name === INITIAL_DOWN ? '' : undefined}
+        >
+          <path
+            d={relay.path}
+            fill="none"
+            stroke="rgba(36, 232, 163, 0.22)"
+            stroke-width="1.5"
+          />
+        </g>
+      ))
+    }
+
+    {/*
+      What is actually on the wire. `motion-reduce:hidden` takes the whole
+      group out rather than freezing it mid-arc, which would leave a run of
+      base64 stranded in open space with nothing to explain it.
+    */}
+    {
+      relays.map((relay) => (
+        <g
+          class="cx-packets motion-reduce:hidden"
+          data-relay={relay.name}
+          data-self={relay.self ? '' : undefined}
+          data-down={relay.name === INITIAL_DOWN ? '' : undefined}
+        >
+          <text
+            x="0"
+            y="0"
+            class="font-mono"
+            font-size="13"
+            fill="#24e8a3"
+            opacity="0.85"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >
+            {relay.out}
+            <animateMotion
+              dur={`${relay.duration}s`}
+              begin={`${relay.delay}s`}
+              repeatCount="indefinite"
+              path={relay.path}
+            />
+          </text>
+
+          {/* The same arc, travelled the other way: a relay is a place things
+              come back from too, and just as unreadable in that direction. */}
+          <text
+            x="0"
+            y="0"
+            class="font-mono"
+            font-size="12"
+            fill="#96ffd6"
+            opacity="0.45"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >
+            {relay.back}
+            <animateMotion
+              dur={`${relay.duration + 0.5}s`}
+              begin={`${relay.delay + 1.1}s`}
+              repeatCount="indefinite"
+              path={relay.path}
+              keyPoints="1;0"
+              keyTimes="0;1"
+              calcMode="linear"
+            />
+          </text>
+        </g>
+      ))
+    }
+
+    {
+      relays.map((relay) => (
+        <g
+          class="cx-node"
+          data-relay={relay.name}
+          data-self={relay.self ? '' : undefined}
+          data-down={relay.name === INITIAL_DOWN ? '' : undefined}
+        >
+          <circle
+            class="cx-node-halo"
+            cx={relay.x}
+            cy={relay.y}
+            r="14"
+            fill={relay.self ? 'rgba(36, 232, 163, 0.10)' : 'rgba(67, 87, 78, 0.22)'}
+          />
+          <circle
+            class="cx-node-dot"
+            cx={relay.x}
+            cy={relay.y}
+            r="7"
+            fill={relay.self ? '#24e8a3' : '#43574e'}
+          />
+          {/* Only ever visible on a dark relay; see the style block below. */}
+          <text
+            class="cx-node-x font-mono"
+            x={relay.x}
+            y={relay.y}
+            font-size="10"
+            font-weight="bold"
+            fill="#050807"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >
+            ✕
+          </text>
+
+          <text
+            class="cx-node-name font-mono"
+            x={relay.x}
+            y={relay.y > CENTER.y ? relay.y + 26 : relay.y - 17}
+            font-size="15"
+            text-anchor="middle"
+            fill={relay.self ? '#24e8a3' : '#6a8177'}
+          >
+            {relay.name}
+          </text>
+
+          {/* The stored copy, so the picture says what a relay ends up holding
+              and not only what crosses it. */}
+          <text
+            class="cx-node-blob font-mono"
+            x={relay.x}
+            y={relay.y > CENTER.y ? relay.y + 44 : relay.y - 35}
+            font-size="12"
+            text-anchor="middle"
+            fill="#2d3d36"
+          >
+            {relay.self ? 'self-hosted' : relay.stored}
+          </text>
+        </g>
+      ))
+    }
+
+    {/*
+      The community, centre stage and the only legible thing in the picture.
+      Drawn last so the arcs run under it — they leave from behind the card,
+      which is where a message leaves from.
+    */}
+    <g>
+      {/*
+        A bloom rather than a disc: at a flat fill the edge is visible against
+        black and reads as a circle somebody drew, which is one more shape in a
+        picture that already has seven.
+      */}
+      <defs>
+        <radialGradient id="cx-mesh-bloom">
+          <stop offset="0%" stop-color="rgba(36, 232, 163, 0.16)" />
+          <stop offset="55%" stop-color="rgba(36, 232, 163, 0.05)" />
+          <stop offset="100%" stop-color="rgba(36, 232, 163, 0)" />
+        </radialGradient>
+      </defs>
+      <circle
+        cx={CENTER.x}
+        cy={CENTER.y}
+        r="150"
+        fill="url(#cx-mesh-bloom)"
+      />
+      <rect
+        x={CENTER.x - 142}
+        y={CENTER.y - 38}
+        width="284"
+        height="76"
+        rx="16"
+        fill="#0e1512"
+        stroke="rgba(36, 232, 163, 0.45)"
+        stroke-width="1.5"
+      />
+
+      <circle
+        cx={CENTER.x - 108}
+        cy={CENTER.y}
+        r="15"
+        fill="rgba(36, 232, 163, 0.12)"
+      />
+      <text
+        class="font-mono"
+        x={CENTER.x - 108}
+        y={CENTER.y}
+        font-size="14"
+        fill="#24e8a3"
+        text-anchor="middle"
+        dominant-baseline="central"
+      >
+        a
+      </text>
+
+      <text
+        x={CENTER.x - 84}
+        y={CENTER.y - 11}
+        font-size="14"
+        font-weight="600"
+        fill="#e7f1ec"
+        dominant-baseline="central"
+      >
+        {MESSAGE.who}
+      </text>
+      <text
+        x={CENTER.x - 84}
+        y={CENTER.y + 12}
+        font-size="14"
+        fill="#9fb3aa"
+        dominant-baseline="central"
+      >
+        {MESSAGE.text}
+      </text>
+
+      <text
+        class="font-mono"
+        x={CENTER.x}
+        y={CENTER.y + 62}
+        font-size="14"
+        fill="#24e8a3"
+        text-anchor="middle"
+      >
+        your community
+      </text>
+      <text
+        class="font-mono"
+        x={CENTER.x}
+        y={CENTER.y + 82}
+        font-size="12"
+        fill="#43574e"
+        text-anchor="middle"
+      >
+        readable on your devices, nowhere else
+      </text>
+    </g>
+  </svg>
+
+  {/*
+    The phone version: the same three facts stacked — the room in the clear at
+    the top, then what each relay is holding, one row each.
+  */}
+  <div class="md:hidden">
+    <div class="cx-card p-4">
+      <div class="flex items-center gap-3">
+        <span
+          class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-mint/10 font-mono text-xs text-mint"
+          aria-hidden="true"
+        >
+          {MESSAGE.who[0]}
+        </span>
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-gray-100">
+            {MESSAGE.who}
+          </span>
+          <span class="block truncate text-sm text-gray-400">
+            {MESSAGE.text}
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <p class="mt-2 text-center font-mono text-[0.65rem] text-gray-500">
+      your community &middot; readable here, nowhere else
+    </p>
+
+    <div class="mx-auto my-3 h-6 w-px bg-mint/25"></div>
+
+    <ul class="space-y-2">
+      {
+        relays.map((relay) => (
+          <li
+            class="cx-row flex items-center gap-3 rounded-lg border border-hairline px-3 py-2.5"
+            data-relay={relay.name}
+            data-self={relay.self ? '' : undefined}
+            data-down={relay.name === INITIAL_DOWN ? '' : undefined}
+          >
+            <span
+              class="cx-row-dot h-2.5 w-2.5 shrink-0 rounded-full"
+              style={`background:${relay.self ? '#24e8a3' : '#43574e'}`}
+            />
+            <span
+              class:list={[
+                'cx-row-name shrink-0 font-mono text-xs',
+                relay.self ? 'text-mint' : 'text-gray-400',
+              ]}
+            >
+              {relay.name}
+            </span>
+            <span class="cx-cipher ml-auto min-w-0 truncate text-right">
+              {relay.self ? 'self-hosted' : relay.stored}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* A relay that is currently dark. One state, described once, for the wide
+     diagram and the stacked list alike. */
+  .cx-arc,
+  .cx-node,
+  .cx-row {
+    transition:
+      opacity 0.5s ease,
+      border-color 0.5s ease;
+  }
+
+  .cx-arc path {
+    transition:
+      stroke 0.5s ease,
+      stroke-dasharray 0.5s ease;
+  }
+
+  .cx-arc[data-down] path {
+    stroke: rgba(67, 87, 78, 0.45);
+    stroke-dasharray: 4 6;
+  }
+
+  .cx-packets[data-down] {
+    display: none;
+  }
+
+  .cx-node[data-down] {
+    opacity: 0.6;
+  }
+
+  .cx-node[data-down] .cx-node-halo {
+    fill: transparent;
+  }
+
+  .cx-node[data-down] .cx-node-dot {
+    fill: #2d3d36;
+  }
+
+  .cx-node[data-down] .cx-node-name {
+    fill: #43574e;
+    text-decoration: line-through;
+  }
+
+  .cx-node[data-down] .cx-node-blob {
+    fill-opacity: 0;
+  }
+
+  /* The ✕ is in the markup for every node and shown on none of them until the
+     dot underneath it goes dark. */
+  .cx-node-x {
+    opacity: 0;
+  }
+
+  .cx-node[data-down] .cx-node-x {
+    opacity: 1;
+  }
+
+  .cx-row[data-down] {
+    opacity: 0.55;
+  }
+
+  .cx-row[data-down] .cx-row-dot {
+    background: #2d3d36 !important;
+  }
+
+  .cx-row[data-down] .cx-row-name {
+    text-decoration: line-through;
+  }
+</style>
+
+<script>
+  /*
+   * Whose turn it is to be offline.
+   *
+   * Relays go down; that is the ordinary condition of the network rather than
+   * an incident, and a diagram where the same one is always dark invites the
+   * reader to think that one is broken. Rotating it says the thing the picture
+   * is for: any of them can go, and the community does not notice.
+   *
+   * The self-hosted node is never picked. Every element that has an opinion
+   * about a relay carries `data-relay`, so both layouts change together and
+   * nothing here needs to know which one is on screen.
+   */
+  const CYCLE_MS = 2600;
+
+  const parts = document.querySelectorAll<HTMLElement>('[data-relay]');
+
+  if (parts.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const names = [
+      ...new Set(
+        [...parts]
+          .filter((part) => part.dataset.self === undefined)
+          .map((part) => part.dataset.relay ?? '')
+      ),
+    ].filter(Boolean);
+
+    /* One beat with everything up, so the mesh is not permanently missing a
+       node and the recovery is as visible as the outage. */
+    const turns = [...names, null];
+    let turn = turns.indexOf(document.querySelector('[data-down]')?.getAttribute('data-relay') ?? null);
+
+    setInterval(() => {
+      turn = (turn + 1) % turns.length;
+      const down = turns[turn];
+      for (const part of parts) {
+        part.toggleAttribute('data-down', part.dataset.relay === down);
+      }
+    }, CYCLE_MS);
+  }
+</script>

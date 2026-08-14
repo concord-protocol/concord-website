@@ -1,59 +1,40 @@
 ---
 /*
- * The whole argument in two pictures: the shape of every other group chat, and
- * the shape of this one.
+ * The argument, directly under the hero, made in one picture.
  *
- * Between the apps and the things built on them, and set in the same frame as
- * both — outlined wordmark title, centred, over cards on a hairline. It carries
- * no headline and no closing paragraph: the pair of diagrams is the claim, and
- * a sentence over the top of them only says it worse.
+ * Set up above the diagram and answered below it, the way the constellation on
+ * soapbox.pub/armada is framed — the reader looks at the mesh with a question
+ * already in hand. The two lines carry the claim in words and the diagram
+ * carries it in evidence: the message is legible at the centre and base64
+ * everywhere else, and one relay is always dark without anything else moving.
  *
- * Note what the right-hand caption does *not* say. There is a computer in the
- * middle here too — several, and they are called relays. The difference is not
- * that they are absent but that no particular one of them matters and none of
- * them can read what it carries, which is a claim that survives contact with
- * how the protocol actually works.
+ * The answer names encryption outright. Decentralisation is what the picture
+ * shows first, and it is the weaker half — a community spread over relays that
+ * could read it would be no better than a company that can. Mint on that
+ * clause, the same way the hero's tagline puts it on "Open protocol."
  */
-import Topology from '../diagrams/Topology.astro';
+import RelayMesh from '../diagrams/RelayMesh.astro';
 ---
 
-<section class="border-b border-hairline">
+{/* The hero's scroll cue lands here, so this is the id it points at. */}
+<section id="the-idea" class="scroll-mt-20 border-b border-hairline">
   <div class="mx-auto max-w-5xl px-5 py-24">
     <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">THE IDEA</h2>
 
-    {/*
-      Same six members in the same ring on both sides, so the only thing that
-      changes between the pictures is the middle — and the palette says which
-      one is yours before a word is read.
-    */}
-    <div class="mt-12 grid gap-4 lg:grid-cols-2">
-      <div class="rounded-xl border border-hairline bg-raised/40 p-6 sm:p-8">
-        <p class="cx-eyebrow cx-eyebrow-muted">Every other group chat</p>
-        <Topology
-          variant="hosted"
-          class="mt-6"
-          label="Six members, every one of them connected to a single central server that all their messages pass through."
-        />
-        <p class="mt-6 text-sm leading-relaxed text-gray-400">
-          One computer holds every message, knows every member, and is the final
-          say on who can do what. It can be subpoenaed, hacked, sold, or
-          switched off — and your community goes with it.
-        </p>
-      </div>
+    <p
+      class="mx-auto mt-12 max-w-2xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-gray-400 sm:text-3xl"
+    >
+      Every other chat app keeps your messages on a server that can read
+      them&hellip;
+    </p>
 
-      <div class="rounded-xl border border-mint/20 bg-raised/40 p-6 sm:p-8">
-        <p class="cx-eyebrow">Concord</p>
-        <Topology
-          variant="concord"
-          class="mt-6"
-          label="The same six members, each connected to two of three interchangeable relays, with sealed packets on every wire and no one relay that any member depends on."
-        />
-        <p class="mt-6 text-sm leading-relaxed text-gray-300">
-          Relays still carry the traffic, but they are interchangeable and every
-          packet reaches them sealed — so losing one costs you nothing and
-          trusting one buys you nothing.
-        </p>
-      </div>
-    </div>
+    <RelayMesh class="mt-10" />
+
+    <p
+      class="mx-auto mt-10 max-w-3xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+    >
+      Concord <span class="text-mint">encrypts every message on your device</span
+      >, then scatters it across relays that cannot read a word.
+    </p>
   </div>
 </section>
