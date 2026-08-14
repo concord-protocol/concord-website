@@ -107,11 +107,14 @@ export const CLIENTS: Client[] = [
 
 export interface Tool {
   name: string;
+  /** 'SDK' and 'Library' are drawn as libraries; 'Bot' as bots. See LibrariesAndBots.astro. */
   kind: string;
   author: string;
   description: string;
   href: string;
   language: string;
+  /** API documentation, where it is published somewhere other than `href`. */
+  docs?: string;
 }
 
 export const TOOLS: Tool[] = [
@@ -123,6 +126,7 @@ export const TOOLS: Tool[] = [
     description:
       'Keys, relays, streams, and encryption handled, so you write handlers instead of cryptography.',
     href: 'https://crates.io/crates/vector_sdk',
+    docs: 'https://docs.rs/vector-sdk',
   },
   {
     name: 'Shanty',
