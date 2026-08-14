@@ -1,13 +1,10 @@
 ---
 /**
- * One sealed message on the wire: a padlock, and the hex it actually is.
+ * One sealed message on the wire: a chat bubble, and the hex it actually is.
  *
- * The icon is what makes the run of hex legible as a *message* rather than as
- * decorative noise — a reader who sees `843def` sliding along a line knows it
- * is data, and something has to say it is somebody's sentence. A padlock says
- * that and one thing more, which is why it replaced the chat bubble that was
- * here: every message on every wire is shut, and the picture no longer needs
- * the devices to be badged for the reader to see where that leaves the relays.
+ * The bubble is what makes the run of hex legible as a *message* rather than
+ * as decorative noise — a reader who sees `843def` sliding along a line knows
+ * it is data, and the icon is what tells them it is somebody's sentence.
  *
  * Drawn about its own origin so the caller can place it either way: the
  * animated copies hand their position to an <animateMotion> on a wrapper, and
@@ -26,18 +23,13 @@ const { hex, fill, opacity, churn = false } = Astro.props;
 ---
 
 <g opacity={opacity}>
-  {/* A solid body and a stroked shackle, which is as much padlock as survives
-      at eleven units wide. No keyhole: it is two more marks that close up into
-      a smudge at this size, and the silhouette is already the shape everybody
-      reads as shut. */}
-  <path
-    d="M -28.2 -2 v -2.8 a 3.2 3.2 0 0 1 6.4 0 v 2.8"
-    fill="none"
-    stroke={fill}
-    stroke-width="1.8"
-    stroke-linecap="round"
-  />
-  <rect x="-30.5" y="-2" width="11" height="9" rx="2" fill={fill} />
+  {/* Solid rather than outlined: at 16×12 the stroke was drawing a box with a
+      hole in it, and a filled bubble is the shape everybody already reads as a
+      message without having to resolve any detail. */}
+  <rect x="-34" y="-8" width="16" height="12" rx="3" fill={fill} />
+  {/* The tail, bottom-left, which is the whole difference between a speech
+      bubble and a rounded rectangle at this size. */}
+  <path d="M -30 4 v 4.5 l 4.5 -4.5 z" fill={fill} />
   <text
     x="-13"
     y="0"
