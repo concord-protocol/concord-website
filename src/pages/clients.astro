@@ -12,6 +12,7 @@
  */
 import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
+import LibrariesAndBots from '../components/sections/LibrariesAndBots.astro';
 import { CLIENTS } from '../data/site';
 
 /** What every client agrees on, which is the reason there can be more of them. */
@@ -171,4 +172,11 @@ const SHARED = [
       </a>
     </div>
   </section>
+
+  {/*
+    The rest of what is installable, after the apps and the promise they keep
+    to each other: an SDK to write one with, and the bots that already sit in
+    somebody's community.
+  */}
+  <LibrariesAndBots />
 </Marketing>
