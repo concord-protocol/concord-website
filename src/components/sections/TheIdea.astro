@@ -2,14 +2,12 @@
 /*
  * The argument, directly under the hero, made in one picture.
  *
- * Set up above the diagram and answered below it, the way the constellation on
- * soapbox.pub/armada is framed — the reader looks at the mesh with a question
- * already in hand. The two lines carry the claim in words and the diagram
- * carries it in evidence: the message is legible at the centre and base64
- * everywhere else, and one relay is always dark without anything else moving.
+ * The diagram carries the claim in evidence — the same sentence readable at
+ * both ends, hex on every wire between them, and a relay going dark without
+ * anything else moving — and one line under it carries the claim in words.
  *
- * The answer names encryption outright. Decentralisation is what the picture
- * shows first, and it is the weaker half — a community spread over relays that
+ * That line names encryption outright. Decentralisation is what the picture
+ * shows first, and it is the weaker half: a community spread over relays that
  * could read it would be no better than a company that can. Mint on that
  * clause, the same way the hero's tagline puts it on "Open protocol."
  */
@@ -21,14 +19,7 @@ import RelayMesh from '../diagrams/RelayMesh.astro';
   <div class="mx-auto max-w-5xl px-5 py-24">
     <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">THE IDEA</h2>
 
-    <p
-      class="mx-auto mt-12 max-w-2xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-gray-400 sm:text-3xl"
-    >
-      Every other chat app keeps your messages on a server that can read
-      them&hellip;
-    </p>
-
-    <RelayMesh class="mt-10" />
+    <RelayMesh class="mt-12" />
 
     <p
       class="mx-auto mt-10 max-w-3xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
