@@ -42,6 +42,7 @@ const DEVICES = [
   { x: 905, y: 105, kind: 'phone' },
   { x: 900, y: 400, kind: 'laptop' },
   { x: 690, y: 545, kind: 'phone' },
+  { x: 395, y: 555, kind: 'phone' },
   { x: 155, y: 455, kind: 'laptop' },
 ] as const;
 
@@ -54,6 +55,20 @@ const RELAYS = [
   { x: 300, y: 190, name: 'relay.dreamith.to' },
   { x: 735, y: 195, name: 'relay.ditto.pub' },
   { x: 545, y: 450, name: 'jskitty.com/nostr' },
+  /*
+   * And the rest of the network, drawn as a stack rather than a box and linked
+   * out to the directory that counts them. Three named relays could be read as
+   * three relays somebody set up for this; the fourth node is what says the
+   * infrastructure was already there. It never goes offline — a thousand
+   * relays do not — so it sits out the rotation below.
+   */
+  {
+    x: 240,
+    y: 320,
+    name: '1000+ more',
+    more: true,
+    href: 'https://nostr.watch/',
+  },
 ];
 
 const relays = RELAYS.map((relay, index) => ({
@@ -121,7 +136,7 @@ const INITIAL_DOWN = 'relay-1';
     viewBox="0 0 1000 600"
     class="hidden w-full md:block"
     role="img"
-    aria-label="Six devices — phones and laptops — scattered around three servers, each device wired to the two nearest. Every wire carries hex. One server is dark, and the mesh carries on around it."
+    aria-label="Seven devices — phones and laptops — scattered around three named relay servers and a stack standing for a thousand more, each device wired to the two nearest. Every wire carries hex. One server is dark, and the mesh carries on around it."
   >
     {
       links.map((link) => (
@@ -175,14 +190,35 @@ const INITIAL_DOWN = 'relay-1';
             drop to the origin.
           */}
           <g>
+            {/*
+              A negative begin, so every packet is already in flight on the
+              first frame. Positive delays parked twelve of these at the SVG's
+              origin for up to three seconds — a stack of hex churning away in
+              the top-left corner, which is exactly the sort of thing an
+              animation should never have to apologise for.
+            */}
             <animateMotion
               dur={`${link.duration}s`}
-              begin={`${link.delay}s`}
+              begin={`-${link.delay}s`}
               repeatCount="indefinite"
               path={link.path}
               keyPoints={link.inbound ? '1;0' : undefined}
               keyTimes={link.inbound ? '0;1' : undefined}
               calcMode={link.inbound ? 'linear' : undefined}
+            />
+            {/*
+              And a fade at both ends of the run. The motion repeats, so at the
+              end of every cycle the packet is back at the far end of the wire
+              in a single frame; hidden for those frames, what is left is a
+              stream that never visibly restarts.
+            */}
+            <animate
+              attributeName="opacity"
+              values="0;1;1;0"
+              keyTimes="0;0.12;0.88;1"
+              dur={`${link.duration}s`}
+              begin={`-${link.delay}s`}
+              repeatCount="indefinite"
             />
             <Packet
               hex={link.packet}
@@ -203,7 +239,38 @@ const INITIAL_DOWN = 'relay-1';
     */}
     {
       relays.map((relay, index) => (
-        <g class="cx-node" data-relay={relay.id} data-down={relay.id === INITIAL_DOWN ? '' : undefined}>
+        <g
+          class:list={['cx-node', relay.more && 'cx-more']}
+          data-relay={relay.id}
+          data-static={relay.more ? '' : undefined}
+          data-down={relay.id === INITIAL_DOWN ? '' : undefined}
+        >
+          {/* Two more racks behind the first one, which is all "and a thousand
+              like it" needs to be. */}
+          {relay.more && (
+            <>
+              <rect
+                x={relay.x - 20}
+                y={relay.y - 36}
+                width="64"
+                height="48"
+                rx="6"
+                fill="#0e1512"
+                stroke="#1b2621"
+                stroke-width="1.5"
+              />
+              <rect
+                x={relay.x - 26}
+                y={relay.y - 30}
+                width="64"
+                height="48"
+                rx="6"
+                fill="#0e1512"
+                stroke="#23302a"
+                stroke-width="1.5"
+              />
+            </>
+          )}
           <rect
             class="cx-node-box"
             x={relay.x - 32}
@@ -270,6 +337,21 @@ const INITIAL_DOWN = 'relay-1';
           >
             {relay.name}
           </text>
+
+          {/* The stack is the only node that goes anywhere. An SVG <a> takes
+              the same href as any other, and the site's middleware gives it the
+              same new-tab treatment. */}
+          {relay.href && (
+            <a href={relay.href} rel="noopener" aria-label="Over a thousand more public Nostr relays, counted by nostr.watch">
+              <rect
+                x={relay.x - 36}
+                y={relay.y - 42}
+                width="82"
+                height="98"
+                fill="transparent"
+              />
+            </a>
+          )}
         </g>
       ))
     }
@@ -390,6 +472,15 @@ const INITIAL_DOWN = 'relay-1';
             <span class="cx-row-name min-w-0 truncate font-mono text-xs text-gray-400">
               {relay.name}
             </span>
+            {relay.href && (
+              <a
+                href={relay.href}
+                rel="noopener"
+                class="ml-auto shrink-0 font-mono text-[0.65rem] text-mint transition-opacity hover:opacity-80"
+              >
+                count them &rarr;
+              </a>
+            )}
           </li>
         ))
       }
@@ -456,6 +547,19 @@ const INITIAL_DOWN = 'relay-1';
 
   .cx-row[data-down] {
     opacity: 0.55;
+  }
+
+  /* The one node you can click. */
+  .cx-more {
+    cursor: pointer;
+  }
+
+  .cx-more .cx-node-name {
+    transition: fill 0.2s ease;
+  }
+
+  .cx-more:hover .cx-node-name {
+    fill: #24e8a3;
   }
 
   /*
@@ -653,7 +757,19 @@ const INITIAL_DOWN = 'relay-1';
     const parts = document.querySelectorAll<HTMLElement>('[data-relay]');
 
     if (parts.length) {
-      const names = [...new Set([...parts].map((part) => part.dataset.relay ?? ''))].filter(Boolean);
+      /* The stack of "1000+ more" sits it out: a thousand relays do not go
+         offline together, and drawing that would be a lie about the network.
+         It is marked once, on the node, and the wires and packets that belong
+         to it are excluded by id rather than by carrying the flag themselves. */
+      const fixed = new Set(
+        [...document.querySelectorAll<HTMLElement>('[data-static]')].map(
+          (part) => part.dataset.relay
+        )
+      );
+
+      const names = [...new Set([...parts].map((part) => part.dataset.relay ?? ''))].filter(
+        (name) => name && !fixed.has(name)
+      );
 
       /* One beat with everything up, so the mesh is not permanently missing a
          relay and the recovery is as visible as the outage. */

@@ -25,7 +25,18 @@ import RelayMesh from '../diagrams/RelayMesh.astro';
       class="mx-auto mt-10 max-w-3xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
     >
       Concord <span class="text-mint">encrypts every message on your device</span
-      >, then scatters it across relays that cannot read a word.
+      >, then scatters it across {/*
+        The one place on the page where the word "Nostr" is worth a click: a
+        reader who does not know what it is has just been told their messages
+        end up there. Dotted rather than solid, so it reads as a definition to
+        look up rather than as the next thing to press — the line is a claim,
+        not a call to action.
+      */}<a
+        href="https://soapbox.pub/blog/nostr101"
+        rel="noopener"
+        class="underline decoration-mint decoration-dotted decoration-2 underline-offset-[6px] transition-colors hover:text-mint"
+        >Nostr relays</a
+      > that cannot read a word.
     </p>
   </div>
 </section>
