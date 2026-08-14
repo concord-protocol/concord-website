@@ -1,0 +1,44 @@
+---
+/**
+ * One sealed message on the wire: a chat bubble, and the hex it actually is.
+ *
+ * The bubble is what makes the run of hex legible as a *message* rather than
+ * as decorative noise — a reader who sees `843def` sliding along a line knows
+ * it is data, and the icon is what tells them it is somebody's sentence.
+ *
+ * Drawn about its own origin so the caller can place it either way: the
+ * animated copies hand their position to an <animateMotion> on a wrapper, and
+ * the still ones translate the wrapper instead. Nothing here knows which.
+ */
+interface Props {
+  hex: string;
+  fill: string;
+  opacity: string;
+  /** Whether the churn loop should rewrite this one. Still copies are only
+      shown under `prefers-reduced-motion`, where nothing churns. */
+  churn?: boolean;
+}
+
+const { hex, fill, opacity, churn = false } = Astro.props;
+---
+
+<g opacity={opacity}>
+  {/* Solid rather than outlined: at 16×12 the stroke was drawing a box with a
+      hole in it, and a filled bubble is the shape everybody already reads as a
+      message without having to resolve any detail. */}
+  <rect x="-34" y="-8" width="16" height="12" rx="3" fill={fill} />
+  {/* The tail, bottom-left, which is the whole difference between a speech
+      bubble and a rounded rectangle at this size. */}
+  <path d="M -30 4 v 4.5 l 4.5 -4.5 z" fill={fill} />
+  <text
+    x="-13"
+    y="0"
+    class="font-mono"
+    data-hex={churn ? '' : undefined}
+    font-size="13"
+    fill={fill}
+    dominant-baseline="central"
+  >
+    {hex}
+  </text>
+</g>

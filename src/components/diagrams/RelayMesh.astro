@@ -19,6 +19,8 @@
  * wires are hex, and the line under the diagram names it once for the reader
  * who wants the word.
  */
+import Packet from './Packet.astro';
+
 interface Props {
   class?: string;
 }
@@ -147,18 +149,13 @@ const INITIAL_DOWN = 'relay-1';
           data-relay={link.relay}
           data-down={link.relay === INITIAL_DOWN ? '' : undefined}
         >
-          <text
-            x={link.still.x}
-            y={link.still.y}
-            class="font-mono"
-            font-size="13"
-            fill={link.inbound ? '#96ffd6' : '#24e8a3'}
-            opacity={link.inbound ? '0.5' : '0.85'}
-            text-anchor="middle"
-            dominant-baseline="central"
-          >
-            {link.packet}
-          </text>
+          <g transform={`translate(${link.still.x} ${link.still.y})`}>
+            <Packet
+              hex={link.packet}
+              fill={link.inbound ? '#96ffd6' : '#24e8a3'}
+              opacity={link.inbound ? '0.5' : '0.85'}
+            />
+          </g>
         </g>
       ))
     }
@@ -187,19 +184,12 @@ const INITIAL_DOWN = 'relay-1';
               keyTimes={link.inbound ? '0;1' : undefined}
               calcMode={link.inbound ? 'linear' : undefined}
             />
-            <text
-              x="0"
-              y="0"
-              class="font-mono"
-              data-hex
-              font-size="13"
+            <Packet
+              hex={link.packet}
               fill={link.inbound ? '#96ffd6' : '#24e8a3'}
               opacity={link.inbound ? '0.5' : '0.85'}
-              text-anchor="middle"
-              dominant-baseline="central"
-            >
-              {link.packet}
-            </text>
+              churn
+            />
           </g>
         </g>
       ))
@@ -212,7 +202,7 @@ const INITIAL_DOWN = 'relay-1';
       here that is not yours.
     */}
     {
-      relays.map((relay) => (
+      relays.map((relay, index) => (
         <g class="cx-node" data-relay={relay.id} data-down={relay.id === INITIAL_DOWN ? '' : undefined}>
           <rect
             class="cx-node-box"
@@ -225,16 +215,23 @@ const INITIAL_DOWN = 'relay-1';
             stroke="#2d3d36"
             stroke-width="1.5"
           />
-          {/* Three bays, each with a light and a vent. */}
+          {/*
+            Three bays, each with a light and a vent. The top light is the
+            fault light: it is the one that turns red when this rack is the one
+            that has gone. Duration and phase come in as custom properties so
+            the nine lights on screen never fall into step — the animations
+            themselves live in the style block, where Astro can scope them.
+          */}
           {[-16, 0, 16].map((offset, bay) => (
             <>
               <circle
-                class="cx-node-led"
+                class:list={['cx-node-led', bay === 0 && 'cx-node-fault']}
+                data-bay={bay}
+                style={`--cx-led-dur: ${(1.1 + bay * 0.37 + index * 0.19).toFixed(2)}s; --cx-led-delay: -${(0.31 * bay + 0.53 * index).toFixed(2)}s`}
                 cx={relay.x - 21}
                 cy={relay.y + offset}
                 r="3"
                 fill="#24e8a3"
-                opacity={1 - bay * 0.28}
               />
               <rect
                 x={relay.x - 11}
@@ -272,20 +269,6 @@ const INITIAL_DOWN = 'relay-1';
             fill="#6a8177"
           >
             {relay.name}
-          </text>
-          {/* Nothing else under a relay that is working: a label there would be
-              describing an ordinary state. Only ever visible on a dark one;
-              see the style block below. */}
-          <text
-            class="cx-node-off font-mono"
-            x={relay.x}
-            y={relay.y + 64}
-            font-size="12"
-            letter-spacing="1.5"
-            text-anchor="middle"
-            fill="#43574e"
-          >
-            OFFLINE
           </text>
         </g>
       ))
@@ -376,8 +359,14 @@ const INITIAL_DOWN = 'relay-1';
     */}
     <div class="my-3 flex flex-col items-center gap-1.5">
       <span class="h-4 w-px bg-mint/25"></span>
-      <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
-        {links[0].packet}
+      <span class="flex items-center gap-1.5">
+        <svg viewBox="0 0 16 14" class="h-3 w-3.5 shrink-0 text-mint/70" aria-hidden="true">
+          <rect x="1" y="1" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.3" />
+          <path d="M 4 11 v 3 l 3.5 -3 z" fill="currentColor" />
+        </svg>
+        <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
+          {links[0].packet}
+        </span>
       </span>
       <span class="h-4 w-px bg-mint/25"></span>
     </div>
@@ -393,16 +382,13 @@ const INITIAL_DOWN = 'relay-1';
             {/* The same rack, small enough to sit in a row. */}
             <svg viewBox="0 0 22 18" class="h-4 w-5 shrink-0" aria-hidden="true">
               <rect x="1" y="1" width="20" height="16" rx="2.5" fill="#0e1512" stroke="#2d3d36" stroke-width="1.25" />
-              <circle class="cx-row-led" cx="5.5" cy="6" r="1.5" fill="#24e8a3" />
-              <circle class="cx-row-led" cx="5.5" cy="12" r="1.5" fill="#24e8a3" opacity="0.6" />
+              <circle class="cx-node-led cx-node-fault" style="--cx-led-dur: 1.2s" cx="5.5" cy="6" r="1.5" fill="#24e8a3" />
+              <circle class="cx-node-led" data-bay="1" style="--cx-led-dur: 1.5s; --cx-led-delay: -0.4s" cx="5.5" cy="12" r="1.5" fill="#24e8a3" />
               <rect x="9" y="4.75" width="9" height="2.5" rx="1.25" fill="#1b2621" />
               <rect x="9" y="10.75" width="9" height="2.5" rx="1.25" fill="#1b2621" />
             </svg>
             <span class="cx-row-name min-w-0 truncate font-mono text-xs text-gray-400">
               {relay.name}
-            </span>
-            <span class="cx-row-off ml-auto shrink-0 font-mono text-[0.65rem] tracking-widest text-gray-500">
-              OFFLINE
             </span>
           </li>
         ))
@@ -411,8 +397,14 @@ const INITIAL_DOWN = 'relay-1';
 
     <div class="my-3 flex flex-col items-center gap-1.5">
       <span class="h-4 w-px bg-mint/25"></span>
-      <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
-        {links[1].packet}
+      <span class="flex items-center gap-1.5">
+        <svg viewBox="0 0 16 14" class="h-3 w-3.5 shrink-0 text-mint/70" aria-hidden="true">
+          <rect x="1" y="1" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.3" />
+          <path d="M 4 11 v 3 l 3.5 -3 z" fill="currentColor" />
+        </svg>
+        <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
+          {links[1].packet}
+        </span>
       </span>
       <span class="h-4 w-px bg-mint/25"></span>
     </div>
@@ -462,44 +454,152 @@ const INITIAL_DOWN = 'relay-1';
     stroke: #1b2621;
   }
 
-  /* The lights go out. It is the one part of the rack that was ever alive. */
-  .cx-node-led,
-  .cx-row-led {
-    transition: fill 0.5s ease;
-  }
-
-  .cx-node[data-down] .cx-node-led,
-  .cx-row[data-down] .cx-row-led {
-    fill: #2d3d36;
-  }
-
-  .cx-node[data-down] .cx-node-name {
-    fill: #43574e;
-    text-decoration: line-through;
-  }
-
-  .cx-node-off {
-    opacity: 0;
-  }
-
-  .cx-node[data-down] .cx-node-off {
-    opacity: 1;
-  }
-
   .cx-row[data-down] {
     opacity: 0.55;
   }
 
-  .cx-row[data-down] .cx-row-name {
-    text-decoration: line-through;
+  /*
+   * The lights, which are how you can tell a rack is alive from across a room.
+   * Two patterns rather than one, `steps(1, end)` so they snap the way an LED
+   * does rather than fading, and a duration and phase per light so nine of them
+   * on one screen never pulse together. Nothing about them is regular, which is
+   * the point: a steady blink reads as a heartbeat monitor, and disk activity
+   * is not steady.
+   */
+  .cx-node-led {
+    animation: cx-led-a var(--cx-led-dur, 1.2s) steps(1, end) infinite;
+    animation-delay: var(--cx-led-delay, 0s);
   }
 
-  .cx-row-off {
-    display: none;
+  .cx-node-led[data-bay='1'] {
+    animation-name: cx-led-b;
   }
 
-  .cx-row[data-down] .cx-row-off {
-    display: block;
+  /* The top light is the power light, and it is on. Activity lights are dark
+     most of the time by nature, and with all three of them flickering a live
+     rack spent most of its life looking as dead as the one that had actually
+     gone. */
+  .cx-node-fault {
+    animation-name: cx-led-power;
+  }
+
+  @keyframes cx-led-power {
+    0%,
+    91% {
+      opacity: 1;
+    }
+    92%,
+    95% {
+      opacity: 0.5;
+    }
+    96%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cx-led-a {
+    0%,
+    6% {
+      opacity: 1;
+    }
+    7%,
+    18% {
+      opacity: 0.12;
+    }
+    19%,
+    24% {
+      opacity: 0.9;
+    }
+    25%,
+    47% {
+      opacity: 0.12;
+    }
+    48%,
+    52% {
+      opacity: 1;
+    }
+    53%,
+    70% {
+      opacity: 0.15;
+    }
+    71%,
+    76% {
+      opacity: 0.85;
+    }
+    77%,
+    100% {
+      opacity: 0.12;
+    }
+  }
+
+  @keyframes cx-led-b {
+    0%,
+    9% {
+      opacity: 0.15;
+    }
+    10%,
+    14% {
+      opacity: 1;
+    }
+    15%,
+    30% {
+      opacity: 0.12;
+    }
+    31%,
+    34% {
+      opacity: 0.8;
+    }
+    35%,
+    58% {
+      opacity: 0.15;
+    }
+    59%,
+    66% {
+      opacity: 1;
+    }
+    67%,
+    88% {
+      opacity: 0.12;
+    }
+    89%,
+    94% {
+      opacity: 0.9;
+    }
+    95%,
+    100% {
+      opacity: 0.15;
+    }
+  }
+
+  /*
+   * A rack that has gone: every light out except the fault light, which is the
+   * only red on the site and is doing the job red is actually for. It replaces
+   * the strikethrough and the OFFLINE caption — a machine tells you it is in
+   * trouble with a light, not with a word.
+   */
+  .cx-node[data-down] .cx-node-led,
+  .cx-row[data-down] .cx-node-led {
+    fill: #2d3d36;
+    animation: none;
+    opacity: 1;
+  }
+
+  .cx-node[data-down] .cx-node-fault,
+  .cx-row[data-down] .cx-node-fault {
+    fill: #f87171;
+    animation: cx-led-fault 0.9s steps(1, end) infinite;
+  }
+
+  @keyframes cx-led-fault {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    46%,
+    100% {
+      opacity: 0.1;
+    }
   }
 </style>
 
@@ -524,7 +624,7 @@ const INITIAL_DOWN = 'relay-1';
    * that says everything except how often it changes.
    */
   const GLYPHS = '0123456789abcdef';
-  const CHURN_MS = 90;
+  const CHURN_MS = 45;
   const CYCLE_MS = 2600;
 
   const glyph = () => GLYPHS[(Math.random() * GLYPHS.length) | 0];
