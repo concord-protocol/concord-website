@@ -1,0 +1,39 @@
+---
+/**
+ * The padlock on a device's screen: where the sealing happens.
+ *
+ * Cut out of the screen rather than laid on top of it — the body and shackle
+ * are drawn in the device's own dark fill, so the lock reads as a shape the lit
+ * screen is showing through, and the keyhole is the one mint mark in it. A mint
+ * lock on a mint screen would have needed an outline to survive, and an
+ * outlined lock at thirteen units tall is four strokes in a diagram that
+ * already has twelve wires in it.
+ *
+ * Drawn about its own origin, like {@link Packet}, and placed by the caller.
+ */
+interface Props {
+  /** Centre of the lock, in the caller's user units. */
+  x: number;
+  y: number;
+}
+
+const { x, y } = Astro.props;
+
+/** The screen the lock sits on, so the keyhole matches the light around it. */
+const SCREEN = 'rgba(36, 232, 163, 0.4)';
+const BODY = '#0e1512';
+---
+
+<g transform={`translate(${x} ${y})`}>
+  {/* Squared-off at the bottom of its arc rather than a full semicircle: a
+      shackle that meets the body vertically is what says "shut". */}
+  <path
+    d="M -3.2 -2.5 v -2.4 a 3.2 3.2 0 0 1 6.4 0 v 2.4"
+    fill="none"
+    stroke={BODY}
+    stroke-width="1.8"
+    stroke-linecap="round"
+  />
+  <rect x="-5.5" y="-2.5" width="11" height="8.5" rx="2" fill={BODY} />
+  <circle cx="0" cy="1.75" r="1.3" fill={SCREEN} />
+</g>
