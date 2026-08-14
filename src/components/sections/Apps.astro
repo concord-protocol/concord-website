@@ -10,9 +10,9 @@
  * so the choice is made by the shape of the two cards rather than by any
  * sentence claiming one is better. Nothing here ranks them out loud.
  *
- * Deliberately not a heading-and-eyebrow section: two app icons and three
- * buttons are already legible as "get one of these", and a title over the top
- * would be the page explaining a picture that does not need it.
+ * A bare title and no eyebrow: "Try an App" is an instruction, and the two
+ * icons under it are the whole argument, so there is nothing for a standfirst
+ * paragraph to add that the cards do not already say.
  *
  * The logos are the apps' own icons rather than redrawn marks, at their
  * shipped sizes — see the note on the store marks below, which applies twice
@@ -20,8 +20,6 @@
  */
 import { Image } from 'astro:assets';
 import { CLIENTS } from '../../data/site';
-import armadaMark from '../../assets/clients/armada.png';
-import vectorMark from '../../assets/clients/vector.png';
 import zapstoreMark from '../../assets/stores/zapstore.png';
 
 /** The entry in {@link CLIENTS}, which owns every outbound URL on the site. */
@@ -55,13 +53,22 @@ const STORES = [
 <section class="border-b border-hairline">
   <div class="mx-auto max-w-5xl px-5 py-24">
     {/*
-      `items-start` rather than the default stretch: Armada's card carries a
-      second row of buttons, and stretched to a common height Vector's opens a
-      hand's width of nothing between its chips and its one button. Left at
-      their own heights the difference is a single button row, which is a
-      truthful thing for the two cards to differ by.
+      The hero's lockup, quietened and reused: same face, same mint outline,
+      same bloom, centred over the pair the way the wordmark is centred over
+      the mark. One word can carry it — Bruno Ace outlined is unreadable at
+      paragraph length and unmistakable at four letters — and it is set well
+      below the hero's size so the page still has one title.
     */}
-    <div class="grid items-start gap-4 md:grid-cols-2">
+    <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">APPS</h2>
+
+    {/*
+      Stretched to a common height, with each card's buttons pushed to the
+      bottom by `mt-auto`. Armada carries a second row of them, so the two
+      cards sized to their own content differ by a button's height and sit
+      visibly mismatched; a shared baseline is the calmer read, and it lines
+      the primary button up with the store row beside it.
+    */}
+    <div class="mt-12 grid gap-4 md:grid-cols-2">
       <article class="cx-card flex flex-col p-7 sm:p-8">
         <div class="flex items-center gap-4">
           {/*
@@ -75,7 +82,7 @@ const STORES = [
             here would have a screen reader say "Vector" twice.
           */}
           <Image
-            src={vectorMark}
+            src={vector.logo}
             alt=""
             width={56}
             height={56}
@@ -104,7 +111,7 @@ const STORES = [
           }
         </ul>
 
-        <div class="mt-8">
+        <div class="mt-auto pt-8">
           <a href={vector.href} rel="noopener" class="cx-btn cx-btn-ghost">
             Download Vector
           </a>
@@ -114,7 +121,7 @@ const STORES = [
       <article class="cx-card cx-card-lit flex flex-col p-7 sm:p-8">
         <div class="flex items-center gap-4">
           <Image
-            src={armadaMark}
+            src={armada.logo}
             alt=""
             width={56}
             height={56}
@@ -153,7 +160,7 @@ const STORES = [
           wrap unpredictably inside half a card, and the filled one is the
           answer for everyone the two Android stores do not cover.
         */}
-        <div class="mt-8">
+        <div class="mt-auto pt-8">
           <a href={armada.href} rel="noopener" class="cx-btn cx-btn-primary">
             Open Armada
           </a>
@@ -214,6 +221,21 @@ const STORES = [
           }
         </div>
       </article>
+    </div>
+
+    {/*
+      The pair above is a recommendation rather than the whole list. Not "all
+      three": the count is a fact about this week, and an open protocol that
+      advertises how many clients exist is quietly saying that is the number
+      there is meant to be.
+    */}
+    <div class="mt-10 text-center">
+      <a
+        href="/clients/"
+        class="inline-flex text-sm text-mint transition-opacity hover:opacity-80"
+      >
+        See every client &rarr;
+      </a>
     </div>
   </div>
 </section>

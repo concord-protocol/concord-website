@@ -527,6 +527,35 @@ body {
   display: inline-block;
 }
 
+/*
+ * The wordmark's treatment without its entrance, for a section title that
+ * should read in the protocol's own voice rather than as another sans heading.
+ * It cannot simply borrow .cx-wordmark-letter: that one animates in on a delay
+ * with `both`, so a heading wearing it would sit invisible until its beat came
+ * up — which for the hero is the point and here would be a bug halfway down
+ * the page. Same stroke, same bloom, no `--cx-i` and no keyframes.
+ *
+ * The colour is written out to match the rule it is quoting, which hardcodes
+ * the mint alongside the rgba() the drop-shadows need anyway.
+ */
+.cx-outline-title {
+  font-family: var(--font-display);
+  /* Bruno Ace ships one weight; see the note on .cx-wordmark. Synthesised bold
+     is worse here than there, since faux weight lands on top of the stroke. */
+  font-weight: 400;
+  letter-spacing: 0;
+  transform: scaleX(0.93);
+  filter: drop-shadow(0 0 0.08em rgba(36, 232, 163, 0.55))
+    drop-shadow(0 0 0.55em rgba(36, 232, 163, 0.35));
+}
+
+@supports (-webkit-text-stroke: 1px currentColor) {
+  .cx-outline-title {
+    -webkit-text-stroke: 0.03em #24e8a3;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
 .cx-wordmark-word {
   display: inline-flex;
 }

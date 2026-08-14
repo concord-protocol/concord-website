@@ -1,6 +1,38 @@
 ---
+/*
+ * The full list, in the same card the homepage uses — icon, one line, chips,
+ * a button — rather than the three essays this page used to be. An app is a
+ * thing you look at and press, and the previous version put two paragraphs of
+ * prose between the reader and every download button, including a block
+ * explaining which one to pick that the cards can say by their own shape.
+ *
+ * Equals here, deliberately: the homepage pair is where the site makes a
+ * recommendation, and this is the page that just lists what exists — a list
+ * that is expected to get longer, which is why nothing on it counts itself.
+ */
+import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
 import { CLIENTS } from '../data/site';
+
+/** What every client agrees on, which is the reason there can be more of them. */
+const SHARED = [
+  {
+    term: 'Your identity',
+    detail: 'One key logs you in everywhere, across Concord and the wider Nostr network.',
+  },
+  {
+    term: 'Your memberships',
+    detail: 'The Community List syncs across your devices and across clients.',
+  },
+  {
+    term: 'Invite links',
+    detail: 'An invite minted by one client opens in another.',
+  },
+  {
+    term: 'The community itself',
+    detail: 'Roles, channels, bans, and pins are protocol state, folded identically.',
+  },
+];
 ---
 
 <Marketing
@@ -14,83 +46,96 @@ import { CLIENTS } from '../data/site';
       <h1
         class="mt-4 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
       >
-        Three independent apps. One protocol.
+        Independent apps. One protocol.
       </h1>
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-gray-300">
-        Concord has no reference client and no blessed implementation. These are
-        separate teams building separate applications against the same
-        specification — which is exactly the property that makes the protocol
-        worth anything.
-      </p>
-      <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-400">
-        A community created in one client opens in the others. Your identity is a
-        key rather than an account, so it travels with you, and if a client ever
-        disappoints you the community does not go with it.
+        A community made in one opens in the others.
       </p>
     </div>
   </section>
 
   <section>
     <div class="mx-auto max-w-6xl px-5 py-20">
-      <div class="space-y-6">
+      <div class="grid gap-4 lg:grid-cols-3">
         {
-          CLIENTS.map((client, index) => (
-            <article class="cx-card overflow-hidden">
-              <div class="grid gap-8 p-8 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-16 lg:p-10">
-                <div>
-                  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-                    <span class="font-mono text-sm text-gray-600">
-                      0{index + 1}
-                    </span>
-                    <h2 class="text-3xl font-semibold tracking-tight text-white">
+          CLIENTS.map((client) => {
+            /*
+             * The first link is the install, and gets the button. The rest are
+             * small text beneath it — Armada's two Android stores, Vector's
+             * handbook — with the repository appended once. Two of the three
+             * already carry their source in `links`, so it is filtered out
+             * before being added back, and none of them prints it twice.
+             */
+            const extras = client.links
+              .slice(1)
+              .filter((link) => link.href !== client.source);
+
+            return (
+              <article class="cx-card flex flex-col p-7 sm:p-8">
+                <div class="flex items-center gap-4">
+                  {/*
+                    Clipped to roughly the radius the icons already draw
+                    themselves at, so three marks from three teams sit as a
+                    set. `alt=""` because the name is in the heading beside it.
+                  */}
+                  <Image
+                    src={client.logo}
+                    alt=""
+                    width={56}
+                    height={56}
+                    densities={[2]}
+                    class="h-14 w-14 shrink-0 rounded-[13%]"
+                  />
+                  <div class="min-w-0">
+                    <h2 class="text-2xl font-semibold tracking-tight text-white">
                       {client.name}
                     </h2>
-                    <span class="rounded-md border border-hairline px-2 py-1 font-mono text-[0.65rem] uppercase tracking-wider text-gray-400">
-                      {client.author}
-                    </span>
+                    <p class="mt-1 font-mono text-xs text-gray-500">
+                      by {client.author}
+                    </p>
                   </div>
-
-                  <p class="mt-3 text-lg text-mint">
-                    {client.tagline}
-                  </p>
-
-                  <p class="mt-6 max-w-2xl text-base leading-relaxed text-gray-300">
-                    {client.description}
-                  </p>
-
-                  <ul class="mt-7 flex flex-wrap gap-2">
-                    {client.platforms.map((platform) => (
-                      <li class="rounded-md border border-hairline bg-raised px-2.5 py-1 font-mono text-xs text-gray-400">
-                        {platform}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
 
-                <div class="flex shrink-0 flex-col gap-2.5 lg:w-56">
-                  {client.links.map((link, linkIndex) => (
-                    <a
-                      href={link.href}
-                      rel="noopener"
-                      class:list={[
-                        'cx-btn w-full',
-                        linkIndex === 0 ? 'cx-btn-primary' : 'cx-btn-ghost',
-                      ]}
-                    >
-                      {link.label}
-                    </a>
+                <p class="mt-6 text-sm text-mint">{client.tagline}</p>
+
+                <p class="mt-3 text-sm leading-relaxed text-gray-400">
+                  {client.summary}
+                </p>
+
+                <ul class="mt-6 flex flex-wrap gap-1.5">
+                  {client.platforms.map((platform) => (
+                    <li class="rounded-md border border-hairline px-2 py-1 font-mono text-[0.65rem] text-gray-400">
+                      {platform}
+                    </li>
                   ))}
+                </ul>
+
+                <div class="mt-auto pt-8">
                   <a
-                    href={client.source}
+                    href={client.links[0].href}
                     rel="noopener"
-                    class="mt-1 text-center text-sm text-gray-500 transition-colors hover:text-mint"
+                    class="cx-btn cx-btn-primary w-full"
                   >
-                    View source
+                    {client.links[0].label}
                   </a>
+
+                  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                    {[...extras, { label: 'Source', href: client.source }].map(
+                      (link) => (
+                        <a
+                          href={link.href}
+                          rel="noopener"
+                          class="text-sm text-gray-400 transition-colors hover:text-gray-100"
+                        >
+                          {link.label}
+                        </a>
+                      ),
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            );
+          })
         }
       </div>
     </div>
@@ -98,87 +143,32 @@ import { CLIENTS } from '../data/site';
 
   <section class="border-t border-hairline">
     <div class="mx-auto max-w-6xl px-5 py-20">
-      <div class="grid gap-12 lg:grid-cols-2 lg:gap-20">
-        <div>
-          <p class="cx-eyebrow">Choosing</p>
-          <h2
-            class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
-          >
-            They are not the same product.
-          </h2>
-          <div class="mt-6 space-y-5 text-base leading-relaxed text-gray-400">
-            <p>
-              <span class="text-gray-100">Armada</span> is the one to pick if you
-              are replacing Discord outright. It has the full feature surface —
-              threads, voice and video, custom emoji and themes, a Discord bridge
-              and server import — and it speaks other community protocols
-              alongside Concord.
-            </p>
-            <p>
-              <span class="text-gray-100">Vector</span> is the one to pick if
-              privacy is the requirement rather than the feature. It is a native
-              application built around encrypted local storage and an optional
-              Tor transport, from the team that co-authored the specification.
-            </p>
-            <p>
-              <span class="text-gray-100">Accordion</span> is the one to read if
-              you are implementing Concord yourself. It runs entirely in the
-              browser with no backend, and it demonstrates how little code the
-              protocol actually requires.
-            </p>
-          </div>
-        </div>
+      <p class="cx-eyebrow">Interoperability</p>
+      <h2
+        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+      >
+        What travels between them.
+      </h2>
 
-        <div>
-          <p class="cx-eyebrow">Interoperability</p>
-          <h2
-            class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
-          >
-            What travels between them.
-          </h2>
-          <dl class="mt-6 divide-y divide-hairline border-y border-hairline">
-            <div class="py-4">
-              <dt class="text-sm font-medium text-gray-100">Your identity</dt>
-              <dd class="mt-1 text-sm leading-relaxed text-gray-400">
-                One key logs you in everywhere, across Concord clients and the
-                wider Nostr ecosystem.
+      <dl class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          SHARED.map((item) => (
+            <div class="border-t border-hairline pt-5">
+              <dt class="text-sm font-medium text-gray-100">{item.term}</dt>
+              <dd class="mt-2 text-sm leading-relaxed text-gray-400">
+                {item.detail}
               </dd>
             </div>
-            <div class="py-4">
-              <dt class="text-sm font-medium text-gray-100">
-                Your memberships
-              </dt>
-              <dd class="mt-1 text-sm leading-relaxed text-gray-400">
-                The Community List syncs across your devices and across clients —
-                two different apps can serve one identity.
-              </dd>
-            </div>
-            <div class="py-4">
-              <dt class="text-sm font-medium text-gray-100">Invite links</dt>
-              <dd class="mt-1 text-sm leading-relaxed text-gray-400">
-                An invite minted by one client opens in another. The base domain
-                is interchangeable; only the locator and fragment are protocol.
-              </dd>
-            </div>
-            <div class="py-4">
-              <dt class="text-sm font-medium text-gray-100">
-                The community itself
-              </dt>
-              <dd class="mt-1 text-sm leading-relaxed text-gray-400">
-                Roles, channels, bans, and pins are Control Plane state that every
-                client folds identically. There is no per-client interpretation.
-              </dd>
-            </div>
-          </dl>
+          ))
+        }
+      </dl>
 
-          <a
-            href="/build/"
-            class="mt-8 inline-flex text-sm text-mint transition-opacity hover:opacity-80"
-          >
-            Build a fourth client &rarr;
-          </a>
-        </div>
-      </div>
+      <a
+        href="/build/"
+        class="mt-12 inline-flex text-sm text-mint transition-opacity hover:opacity-80"
+      >
+        Build your own client &rarr;
+      </a>
     </div>
   </section>
 </Marketing>

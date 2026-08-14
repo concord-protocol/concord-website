@@ -2,6 +2,21 @@
  * Single source of truth for outbound links and the client/tooling ecosystem.
  * Every URL here was verified against the upstream project.
  */
+import type { ImageMetadata } from 'astro';
+
+/*
+ * Each client's own app icon, as it ships it — Vector's and Accordion's from
+ * their repositories, Armada's from its public/ directory. Imported rather
+ * than dropped in public/ so Astro resizes them to the ~56px the cards draw
+ * them at; the sources are 512px, which is 40× the pixels a card needs.
+ *
+ * Accordion's is the one processed copy: upstream ships it on an opaque white
+ * canvas, so its rounded corners arrived as white blocks on a black card and
+ * have been cut to transparent at the radius the artwork already uses.
+ */
+import accordionLogo from '../assets/clients/accordion.png';
+import armadaLogo from '../assets/clients/armada.png';
+import vectorLogo from '../assets/clients/vector.png';
 
 export const SPEC_REPO = 'https://github.com/concord-protocol/concord';
 export const SPEC_ORG = 'https://github.com/concord-protocol';
@@ -17,14 +32,16 @@ export const NAV = [
 export interface Client {
   name: string;
   tagline: string;
-  /** One line, for the homepage card. `description` is for /clients/. */
+  /** One line. Every card on the site runs on this; there is no long version. */
   summary: string;
-  description: string;
+  /** The app's own icon. See the import block above. */
+  logo: ImageMetadata;
   href: string;
   source: string;
   author: string;
   platforms: string[];
   accent: string;
+  /** The install and about links. The first is the one a card fills in. */
   links: { label: string; href: string }[];
 }
 
@@ -35,8 +52,7 @@ export const CLIENTS: Client[] = [
     author: 'Soapbox',
     summary:
       'Channels, threads, roles, voice and video, custom emoji — plus a Discord bridge and server import.',
-    description:
-      'Communities, channels, threads, roles, voice and video, custom emoji and themes, plus a Discord bridge and server import. Armada speaks Concord alongside NIP-29 and Buzz communities, so one key carries you across the ecosystem.',
+    logo: armadaLogo,
     href: 'https://armada.buzz',
     source: 'https://gitworkshop.dev/soapbox.pub/armada',
     platforms: ['Web', 'Android', 'Linux', 'Windows', 'macOS'],
@@ -57,8 +73,7 @@ export const CLIENTS: Client[] = [
     author: 'Vector Privacy',
     summary:
       'A standalone Rust desktop messenger: no KYC, encrypted storage, optional Tor. Co-authored Concord.',
-    description:
-      'A standalone Rust and Tauri messenger built on a Privacy by Principle philosophy: no KYC, no metadata collection, encrypted storage, optional Tor transport, and in-chat mini-apps. Vector co-authored Concord and ships the reference relay dictionary.',
+    logo: vectorLogo,
     href: 'https://vectorapp.io',
     source: 'https://github.com/VectorPrivacy/Vector',
     platforms: ['Windows', 'macOS', 'Linux', 'Android'],
@@ -78,8 +93,7 @@ export const CLIENTS: Client[] = [
     author: 'hzrd149',
     summary:
       'A compact browser client with no backend — proof of how little you need to speak the protocol.',
-    description:
-      'A Concord community app built on the applesauce Nostr toolkit — a compact, independent implementation that demonstrates how little you need to speak the protocol. Runs entirely in the browser with no backend.',
+    logo: accordionLogo,
     href: 'https://accordion.chat',
     source: 'https://github.com/hzrd149/accordion.chat',
     platforms: ['Web'],
