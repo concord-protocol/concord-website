@@ -1,22 +1,23 @@
 ---
 /**
- * Six members, three relays, and hex on every wire.
+ * Six devices, three relays, and hex on every wire.
  *
- * The shape is the one the comparison card used: the same ring of members
- * around a triangle of interchangeable relays, each member wired to its two
- * nearest, so no member depends on any particular relay. What it borrows from
- * the constellation on soapbox.pub/armada is the life — packets actually
- * moving, and a relay dropping out on a cycle while nothing else changes.
+ * Every coordinate below is hand-placed and none of them is on a ring. An
+ * earlier version generated the positions — six points on an ellipse, relays
+ * on the interior crossings — and the wires promptly drew a perfect hexagram,
+ * which is what regular geometry does whether or not you asked it to. A real
+ * network is lumpy: relays where somebody happened to run one, devices wherever
+ * their owners are, and no two of the twelve wires the same length. Irregular
+ * is both the truth and the only reliable way to avoid drawing a symbol.
  *
- * The encryption is the part the geometry cannot say on its own, so the ends
- * say it. Two members hold the message in the clear, one sending and one
- * receiving, and between them every wire and every relay carries hex. The
- * same sentence at both ends and nowhere in between is the whole claim, drawn
- * rather than asserted.
+ * The endpoints are phones and laptops, and the relays are servers, because
+ * "member" and "node" are abstractions and a lit screen next to a rack is not.
+ * What moves between them is hex, and it churns, so the ciphertext reads as
+ * something being computed rather than as a label somebody typed.
  *
- * Nothing is labelled "encrypted" inside the picture. A reader who can see
- * that the middle is unreadable does not need to be told, and the line under
- * the diagram names it once for the reader who wants the word.
+ * Nothing in the picture is captioned "encrypted". The screens are lit, the
+ * wires are hex, and the line under the diagram names it once for the reader
+ * who wants the word.
  */
 interface Props {
   class?: string;
@@ -24,45 +25,49 @@ interface Props {
 
 const { class: className = '' } = Astro.props;
 
-const CX = 500;
-const CY = 260;
-
-/** Rounded to a tenth of a user unit: sub-pixel at every size this renders at,
-    and it keeps sixteen digits of float noise out of the built HTML. */
+/** Rounded to a tenth of a user unit: sub-pixel at every size this renders at. */
 const round = (n: number) => Math.round(n * 10) / 10;
 
-/** Points on an ellipse about the centre, clockwise from twelve o'clock. */
-const ring = (n: number, rx: number, ry: number) =>
-  Array.from({ length: n }, (_, i) => {
-    const a = ((-90 + (360 / n) * i) * Math.PI) / 180;
-    return { x: round(CX + rx * Math.cos(a)), y: round(CY + ry * Math.sin(a)) };
-  });
-
-const members = ring(6, 400, 205);
+/*
+ * The devices, scattered around the edge of the frame. Which glyph each one
+ * gets is fixed here rather than derived from its index, so the phones and
+ * laptops are mixed rather than alternating — another regularity nobody needs
+ * to see.
+ */
+const DEVICES = [
+  { x: 120, y: 95, kind: 'phone' },
+  { x: 520, y: 80, kind: 'laptop' },
+  { x: 905, y: 105, kind: 'phone' },
+  { x: 900, y: 400, kind: 'laptop' },
+  { x: 690, y: 545, kind: 'phone' },
+  { x: 155, y: 455, kind: 'laptop' },
+] as const;
 
 /*
- * Three, in a triangle inside the ring, placed so none of them reaches a member
- * dot or overlaps another. They are named, and named after real ones: "RELAY"
- * three times reads as a generic box in a systems diagram, and the whole point
- * is that these are ordinary public Nostr relays that already exist and were
- * not built for this.
- *
- * Each pill is sized to its own label — JetBrains Mono advances at about 0.6em,
- * so the text width is known here without measuring anything.
+ * Three relays, named after real ones: three identical boxes marked "RELAY"
+ * read as generic systems-diagram furniture, and the point is that these are
+ * ordinary public Nostr relays that already exist and were not built for this.
  */
-const NAMES = ['relay.damus.io', 'relay.ditto.pub', 'nos.lol'];
+const RELAYS = [
+  { x: 300, y: 190, name: 'relay.dreamith.to' },
+  { x: 735, y: 195, name: 'relay.ditto.pub' },
+  { x: 545, y: 450, name: 'jskitty.com/nostr' },
+];
 
-const relays = ring(3, 165, 130).map((point, index) => ({
-  ...point,
+const relays = RELAYS.map((relay, index) => ({
+  ...relay,
   id: `relay-${index}`,
-  name: NAMES[index],
-  width: Math.max(120, Math.round(NAMES[index].length * 8.4) + 40),
 }));
 
 /*
  * Ciphertext that has to look like ciphertext without being any: hex, which is
- * what a reader who has ever seen an event id or a key recognises on sight. A
- * seeded LCG rather than Math.random, so a rebuild doesn't churn the HTML.
+ * what anybody who has seen an event id or a key recognises on sight. Truncated
+ * flat, with no ellipsis — a run of hex is obviously longer than the six
+ * characters of it that fit, and the dots were three more marks floating in a
+ * diagram that has enough going on.
+ *
+ * A seeded LCG rather than Math.random, so a rebuild doesn't churn the HTML.
+ * The script below churns it in the browser instead, which is where it belongs.
  */
 let seed = 0x5eed1e;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
@@ -71,38 +76,36 @@ const hex = (n: number) =>
   Array.from({ length: n }, () => HEX[(rand() * HEX.length) | 0]).join('');
 
 /*
- * Each member links to its two nearest relays, which is what makes them
- * interchangeable: losing one costs every member a spare, not a connection.
+ * Each device links to its two nearest relays, which is what makes them
+ * interchangeable: losing one costs a device a spare, not a connection. The
+ * uneven placement means the relays end up carrying three, four, and five
+ * wires, which is also how it goes.
  */
-const links = members
-  .flatMap((m) =>
-    relays
-      .map((r) => ({ m, r, d: Math.hypot(r.x - m.x, r.y - m.y) }))
-      .sort((a, b) => a.d - b.d)
-      .slice(0, 2)
-  )
-  .map(({ m, r }, index) => ({
-    relay: r.id,
-    path: `M ${m.x} ${m.y} L ${r.x} ${r.y}`,
-    packet: `${hex(6)}…`,
-    /* Where the packet sits when it is not allowed to move. Short of halfway,
-       so it clears both the member's dot and the relay's pill. */
-    still: { x: round(m.x + (r.x - m.x) * 0.42), y: round(m.y + (r.y - m.y) * 0.42) },
-    /* Alternating, so the mesh reads as a conversation rather than as an
-       upload, and staggered so it is traffic rather than a metronome. */
-    inbound: index % 2 === 1,
-    duration: 2.4 + (index % 4) * 0.3,
-    delay: round(index * 0.22),
-  }));
-
-/** The room, in the two places it exists in the clear. */
-const MESSAGE = 'venue’s booked for the 14th';
-const SENDER = members[5];
-const RECIPIENT = members[2];
+const links = DEVICES.flatMap((d) =>
+  relays
+    .map((r) => ({ d, r, dist: Math.hypot(r.x - d.x, r.y - d.y) }))
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, 2)
+).map(({ d, r }, index) => ({
+  relay: r.id,
+  path: `M ${d.x} ${d.y} L ${r.x} ${r.y}`,
+  packet: hex(6),
+  /* Where the packet sits when it is not allowed to move. Short of halfway,
+     so it clears both the device and the relay. */
+  still: {
+    x: round(d.x + (r.x - d.x) * 0.42),
+    y: round(d.y + (r.y - d.y) * 0.42),
+  },
+  /* Alternating, so the mesh reads as a conversation rather than as an upload,
+     and staggered so it is traffic rather than a metronome. */
+  inbound: index % 2 === 1,
+  duration: 2.4 + (index % 4) * 0.3,
+  delay: round(index * 0.22),
+}));
 
 /*
  * Whichever relay is dark before the script takes over, and the one it stays
- * on for anybody who has turned motion off.
+ * on for anybody who has turned motion off. Ours, rather than somebody else's.
  */
 const INITIAL_DOWN = 'relay-1';
 ---
@@ -110,13 +113,13 @@ const INITIAL_DOWN = 'relay-1';
 <div class:list={[className]}>
   {/*
     The wide version. The stacked one below carries the same argument on a
-    phone, where six members around a ring would put every label at 5px.
+    phone, where twelve wires would be a smudge.
   */}
   <svg
-    viewBox="0 0 1000 520"
+    viewBox="0 0 1000 600"
     class="hidden w-full md:block"
     role="img"
-    aria-label="Six members in a ring around three interchangeable relays, each member wired to the two nearest. The message is readable at the sending member and at the receiving one; every wire and every relay in between carries hex. One relay is dark, and the mesh carries on around it."
+    aria-label="Six devices — phones and laptops — scattered around three servers, each device wired to the two nearest. Every wire carries hex. One server is dark, and the mesh carries on around it."
   >
     {
       links.map((link) => (
@@ -132,9 +135,9 @@ const INITIAL_DOWN = 'relay-1';
     }
 
     {/*
-      What is actually on the wire, for a reader who has asked for no motion:
-      the same hex, parked. The animated group below is hidden in that case
-      rather than frozen, since a run of hex stopped at an arbitrary point of
+      What is on the wire for a reader who has asked for no motion: the same
+      hex, parked and not churning. The animated group below is hidden in that
+      case rather than frozen, since a packet stopped at an arbitrary point of
       its flight reads as a rendering bug.
     */}
     {
@@ -167,17 +170,14 @@ const INITIAL_DOWN = 'relay-1';
           data-relay={link.relay}
           data-down={link.relay === INITIAL_DOWN ? '' : undefined}
         >
-          <text
-            x="0"
-            y="0"
-            class="font-mono"
-            font-size="13"
-            fill={link.inbound ? '#96ffd6' : '#24e8a3'}
-            opacity={link.inbound ? '0.5' : '0.85'}
-            text-anchor="middle"
-            dominant-baseline="central"
-          >
-            {link.packet}
+          {/*
+            The motion is on a wrapper rather than on the <text> itself. The
+            churn below rewrites the run through `textContent`, which replaces
+            every child node — and an <animateMotion> living inside the text is
+            one of them, so the packet would lose its path on the first tick and
+            drop to the origin.
+          */}
+          <g>
             <animateMotion
               dur={`${link.duration}s`}
               begin={`${link.delay}s`}
@@ -187,45 +187,99 @@ const INITIAL_DOWN = 'relay-1';
               keyTimes={link.inbound ? '0;1' : undefined}
               calcMode={link.inbound ? 'linear' : undefined}
             />
-          </text>
+            <text
+              x="0"
+              y="0"
+              class="font-mono"
+              data-hex
+              font-size="13"
+              fill={link.inbound ? '#96ffd6' : '#24e8a3'}
+              opacity={link.inbound ? '0.5' : '0.85'}
+              text-anchor="middle"
+              dominant-baseline="central"
+            >
+              {link.packet}
+            </text>
+          </g>
         </g>
       ))
     }
 
-    {/* After the wires, so the lines disappear beneath them. */}
+    {/*
+      The relays, as the racks they are. Drawn after the wires, so a wire that
+      passes one on its way somewhere else goes behind it. Grey throughout:
+      mint is this diagram's colour for your data, and a relay is the one thing
+      here that is not yours.
+    */}
     {
       relays.map((relay) => (
         <g class="cx-node" data-relay={relay.id} data-down={relay.id === INITIAL_DOWN ? '' : undefined}>
           <rect
             class="cx-node-box"
-            x={relay.x - relay.width / 2}
-            y={relay.y - 22}
-            width={relay.width}
-            height="44"
-            rx="22"
+            x={relay.x - 32}
+            y={relay.y - 24}
+            width="64"
+            height="48"
+            rx="6"
             fill="#0e1512"
             stroke="#2d3d36"
             stroke-width="1.5"
           />
+          {/* Three bays, each with a light and a vent. */}
+          {[-16, 0, 16].map((offset, bay) => (
+            <>
+              <circle
+                class="cx-node-led"
+                cx={relay.x - 21}
+                cy={relay.y + offset}
+                r="3"
+                fill="#24e8a3"
+                opacity={1 - bay * 0.28}
+              />
+              <rect
+                x={relay.x - 11}
+                y={relay.y + offset - 2}
+                width="28"
+                height="4"
+                rx="2"
+                fill="#1b2621"
+              />
+            </>
+          ))}
+          <line
+            x1={relay.x - 32}
+            y1={relay.y - 8}
+            x2={relay.x + 32}
+            y2={relay.y - 8}
+            stroke="#1b2621"
+            stroke-width="1.25"
+          />
+          <line
+            x1={relay.x - 32}
+            y1={relay.y + 8}
+            x2={relay.x + 32}
+            y2={relay.y + 8}
+            stroke="#1b2621"
+            stroke-width="1.25"
+          />
+
           <text
             class="cx-node-name font-mono"
             x={relay.x}
-            y={relay.y}
+            y={relay.y + 44}
             font-size="14"
             text-anchor="middle"
-            dominant-baseline="central"
             fill="#6a8177"
           >
             {relay.name}
           </text>
-          {/* Nothing under a relay that is working: a label there would be
-              describing an ordinary state, and the pills are already the
-              busiest things in the picture. Only ever visible on a dark one;
+          {/* Nothing else under a relay that is working: a label there would be
+              describing an ordinary state. Only ever visible on a dark one;
               see the style block below. */}
           <text
             class="cx-node-off font-mono"
             x={relay.x}
-            y={relay.y + 40}
+            y={relay.y + 64}
             font-size="12"
             letter-spacing="1.5"
             text-anchor="middle"
@@ -237,142 +291,94 @@ const INITIAL_DOWN = 'relay-1';
       ))
     }
 
-    {
-      members.map((member) => (
-        <>
-          <circle cx={member.x} cy={member.y} r="22" fill="#0e1512" stroke="#1b2621" stroke-width="1.5" />
-          <circle cx={member.x} cy={member.y} r="8" fill="#24e8a3" />
-        </>
-      ))
-    }
-
     {/*
-      The two ends. Same sentence in both, which is the point: what the relays
-      hold decrypts to exactly this, and only here.
+      The devices, drawn last so the wires end underneath them: a wire reaches
+      the device, and the device is where it stops being hex.
     */}
-    <g>
-      <line
-        x1={SENDER.x}
-        y1={SENDER.y - 22}
-        x2={SENDER.x}
-        y2={SENDER.y - 40}
-        stroke="rgba(36, 232, 163, 0.45)"
-        stroke-width="1.5"
-      />
-      <rect
-        x={SENDER.x - 125}
-        y={SENDER.y - 102}
-        width="250"
-        height="62"
-        rx="14"
-        fill="#0e1512"
-        stroke="rgba(36, 232, 163, 0.45)"
-        stroke-width="1.5"
-      />
-      <text
-        x={SENDER.x - 105}
-        y={SENDER.y - 79}
-        font-size="14"
-        font-weight="600"
-        fill="#e7f1ec"
-        dominant-baseline="central"
-      >
-        alice
-      </text>
-      <text
-        x={SENDER.x - 105}
-        y={SENDER.y - 58}
-        font-size="14"
-        fill="#9fb3aa"
-        dominant-baseline="central"
-      >
-        {MESSAGE}
-      </text>
-      <text
-        class="font-mono"
-        x={SENDER.x}
-        y={SENDER.y - 114}
-        font-size="12"
-        text-anchor="middle"
-        fill="#43574e"
-      >
-        on alice’s device
-      </text>
-    </g>
-
-    <g>
-      <line
-        x1={RECIPIENT.x}
-        y1={RECIPIENT.y + 22}
-        x2={RECIPIENT.x}
-        y2={RECIPIENT.y + 40}
-        stroke="rgba(36, 232, 163, 0.45)"
-        stroke-width="1.5"
-      />
-      <rect
-        x={RECIPIENT.x - 125}
-        y={RECIPIENT.y + 40}
-        width="250"
-        height="62"
-        rx="14"
-        fill="#0e1512"
-        stroke="rgba(36, 232, 163, 0.45)"
-        stroke-width="1.5"
-      />
-      <text
-        x={RECIPIENT.x - 105}
-        y={RECIPIENT.y + 63}
-        font-size="14"
-        font-weight="600"
-        fill="#e7f1ec"
-        dominant-baseline="central"
-      >
-        derek
-      </text>
-      <text
-        x={RECIPIENT.x - 105}
-        y={RECIPIENT.y + 84}
-        font-size="14"
-        fill="#9fb3aa"
-        dominant-baseline="central"
-      >
-        {MESSAGE}
-      </text>
-      <text
-        class="font-mono"
-        x={RECIPIENT.x}
-        y={RECIPIENT.y + 118}
-        font-size="12"
-        text-anchor="middle"
-        fill="#43574e"
-      >
-        on derek’s device
-      </text>
-    </g>
+    {
+      DEVICES.map((device) =>
+        device.kind === 'phone' ? (
+          <g>
+            <rect
+              x={device.x - 14}
+              y={device.y - 21}
+              width="28"
+              height="42"
+              rx="6"
+              fill="#0e1512"
+              stroke="#24e8a3"
+              stroke-width="1.5"
+            />
+            <rect
+              x={device.x - 9}
+              y={device.y - 15}
+              width="18"
+              height="26"
+              rx="2"
+              fill="rgba(36, 232, 163, 0.4)"
+            />
+            <circle cx={device.x} cy={device.y + 15} r="2" fill="#24e8a3" />
+          </g>
+        ) : (
+          <g>
+            <rect
+              x={device.x - 23}
+              y={device.y - 19}
+              width="46"
+              height="32"
+              rx="4"
+              fill="#0e1512"
+              stroke="#24e8a3"
+              stroke-width="1.5"
+            />
+            <rect
+              x={device.x - 18}
+              y={device.y - 14}
+              width="36"
+              height="22"
+              rx="2"
+              fill="rgba(36, 232, 163, 0.4)"
+            />
+            <rect
+              x={device.x - 29}
+              y={device.y + 14}
+              width="58"
+              height="5"
+              rx="2.5"
+              fill="#24e8a3"
+            />
+          </g>
+        )
+      )
+    }
   </svg>
 
   {/*
-    The phone version: the same three facts stacked — the message in the clear,
-    what each relay in between is holding, and the message again at the far
-    end.
+    The phone version: a device, what the wire out of it carries, the relays in
+    between, and a device at the far end.
   */}
   <div class="md:hidden">
-    <div class="cx-card p-4">
-      <p class="text-sm font-semibold text-gray-100">alice</p>
-      <p class="mt-1 truncate text-sm text-gray-400">{MESSAGE}</p>
-    </div>
-    <p class="mt-2 text-center font-mono text-[0.65rem] text-gray-500">
-      on alice’s device
-    </p>
+    <svg
+      viewBox="0 0 60 52"
+      class="mx-auto h-14 w-auto"
+      role="img"
+      aria-label="A phone"
+    >
+      <rect x="16" y="4" width="28" height="42" rx="6" fill="#0e1512" stroke="#24e8a3" stroke-width="1.5"></rect>
+      <rect x="21" y="10" width="18" height="26" rx="2" fill="rgba(36, 232, 163, 0.4)"></rect>
+      <circle cx="30" cy="40" r="2" fill="#24e8a3"></circle>
+    </svg>
 
     {/*
       The wire, with what is on it. Same rule as the wide diagram — hex between
-      the ends, nothing at the relay — and without this the middle of the phone
-      version would be three names and no evidence.
+      the devices, nothing at the relay — and without this the middle of the
+      phone version would be three names and no evidence.
     */}
     <div class="my-3 flex flex-col items-center gap-1.5">
       <span class="h-4 w-px bg-mint/25"></span>
-      <span class="font-mono text-[0.65rem] text-mint/70">{links[0].packet}</span>
+      <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
+        {links[0].packet}
+      </span>
       <span class="h-4 w-px bg-mint/25"></span>
     </div>
 
@@ -384,11 +390,17 @@ const INITIAL_DOWN = 'relay-1';
             data-relay={relay.id}
             data-down={relay.id === INITIAL_DOWN ? '' : undefined}
           >
-            <span class="cx-row-dot h-2.5 w-2.5 shrink-0 rounded-full bg-gray-500" />
+            {/* The same rack, small enough to sit in a row. */}
+            <svg viewBox="0 0 22 18" class="h-4 w-5 shrink-0" aria-hidden="true">
+              <rect x="1" y="1" width="20" height="16" rx="2.5" fill="#0e1512" stroke="#2d3d36" stroke-width="1.25" />
+              <circle class="cx-row-led" cx="5.5" cy="6" r="1.5" fill="#24e8a3" />
+              <circle class="cx-row-led" cx="5.5" cy="12" r="1.5" fill="#24e8a3" opacity="0.6" />
+              <rect x="9" y="4.75" width="9" height="2.5" rx="1.25" fill="#1b2621" />
+              <rect x="9" y="10.75" width="9" height="2.5" rx="1.25" fill="#1b2621" />
+            </svg>
             <span class="cx-row-name min-w-0 truncate font-mono text-xs text-gray-400">
               {relay.name}
             </span>
-            {/* Same rule as the wide diagram: a working relay says nothing. */}
             <span class="cx-row-off ml-auto shrink-0 font-mono text-[0.65rem] tracking-widest text-gray-500">
               OFFLINE
             </span>
@@ -399,17 +411,22 @@ const INITIAL_DOWN = 'relay-1';
 
     <div class="my-3 flex flex-col items-center gap-1.5">
       <span class="h-4 w-px bg-mint/25"></span>
-      <span class="font-mono text-[0.65rem] text-mint/70">{links[1].packet}</span>
+      <span class="font-mono text-[0.65rem] text-mint/70" data-hex>
+        {links[1].packet}
+      </span>
       <span class="h-4 w-px bg-mint/25"></span>
     </div>
 
-    <div class="cx-card p-4">
-      <p class="text-sm font-semibold text-gray-100">derek</p>
-      <p class="mt-1 truncate text-sm text-gray-400">{MESSAGE}</p>
-    </div>
-    <p class="mt-2 text-center font-mono text-[0.65rem] text-gray-500">
-      on derek’s device
-    </p>
+    <svg
+      viewBox="0 0 60 44"
+      class="mx-auto h-12 w-auto"
+      role="img"
+      aria-label="A laptop"
+    >
+      <rect x="7" y="4" width="46" height="32" rx="4" fill="#0e1512" stroke="#24e8a3" stroke-width="1.5"></rect>
+      <rect x="12" y="9" width="36" height="22" rx="2" fill="rgba(36, 232, 163, 0.4)"></rect>
+      <rect x="1" y="37" width="58" height="5" rx="2.5" fill="#24e8a3"></rect>
+    </svg>
   </div>
 </div>
 
@@ -445,6 +462,17 @@ const INITIAL_DOWN = 'relay-1';
     stroke: #1b2621;
   }
 
+  /* The lights go out. It is the one part of the rack that was ever alive. */
+  .cx-node-led,
+  .cx-row-led {
+    transition: fill 0.5s ease;
+  }
+
+  .cx-node[data-down] .cx-node-led,
+  .cx-row[data-down] .cx-row-led {
+    fill: #2d3d36;
+  }
+
   .cx-node[data-down] .cx-node-name {
     fill: #43574e;
     text-decoration: line-through;
@@ -462,10 +490,6 @@ const INITIAL_DOWN = 'relay-1';
     opacity: 0.55;
   }
 
-  .cx-row[data-down] .cx-row-dot {
-    background: #2d3d36;
-  }
-
   .cx-row[data-down] .cx-row-name {
     text-decoration: line-through;
   }
@@ -481,37 +505,70 @@ const INITIAL_DOWN = 'relay-1';
 
 <script>
   /*
-   * Whose turn it is to be offline.
+   * Two loops, both of which exist to keep the diagram from reading as a
+   * drawing of one moment.
    *
-   * Relays go down; that is the ordinary condition of the network rather than
-   * an incident, and a diagram where the same one is always dark invites the
-   * reader to think that one is broken. Rotating it says the thing the picture
-   * is for: any of them can go, and every member still has a wire.
+   * The first is the hex, churning. It is the hero tagline's trick with the
+   * resolve taken out: there the ciphertext settles into a sentence because the
+   * reader holds the key, and here it never settles, because nothing on these
+   * wires ever will. Characters are replaced a couple at a time rather than the
+   * whole run at once, which reads as computation instead of as a flicker.
    *
-   * Every element that has an opinion about a relay carries `data-relay`, so
-   * both layouts change together and nothing here needs to know which one is
-   * on screen.
+   * The second is which relay is offline. Relays go down; that is the ordinary
+   * condition of the network rather than an incident, and a diagram where the
+   * same one is always dark invites the reader to think that one is broken.
+   * Rotating it says the thing the picture is for: any of them can go, and
+   * every device still has a wire.
+   *
+   * Both are off under `prefers-reduced-motion`, which leaves a still diagram
+   * that says everything except how often it changes.
    */
+  const GLYPHS = '0123456789abcdef';
+  const CHURN_MS = 90;
   const CYCLE_MS = 2600;
 
-  const parts = document.querySelectorAll<HTMLElement>('[data-relay]');
+  const glyph = () => GLYPHS[(Math.random() * GLYPHS.length) | 0];
 
-  if (parts.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const names = [...new Set([...parts].map((part) => part.dataset.relay ?? ''))].filter(Boolean);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const chips = document.querySelectorAll<HTMLElement>('[data-hex]');
 
-    /* One beat with everything up, so the mesh is not permanently missing a
-       relay and the recovery is as visible as the outage. */
-    const turns: Array<string | null> = [...names, null];
-    let turn = turns.indexOf(
-      document.querySelector('[data-down]')?.getAttribute('data-relay') ?? null
-    );
+    if (chips.length) {
+      setInterval(() => {
+        for (const chip of chips) {
+          const run = (chip.textContent ?? '').split('');
+          if (!run.length) continue;
+          /* Two positions a tick: enough to never look static, few enough that
+             a glance can still tell it is the same kind of thing. */
+          for (let i = 0; i < 2; i++) {
+            run[(Math.random() * run.length) | 0] = glyph();
+          }
+          chip.textContent = run.join('');
+        }
+      }, CHURN_MS);
+    }
 
-    setInterval(() => {
-      turn = (turn + 1) % turns.length;
-      const down = turns[turn];
-      for (const part of parts) {
-        part.toggleAttribute('data-down', part.dataset.relay === down);
-      }
-    }, CYCLE_MS);
+    /* Every element with an opinion about a relay carries `data-relay`, so both
+       layouts change together and nothing here needs to know which is on
+       screen. */
+    const parts = document.querySelectorAll<HTMLElement>('[data-relay]');
+
+    if (parts.length) {
+      const names = [...new Set([...parts].map((part) => part.dataset.relay ?? ''))].filter(Boolean);
+
+      /* One beat with everything up, so the mesh is not permanently missing a
+         relay and the recovery is as visible as the outage. */
+      const turns: Array<string | null> = [...names, null];
+      let turn = turns.indexOf(
+        document.querySelector('[data-down]')?.getAttribute('data-relay') ?? null
+      );
+
+      setInterval(() => {
+        turn = (turn + 1) % turns.length;
+        const down = turns[turn];
+        for (const part of parts) {
+          part.toggleAttribute('data-down', part.dataset.relay === down);
+        }
+      }, CYCLE_MS);
+    }
   }
 </script>
