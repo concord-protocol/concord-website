@@ -49,10 +49,12 @@ const BOT_ICON = [
 ];
 ---
 
-{/* A rule above rather than below: the section under this one draws its own,
-    and two adjacent hairlines read as a 2px line. */}
-<section class="border-t border-hairline">
-  <div class="mx-auto max-w-5xl px-5 py-24">
+{/* No rule of its own, above or below. It follows the client cards as more of
+    the same thing, and the section under it draws the next hairline. */}
+<section>
+  {/* The clients page's width, not the homepage's, so these cards line up
+      with the app cards above them. */}
+  <div class="mx-auto max-w-6xl px-5 py-24">
     {/*
       The hero's lockup again, at the size the APPS title uses. Two words and
       an ampersand is near the limit of what an outlined display face can carry,
