@@ -1,8 +1,9 @@
 ---
 /*
- * What else is running on the protocol, under the clients and in the same
- * shape as them: outlined wordmark title, cards on a hairline, one link out at
- * the bottom.
+ * What else is running on the protocol, appended to the client cards rather
+ * than set apart from them: no title, no rule, no section of its own — just
+ * more rows of the same grid, at the same width and the same gap, so the page
+ * reads as one list of things to install that gets smaller as it goes.
  *
  * The two groups are drawn at different weights on purpose. A library is a
  * decision — you pick one and build on it — so it gets a full-width card with
@@ -10,12 +11,10 @@
  * you drop into a community and forget about, so three of them fit across the
  * same width. Size is the whole hierarchy here; nothing says "more important".
  *
- * Neither group is labelled. The two blocks sit close enough to read as one
- * grid of cards, and the crate and the robot on the cards themselves are the
- * only thing that has to say which is which — a pair of subheadings above
- * groups this obviously different was signposting a distinction the shapes
- * already make. The icons are drawn from shared path lists rather than pasted
- * twice.
+ * Neither group is labelled, and the crate and the robot on the cards are the
+ * only thing that says which is which — subheadings over groups this obviously
+ * different were signposting a distinction the shapes already make. The icons
+ * are drawn from shared path lists rather than pasted twice.
  *
  * `Private Events` is in TOOLS and deliberately not here: it is an application
  * built on Concord rather than a library or a bot, and it keeps its place in
@@ -49,142 +48,102 @@ const BOT_ICON = [
 ];
 ---
 
-{/* No rule of its own, above or below. It follows the client cards as more of
-    the same thing, and the section under it draws the next hairline. */}
-<section>
-  {/* The clients page's width, not the homepage's, so these cards line up
-      with the app cards above them. */}
-  <div class="mx-auto max-w-6xl px-5 py-24">
-    {/*
-      The hero's lockup again, at the size the APPS title uses. Two words and
-      an ampersand is near the limit of what an outlined display face can carry,
-      so it steps down twice on the way to a phone rather than wrapping.
-    */}
-    <h2
-      class="cx-outline-title text-center text-2xl sm:text-3xl md:text-4xl"
-    >
-      LIBRARIES &amp; BOTS
-    </h2>
+{/*
+  `mt-4` twice, the gap the grid above uses, so each block lands where the
+  next row of cards would have. One library today, so a grid would leave it
+  stranded at half width; the column only appears once there is something to
+  sit beside it.
+*/}
+<div class:list={['mt-4 grid gap-4', libraries.length > 1 && 'md:grid-cols-2']}>
+  {
+    libraries.map((library) => (
+      <article class="cx-card flex flex-col gap-6 p-7 sm:flex-row sm:items-center sm:p-8">
+        <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-[13%] border border-hairline bg-raised">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-7 w-7 text-mint"
+            aria-hidden="true"
+          >
+            {LIBRARY_ICON.map((d) => (
+              <path d={d} />
+            ))}
+          </svg>
+        </span>
 
-    <div class="mt-12">
-      {/*
-        One library today, so a grid would leave it stranded at half width.
-        The column only appears once there is something to sit beside.
-      */}
-      <div
-        class:list={['grid gap-4', libraries.length > 1 && 'md:grid-cols-2']}
-      >
-        {
-          libraries.map((library) => (
-            <article class="cx-card flex flex-col gap-6 p-7 sm:flex-row sm:items-center sm:p-8">
-              <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-[13%] border border-hairline bg-raised">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="h-7 w-7 text-mint"
-                  aria-hidden="true"
-                >
-                  {LIBRARY_ICON.map((d) => (
-                    <path d={d} />
-                  ))}
-                </svg>
-              </span>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h3 class="font-mono text-xl font-semibold tracking-tight text-white">
+              {library.name}
+            </h3>
+            <p class="font-mono text-xs text-gray-500">
+              by {library.author} &middot; {library.language}
+            </p>
+          </div>
+          <p class="mt-3 text-balance text-sm leading-relaxed text-gray-400">
+            {library.description}
+          </p>
+        </div>
 
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h4 class="font-mono text-xl font-semibold tracking-tight text-white">
-                    {library.name}
-                  </h4>
-                  <p class="font-mono text-xs text-gray-500">
-                    by {library.author} &middot; {library.language}
-                  </p>
-                </div>
-                <p class="mt-3 text-balance text-sm leading-relaxed text-gray-400">
-                  {library.description}
-                </p>
-              </div>
+        <div class="flex shrink-0 flex-wrap gap-2.5">
+          <a href={library.href} rel="noopener" class="cx-btn cx-btn-ghost">
+            Get {library.name}
+          </a>
+          {library.docs && (
+            <a href={library.docs} rel="noopener" class="cx-btn cx-btn-ghost">
+              Docs
+            </a>
+          )}
+        </div>
+      </article>
+    ))
+  }
+</div>
 
-              <div class="flex shrink-0 flex-wrap gap-2.5">
-                <a
-                  href={library.href}
-                  rel="noopener"
-                  class="cx-btn cx-btn-ghost"
-                >
-                  Get {library.name}
-                </a>
-                {library.docs && (
-                  <a
-                    href={library.docs}
-                    rel="noopener"
-                    class="cx-btn cx-btn-ghost"
-                  >
-                    Docs
-                  </a>
-                )}
-              </div>
-            </article>
-          ))
-        }
-      </div>
-    </div>
+{/* Three across at the gap the client cards use, so the bot cards sit in
+    their columns rather than a hair off them. */}
+<ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {
+    bots.map((bot) => (
+      <li>
+        <a
+          href={bot.href}
+          rel="noopener"
+          class="cx-card cx-card-link flex h-full flex-col p-5"
+        >
+          <span class="flex items-center gap-2.5">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-[18px] w-[18px] shrink-0 text-mint"
+              aria-hidden="true"
+            >
+              {BOT_ICON.map((d) => (
+                <path d={d} />
+              ))}
+            </svg>
+            <span class="truncate font-mono text-sm font-semibold text-white">
+              {bot.name}
+            </span>
+          </span>
 
-    {/* The gap the library card's own grid uses, so the bots read as the next
-        row of it rather than as a second block. */}
-    <div class="mt-4">
-      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          bots.map((bot) => (
-            <li>
-              <a
-                href={bot.href}
-                rel="noopener"
-                class="cx-card cx-card-link flex h-full flex-col p-5"
-              >
-                <span class="flex items-center gap-2.5">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="h-[18px] w-[18px] shrink-0 text-mint"
-                    aria-hidden="true"
-                  >
-                    {BOT_ICON.map((d) => (
-                      <path d={d} />
-                    ))}
-                  </svg>
-                  <span class="truncate font-mono text-sm font-semibold text-white">
-                    {bot.name}
-                  </span>
-                </span>
+          <span class="mt-1.5 block font-mono text-[0.65rem] text-gray-500">
+            by {bot.author} &middot; {bot.language}
+          </span>
 
-                <span class="mt-1.5 block font-mono text-[0.65rem] text-gray-500">
-                  by {bot.author} &middot; {bot.language}
-                </span>
-
-                <span class="mt-3 block text-xs leading-relaxed text-gray-400">
-                  {bot.description}
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-
-    <div class="mt-10 text-center">
-      <a
-        href="/build/"
-        class="inline-flex text-sm text-mint transition-opacity hover:opacity-80"
-      >
-        Build your own &rarr;
-      </a>
-    </div>
-  </div>
-</section>
+          <span class="mt-3 block text-xs leading-relaxed text-gray-400">
+            {bot.description}
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
