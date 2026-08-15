@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# nsyte deploy config (local, holds the signing bunker pubkey)
+.nsite/
+
 # dependencies
 node_modules/
 
