@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "sync:spec": "node scripts/sync-spec.mjs",
+    "og": "node scripts/og-image.mjs",
     "predeploy": "npm run build",
     "deploy": "deno run -A jsr:@nsyte/cli@0.27.4 deploy dist --concurrency 2 --scan-level low --non-interactive"
   },
@@ -25,5 +26,8 @@
     "astro": "^7.2.1",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "wawoff2": "^2.0.1"
   }
 }
