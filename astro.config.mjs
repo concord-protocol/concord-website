@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import externalizeInlineScripts from './scripts/externalize-inline-scripts.mjs';
 
 // TODO: point this at the real production domain before deploying.
 const SITE = 'https://concordprotocol.org';
@@ -11,8 +12,18 @@ export default defineConfig({
   site: SITE,
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // Never paste an asset into the page as a data: URI or a bundled script
+      // into the HTML as an inline one. The nsite gateway serves the site under
+      // `script-src 'self'; font-src 'self'`, which blocks both — a base64
+      // JetBrains Mono subset was small enough to be inlined, and so were the
+      // component scripts. See scripts/externalize-inline-scripts.mjs, which
+      // handles the inline scripts this does not reach.
+      assetsInlineLimit: 0,
+    },
   },
   integrations: [
+    externalizeInlineScripts(),
     sitemap(),
     starlight({
       title: 'Concord',
