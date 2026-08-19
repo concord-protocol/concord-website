@@ -6,7 +6,8 @@ import type { ImageMetadata } from 'astro';
 
 /*
  * Each client's own app icon, as it ships it — Vector's and Accordion's from
- * their repositories, Armada's from its public/ directory. Imported rather
+ * their repositories, Armada's from its public/ directory, Amethyst's from its
+ * Play listing in fastlane/, Grimoire's from its web manifest. Imported rather
  * than dropped in public/ so Astro resizes them to the ~56px the cards draw
  * them at; the sources are 512px, which is 40× the pixels a card needs.
  *
@@ -15,7 +16,9 @@ import type { ImageMetadata } from 'astro';
  * have been cut to transparent at the radius the artwork already uses.
  */
 import accordionLogo from '../assets/clients/accordion.png';
+import amethystLogo from '../assets/clients/amethyst.png';
 import armadaLogo from '../assets/clients/armada.png';
+import grimoireLogo from '../assets/clients/grimoire.png';
 import vectorLogo from '../assets/clients/vector.png';
 
 export const SPEC_REPO = 'https://github.com/concord-protocol/concord';
@@ -101,6 +104,45 @@ export const CLIENTS: Client[] = [
     links: [
       { label: 'Open Accordion', href: 'https://accordion.chat' },
       { label: 'Source', href: 'https://github.com/hzrd149/accordion.chat' },
+    ],
+  },
+  {
+    name: 'Amethyst',
+    tagline: 'Communities inside a whole Nostr client',
+    author: 'Vitor Pamplona',
+    summary:
+      'Concord Channels alongside the feeds, zaps, and streams — in the Android client, and on the desktop.',
+    logo: amethystLogo,
+    href: 'https://amethyst.social',
+    source: 'https://github.com/vitorpamplona/amethyst',
+    platforms: ['Android', 'Windows', 'macOS', 'Linux'],
+    accent: 'from-indigo-400/20',
+    links: [
+      { label: 'Get Amethyst', href: 'https://amethyst.social' },
+      {
+        label: 'Google Play',
+        href: 'https://play.google.com/store/apps/details?id=com.vitorpamplona.amethyst',
+      },
+      {
+        label: 'Desktop downloads',
+        href: 'https://github.com/vitorpamplona/amethyst/releases',
+      },
+    ],
+  },
+  {
+    name: 'Grimoire',
+    tagline: 'A tiling workspace for Nostr',
+    author: 'purrgrammer',
+    summary:
+      'Communities as one pane among many, opened from a command palette — a client for people who like a keyboard.',
+    logo: grimoireLogo,
+    href: 'https://grimoire.rocks',
+    source: 'https://github.com/purrgrammer/grimoire',
+    platforms: ['Web'],
+    accent: 'from-fuchsia-400/20',
+    links: [
+      { label: 'Open Grimoire', href: 'https://grimoire.rocks' },
+      { label: 'Source', href: 'https://github.com/purrgrammer/grimoire' },
     ],
   },
 ];
