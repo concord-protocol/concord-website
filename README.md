@@ -28,7 +28,7 @@ npm run preview
 
 ```
 src/
-  pages/            marketing pages (landing, clients, announcement, 404)
+  pages/            marketing pages (landing, clients, 404)
   layouts/          the marketing shell
   components/
     sections/       landing-page sections

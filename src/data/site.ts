@@ -29,7 +29,6 @@ export const NAV = [
   { label: 'Specification', href: '/spec/' },
   { label: 'Clients', href: '/clients/' },
   { label: 'Build', href: '/build/' },
-  { label: 'Announcement', href: '/announcement/' },
 ];
 
 export interface Client {
