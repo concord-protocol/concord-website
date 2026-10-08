@@ -7,6 +7,7 @@
 import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
 import LinkIcon from '../components/LinkIcon.astro';
+import Logo from '../components/Logo.astro';
 import LibrariesAndBots from '../components/sections/LibrariesAndBots.astro';
 import { CLIENTS, type LinkIcon as Icon } from '../data/site';
 
@@ -54,6 +55,71 @@ const SHARED = [
     ],
   },
 ];
+
+/** The diagram's ring, as a percentage of its square. */
+const ORBIT = 40;
+
+/** Seconds for the packet to go once round. */
+const LAP = 9;
+
+/**
+ * How far along the ring, as a percentage, the packet's head starts. The
+ * longest tail layer runs from the top to here.
+ */
+const PACKET_REACH = 26;
+
+/** Each client's spot on the ring, starting at the top and going clockwise. */
+const ORBITING = CLIENTS.map((client, i) => {
+  const angle = (i / CLIENTS.length) * 2 * Math.PI - Math.PI / 2;
+  return {
+    client,
+    x: +(50 + ORBIT * Math.cos(angle)).toFixed(2),
+    y: +(50 + ORBIT * Math.sin(angle)).toFixed(2),
+    /* When the packet's head reaches this client, in seconds into a lap. */
+    arrival: +(((i / CLIENTS.length - PACKET_REACH / 100 + 1) % 1) * LAP).toFixed(2),
+  };
+});
+
+/**
+ * The packet's tail: layers sharing a front, shorter ones brighter, so it
+ * fades out behind the head.
+ */
+const TAIL = [26, 18, 12, 7, 3.5, 1.2].map((length, i, all) => ({
+  length,
+  opacity: +(((i + 1) / all.length) ** 2).toFixed(2),
+  width: +(0.45 + (0.5 * i) / (all.length - 1)).toFixed(2),
+}));
+
+/**
+ * A trail of bits shed beside the tail: dashes and gaps of varied, fixed
+ * lengths over the tail's span, then nothing for the rest of the lap.
+ */
+const BITS = (seed: number) => {
+  const dashes: number[] = [];
+  let used = 0;
+  for (let k = 0; used < PACKET_REACH - 2; k++) {
+    const dash = 0.3 + ((k * 7 + seed * 3) % 5) * 0.25;
+    const gap = 0.6 + ((k * 5 + seed) % 4) * 0.55;
+    dashes.push(dash, gap);
+    used += dash + gap;
+  }
+  /* The last gap runs out the lap. An odd count would repeat the list and
+     turn this gap into a dash. */
+  dashes[dashes.length - 1] += 100 - used;
+  return dashes.map((n) => +n.toFixed(2)).join(' ');
+};
+
+/*
+ * The packet changes colour by crossfading one copy per client, since
+ * opacity animates on the compositor and stroke colour would repaint every
+ * frame. Each copy is fully shown at its client's arrival and gone by the
+ * next, so the keyframes depend on how many clients there are.
+ */
+const SHARE = +(100 / CLIENTS.length).toFixed(4);
+const HUE_KEYFRAMES = `@keyframes cx-packet-hue {
+  0%, 100% { opacity: 1; }
+  ${SHARE}%, ${100 - SHARE}% { opacity: 0; }
+}`;
 ---
 
 <Marketing
@@ -189,44 +255,235 @@ const SHARED = [
   <section class="relative overflow-hidden">
     <div class="cx-rule absolute inset-x-0 top-0"></div>
     <div class="cx-radial pointer-events-none absolute inset-0 opacity-50"></div>
-    <div class="relative mx-auto max-w-6xl px-5 py-24">
-      <p class="cx-outline-title origin-left text-2xl uppercase">Interoperability</p>
-      <h2
-        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
-      >
-        Switch clients. Keep everything.
-      </h2>
+    <div
+      class="relative mx-auto grid max-w-6xl items-center gap-x-16 gap-y-16 px-5 py-24 lg:grid-cols-[minmax(0,1fr)_26rem]"
+    >
+      <div>
+        <p class="cx-outline-title origin-left text-2xl uppercase">Interoperability</p>
+        <h2
+          class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+        >
+          Switch clients. Keep everything.
+        </h2>
+        <p class="mt-4 max-w-xl text-sm leading-relaxed text-gray-400">
+          A community doesn't live inside an app. It lives on relays, as
+          encrypted events in one shared format, and every client above reads
+          the same events. They differ in what they build around a community,
+          not in the community itself.
+        </p>
 
-      <dl class="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-        {
-          SHARED.map((item) => (
-            <div>
-              <span
-                class="grid h-11 w-11 place-items-center rounded-[13%] border border-mint/30 bg-mint/10 text-mint"
-                aria-hidden="true"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="h-5 w-5"
+        <dl class="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2">
+          {
+            SHARED.map((item) => (
+              <div class="flex gap-4">
+                <span
+                  class="grid h-9 w-9 shrink-0 place-items-center rounded-[13%] border border-mint/30 bg-mint/10 text-mint"
+                  aria-hidden="true"
                 >
-                  {item.icon.map((d) => (
-                    <path d={d} />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[1.125rem] w-[1.125rem]"
+                  >
+                    {item.icon.map((d) => (
+                      <path d={d} />
+                    ))}
+                  </svg>
+                </span>
+                <div>
+                  <dt class="text-sm font-semibold text-white">{item.term}</dt>
+                  <dd class="mt-1 text-sm leading-relaxed text-gray-400">
+                    {item.detail}
+                  </dd>
+                </div>
+              </div>
+            ))
+          }
+        </dl>
+
+        <a
+          href="/build/#interoperability"
+          class="mt-10 inline-flex text-sm text-mint transition-opacity hover:opacity-80"
+        >
+          How clients stay compatible &rarr;
+        </a>
+      </div>
+
+      {/*
+        Every client around one community, each wired to it in its own glow,
+        with a packet circling through them all. Positions are percentages of
+        the square, so the lines (in a 100-unit viewBox) and the logos
+        (absolutely placed) line up at any size.
+
+        Everything that moves animates only transform, scale, and opacity on
+        one CSS clock, so the blurred SVG is rasterized once and the compositor
+        does the rest.
+      */}
+      <div class="relative mx-auto aspect-square w-full max-w-[26rem]" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="absolute inset-0 h-full w-full overflow-visible">
+          <defs>
+            {/* Spokes fade from the client's glow to almost nothing at the centre. */}
+            {ORBITING.map(({ client, x, y }, i) => (
+              <linearGradient
+                id={`spoke-${i}`}
+                gradientUnits="userSpaceOnUse"
+                x1={x}
+                y1={y}
+                x2="50"
+                y2="50"
+              >
+                <stop offset="0" stop-color={client.glow} stop-opacity="0.6" />
+                <stop offset="1" stop-color={client.glow} stop-opacity="0.05" />
+              </linearGradient>
+            ))}
+            <filter id="packet-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="0.6" result="near" />
+              <feGaussianBlur stdDeviation="2.2" result="far" />
+              <feMerge>
+                <feMergeNode in="far" />
+                <feMergeNode in="near" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="packet-haze" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.5" />
+            </filter>
+          </defs>
+
+          <circle
+            cx="50"
+            cy="50"
+            r={ORBIT}
+            fill="none"
+            stroke="white"
+            stroke-opacity="0.06"
+            vector-effect="non-scaling-stroke"
+          />
+
+          {ORBITING.map(({ x, y }, i) => (
+            <line
+              x1="50"
+              y1="50"
+              x2={x}
+              y2={y}
+              stroke={`url(#spoke-${i})`}
+              vector-effect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+
+        {/*
+          The packet, drawn still with its head PACKET_REACH along from the top
+          and turned a lap by its wrapper. One copy per client glow crossfades
+          to the next as the head passes each client; the white core is shared.
+        */}
+        <div class="cx-packet absolute inset-0" style={`--lap: ${LAP}s`}>
+          {ORBITING.map(({ client, arrival }) => (
+            <svg
+              viewBox="0 0 100 100"
+              class="cx-packet-hue absolute inset-0 h-full w-full overflow-visible"
+              style={`animation-delay: ${(arrival - LAP).toFixed(2)}s`}
+            >
+              <g
+                transform="rotate(-90 50 50)"
+                fill="none"
+                stroke={client.glow}
+                stroke-linecap="round"
+              >
+                {/* A wide blur under the tail, for the haze it leaves. */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={ORBIT}
+                  pathLength="100"
+                  stroke-width="4"
+                  stroke-opacity="0.22"
+                  stroke-dasharray="16 84"
+                  stroke-dashoffset={16 - PACKET_REACH}
+                  filter="url(#packet-haze)"
+                />
+                {[ORBIT - 1.4, ORBIT + 1.4].map((r, k) => (
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={r}
+                    pathLength="100"
+                    stroke-width="0.35"
+                    stroke-opacity="0.55"
+                    stroke-linecap="butt"
+                    stroke-dasharray={BITS(k + 1)}
+                    stroke-dashoffset="-2"
+                  />
+                ))}
+                <g filter="url(#packet-glow)">
+                  {TAIL.map(({ length, opacity, width }) => (
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r={ORBIT}
+                      pathLength="100"
+                      stroke-width={width}
+                      stroke-opacity={opacity}
+                      stroke-dasharray={`${length} ${100 - length}`}
+                      stroke-dashoffset={length - PACKET_REACH}
+                    />
                   ))}
-                </svg>
-              </span>
-              <dt class="mt-5 text-sm font-semibold text-white">{item.term}</dt>
-              <dd class="mt-2 text-sm leading-relaxed text-gray-400">
-                {item.detail}
-              </dd>
+                </g>
+              </g>
+            </svg>
+          ))}
+          <svg viewBox="0 0 100 100" class="absolute inset-0 h-full w-full overflow-visible">
+            <circle
+              cx="50"
+              cy="50"
+              r={ORBIT}
+              pathLength="100"
+              transform="rotate(-90 50 50)"
+              fill="none"
+              stroke="white"
+              stroke-width="0.7"
+              stroke-linecap="round"
+              stroke-dasharray="0.3 99.7"
+              stroke-dashoffset={0.3 - PACKET_REACH}
+            />
+          </svg>
+        </div>
+
+        {/* The community breathes: a glow behind it fades in and out. */}
+        <div class="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2">
+          <div class="cx-hub-glow absolute -inset-10 rounded-full"></div>
+          <div
+            class="relative grid h-full w-full place-items-center rounded-full border border-mint/30 bg-surface shadow-[0_0_40px_rgba(36,232,163,0.18)]"
+          >
+            <Logo size={52} />
+          </div>
+        </div>
+
+        {/* Each logo flares as the packet's head passes under it. */}
+        {
+          ORBITING.map(({ client, x, y, arrival }) => (
+            <div
+              class="absolute h-12 w-12 -translate-x-1/2 -translate-y-1/2"
+              style={`left: ${x}%; top: ${y}%; --glow: ${client.glow}; --lap: ${LAP}s; --delay: ${(arrival - LAP - 0.2).toFixed(2)}s`}
+            >
+              <div class="cx-node-flare absolute -inset-6 rounded-full"></div>
+              <Image
+                src={client.logo}
+                alt=""
+                width={48}
+                height={48}
+                densities={[2]}
+                class="cx-node relative h-12 w-12 rounded-[13%] bg-black"
+                style={`box-shadow: 0 0 24px ${client.glow}55`}
+              />
             </div>
           ))
         }
-      </dl>
+      </div>
     </div>
   </section>
 
@@ -265,6 +522,13 @@ const SHARED = [
           <LibrariesAndBots group="bots" more />
         </div>
       </div>
+
+      <a
+        href="/build/bots/"
+        class="mt-12 inline-flex text-sm text-mint transition-opacity hover:opacity-80"
+      >
+        How bots work &rarr;
+      </a>
     </div>
   </section>
 
@@ -301,12 +565,14 @@ const SHARED = [
         </div>
       </div>
 
-      <a
-        href="/build/"
-        class="mt-12 inline-flex text-sm text-mint transition-opacity hover:opacity-80"
-      >
-        Build your own client &rarr;
-      </a>
+      <div class="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-sm text-mint">
+        <a href="/build/sdks/" class="transition-opacity hover:opacity-80">
+          SDKs and libraries &rarr;
+        </a>
+        <a href="/build/" class="transition-opacity hover:opacity-80">
+          Build your own client &rarr;
+        </a>
+      </div>
     </div>
   </section>
 </Marketing>
@@ -314,3 +580,93 @@ const SHARED = [
 <script>
   import '../scripts/app-noise';
 </script>
+
+<style is:inline set:html={HUE_KEYFRAMES}></style>
+
+<style>
+  /* One lap, turned on the compositor. */
+  .cx-packet {
+    will-change: transform;
+    animation: cx-packet-spin var(--lap) linear infinite;
+  }
+
+  @keyframes cx-packet-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .cx-packet-hue {
+    opacity: 0;
+    will-change: opacity;
+    animation: cx-packet-hue var(--lap) linear infinite;
+  }
+
+  /*
+   * A logo flares as the packet passes, decaying over a beat: it swells
+   * slightly and a soft glow in its colour blooms behind it.
+   */
+  .cx-node {
+    animation: cx-node-swell var(--lap) ease-out var(--delay) infinite;
+  }
+
+  .cx-node-flare {
+    opacity: 0;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--glow) 55%, transparent) 0%,
+      transparent 65%
+    );
+    will-change: opacity;
+    animation: cx-node-bloom var(--lap) ease-out var(--delay) infinite;
+  }
+
+  @keyframes cx-node-swell {
+    0%,
+    22%,
+    100% {
+      scale: 1;
+    }
+    3% {
+      scale: 1.08;
+    }
+  }
+
+  @keyframes cx-node-bloom {
+    0%,
+    25%,
+    100% {
+      opacity: 0;
+    }
+    3% {
+      opacity: 1;
+    }
+  }
+
+  .cx-hub-glow {
+    background: radial-gradient(circle, rgba(36, 232, 163, 0.28) 0%, transparent 62%);
+    will-change: opacity;
+    animation: cx-hub-breathe 5s ease-in-out infinite alternate;
+  }
+
+  @keyframes cx-hub-breathe {
+    from {
+      opacity: 0.35;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cx-packet {
+      display: none;
+    }
+
+    .cx-node,
+    .cx-node-flare,
+    .cx-hub-glow {
+      animation: none;
+    }
+  }
+</style>
