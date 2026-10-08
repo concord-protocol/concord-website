@@ -13,12 +13,10 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     build: {
-      // Never paste an asset into the page as a data: URI or a bundled script
-      // into the HTML as an inline one. The nsite gateway serves the site under
-      // `script-src 'self'; font-src 'self'`, which blocks both — a base64
-      // JetBrains Mono subset was small enough to be inlined, and so were the
-      // component scripts. See scripts/externalize-inline-scripts.mjs, which
-      // handles the inline scripts this does not reach.
+      // Never inline assets as data: URIs or bundled scripts as inline
+      // <script>. The nsite gateway's CSP (`script-src 'self'; font-src
+      // 'self'`) blocks both; small font subsets would otherwise be inlined.
+      // scripts/externalize-inline-scripts.mjs handles the rest.
       assetsInlineLimit: 0,
     },
   },

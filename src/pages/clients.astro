@@ -1,14 +1,7 @@
 ---
 /*
- * The full list, in the same card the homepage uses — icon, one line, chips,
- * a button — rather than the three essays this page used to be. An app is a
- * thing you look at and press, and the previous version put two paragraphs of
- * prose between the reader and every download button, including a block
- * explaining which one to pick that the cards can say by their own shape.
- *
- * Equals here, deliberately: the homepage pair is where the site makes a
- * recommendation, and this is the page that just lists what exists — a list
- * that is expected to get longer, which is why nothing on it counts itself.
+ * Every client, listed as equals (the homepage is where the site recommends
+ * one), followed by bridges, bots, libraries, and apps built on Concord.
  */
 import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
@@ -19,7 +12,7 @@ import { CLIENTS, type LinkIcon as Icon } from '../data/site';
 /** Listings that install and update the app, as opposed to files to download. */
 const STORE_ICONS = new Set<Icon>(['google-play', 'fdroid', 'zapstore']);
 
-/** What every client agrees on, which is the reason there can be more of them. */
+/** Shared by every client. */
 const SHARED = [
   {
     term: 'One identity',
@@ -27,11 +20,11 @@ const SHARED = [
   },
   {
     term: 'Your communities',
-    detail: 'Join in one app and the community shows up in the others.',
+    detail: 'Join in one client and the community shows up in the others.',
   },
   {
     term: 'Invites',
-    detail: 'An invite link from any app opens in every other.',
+    detail: 'An invite link from any client opens in every other.',
   },
   {
     term: 'Roles and moderation',
@@ -42,7 +35,7 @@ const SHARED = [
 
 <Marketing
   title="Clients · Concord"
-  description="Armada, Vector, Amethyst, PosterChan, Grimoire, Accordion, and Coinos are independent applications that speak the Concord protocol. A community created in one opens in the others."
+  description="Clients that speak the Concord protocol, plus the bridges, bots, and libraries built on it. Sign in to any of them with the same Nostr key."
 >
   <section class="relative overflow-hidden border-b border-hairline">
     <div class="cx-radial pointer-events-none absolute inset-0"></div>
@@ -51,10 +44,10 @@ const SHARED = [
       <h1
         class="mt-4 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
       >
-        Independent apps. One protocol.
+        Many clients, all in concord.
       </h1>
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-gray-300">
-        A community made in one opens in the others.
+        Built by different people, speaking the same language.
       </p>
     </div>
   </section>
@@ -64,21 +57,14 @@ const SHARED = [
     <div class="cx-radial pointer-events-none absolute inset-0"></div>
     <div class="relative mx-auto max-w-6xl px-5 py-16">
       {/*
-        One panel per app, stacked, every panel sharing the same columns. The
-        panel keeps what the old cards had — each app is an object you can
-        point at — without what made them noise: seven boxes each repeating
-        their own "Stores" and "Downloads" labels and wrapping their links
-        onto as many lines as they needed. Here each label is said once, in
-        the header, and the eye runs down a column to find its own system.
-
-        Below `lg` the columns fold into a stack per row, and the header goes,
-        since there are no columns left for it to name.
+        One row per client on shared columns, with the column labels in a single
+        header. Below `lg` each row stacks and the header is hidden.
       */}
       <div
         class="hidden px-6 pb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-gray-500 lg:grid lg:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_12rem_10rem] lg:gap-x-8"
         aria-hidden="true"
       >
-        <span>App</span>
+        <span>Client</span>
         <span>Stores</span>
         <span>Downloads</span>
         <span></span>
@@ -89,12 +75,8 @@ const SHARED = [
         {
           CLIENTS.map((client) => {
             /*
-             * The first link is the install, and gets the button. Stores and
-             * files are bare marks, named on hover and in the accessible
-             * label; the few pages worth a word — a page of every build, an
-             * about page, a handbook, the repository — stay text.
-             *
-             * A closed-source client has no repository to append.
+             * The first link gets the button. Stores and downloads are icons
+             * (named in `title` and `aria-label`); other pages are text.
              */
             const rest = client.links.slice(1);
             const stores = rest.filter((link) => link.icon && STORE_ICONS.has(link.icon));
@@ -110,11 +92,6 @@ const SHARED = [
                 {/* The hover field; see .cx-app-noise and the script below. */}
                 <canvas class="cx-app-noise" aria-hidden="true" />
                 <div class="flex min-w-0 items-center gap-4">
-                  {/*
-                    Clipped to roughly the radius the icons already draw
-                    themselves at, so marks from as many teams sit as a set.
-                    `alt=""` because the name is right beside it.
-                  */}
                   <Image
                     src={client.logo}
                     alt=""
@@ -134,10 +111,7 @@ const SHARED = [
                   </div>
                 </div>
 
-                {/*
-                  On a phone the two mark groups share one line, with a gap
-                  between them standing in for the header's column break.
-                */}
+                {/* Below `lg`, stores and downloads share one line. */}
                 <div class="hidden flex-wrap items-center gap-x-6 gap-y-2 has-[li]:flex lg:contents lg:has-[li]:contents">
                   {[stores, files].map((links) => (
                     <ul class="-ml-1.5 flex flex-wrap empty:hidden lg:empty:block">
@@ -185,14 +159,6 @@ const SHARED = [
     </div>
   </section>
 
-  {/*
-    Bots and libraries each get a section of their own, under a heading, on
-    a ground a shade off the page's. They used to continue the client grid
-    behind a hairline, and read as more of the same list; they are not. A
-    client is where you talk, a bot is something you invite into the room,
-    and a library is what either is made from, so each is a stop on the way
-    down the page rather than a few more rows of the list above.
-  */}
   <section class="border-t border-hairline bg-raised/40">
     <div class="mx-auto max-w-6xl px-5 py-20">
       <p class="cx-eyebrow">Bridges &amp; bots</p>
@@ -202,19 +168,15 @@ const SHARED = [
         Invite help into a community.
       </h2>
       <p class="mt-4 max-w-2xl text-sm leading-relaxed text-gray-400">
-        Each one joins on an invite like any member, and holds only the role
-        it is granted.
+        These join a community through an invite, like any member, and can do
+        only what their role allows.
       </p>
 
-      {/*
-        Bridges first, lit, and set apart from the bots under their own label:
-        they are what lets an existing Discord or Matrix community talk to its
-        Concord counterpart before anyone moves.
-      */}
       <div class="mt-12">
         <h3 class="text-base font-semibold text-white">Bridges</h3>
         <p class="mt-1 text-sm text-gray-400">
-          Bring an existing community along, both ways, while it moves.
+          Connect a Concord channel to a Discord channel or Matrix room, so
+          messages show up on both sides.
         </p>
         <div class="mt-6">
           <LibrariesAndBots group="bridges" />
@@ -235,18 +197,33 @@ const SHARED = [
 
   <section class="border-t border-hairline">
     <div class="mx-auto max-w-6xl px-5 py-20">
-      <p class="cx-eyebrow">Libraries</p>
+      <p class="cx-eyebrow">Build</p>
       <h2
         class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
       >
         Build your own.
       </h2>
-      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-gray-400">
-        Keys, planes, and encryption are handled for you. Write the client or
-        the bot, not the cryptography.
-      </p>
-      <div class="mt-10">
-        <LibrariesAndBots group="libraries" />
+
+      <div class="mt-12">
+        <h3 class="text-base font-semibold text-white">Libraries</h3>
+        <p class="mt-1 text-sm text-gray-400">
+          These handle key derivation, encryption, and relay traffic, so a
+          client or bot doesn't have to implement them itself.
+        </p>
+        <div class="mt-6">
+          <LibrariesAndBots group="libraries" />
+        </div>
+      </div>
+
+      <div class="mt-16">
+        <h3 class="text-base font-semibold text-white">Built on Concord</h3>
+        <p class="mt-1 text-sm text-gray-400">
+          Applications that use Concord communities for something other than
+          chat.
+        </p>
+        <div class="mt-6">
+          <LibrariesAndBots group="apps" />
+        </div>
       </div>
     </div>
   </section>
@@ -257,7 +234,7 @@ const SHARED = [
       <h2
         class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
       >
-        Switch apps. Keep everything.
+        Switch clients. Keep everything.
       </h2>
 
       <dl class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">

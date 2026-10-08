@@ -1,151 +1,149 @@
 ---
 title: Threat model
-description: What Concord defends against, what it explicitly does not, and the residual risks the specification names rather than hides.
+description: What Concord protects against, what it doesn't, and the known weaknesses the specification accepts.
 sidebar:
   order: 4
 ---
 
-A protocol is only as useful as its honesty about limits. This page collects the
-guarantees and the named residuals from across the CORD documents.
+This page collects the guarantees and known weaknesses described across the
+CORD documents.
 
-## Adversaries Concord defends against
+## What Concord protects against
 
 ### A malicious or compromised relay
 
-A relay can refuse service, drop events, or replay old ones. It cannot read
-anything, forge anything, or determine who is in a community.
+A relay can refuse service, drop events, or replay old ones. It can't read
+anything, forge anything, or tell who is in a community.
 
-Replay is handled by the fold: clients refuse to downgrade an entity to a lower
-version, so a relay replaying a stale grant or a lifted ban gets nowhere. Refusal
-of service is handled by publishing to several relays at once.
+Clients never go back to an older version of an entity, so a relay replaying an
+old grant or a lifted ban has no effect. Publishing to several relays at once
+covers a relay that refuses service.
 
-One relay behaviour matters: relays should reject giftwrap deletions by author,
-so participants cannot delete each other's events. Clients should use at least
-one relay that does.
+Relays should reject giftwrap deletions by author, so that participants can't
+delete each other's events. Clients should use at least one relay that does.
 
 ### A network observer
 
-Sees ciphertext addressed to rotating labels. See
-[what a relay sees](/learn/what-a-relay-sees/) for the traffic-analysis
-residuals.
+Sees encrypted data sent to addresses that change over time. See
+[what a relay sees](/learn/what-a-relay-sees/) for what traffic analysis can
+still reveal.
 
 ### A non-member
 
-Cannot find a community's addresses at all — every coordinate derives one-way
-from a secret they do not hold. A non-member holding only a `community_id` (which
-ships in every invite) can derive exactly one public coordinate: the dissolution
-tombstone address. They can read that plane and even publish to it, but the only
-thing that counts there is an owner-signed tombstone, which they cannot forge.
+Can't find a community's addresses, because every address is derived one way
+from a secret they don't have. Someone with only a `community_id` (which is
+included in every invite) can derive one address: where the community's
+dissolution notice would be posted. They can read and post there, but the only
+thing that counts at that address is a notice signed by the owner, which they
+can't forge.
 
 ### A member forging authority
 
-Anyone holding the staff write key can *publish* to the Control Plane. Nobody can
-*forge* a verdict. Every edition is judged by the actor's signature inside it and
-their rank in the owner-rooted roster. A demoted staffer who kept the write key
-retains only the ability to flood, and that turns over at the next rotation.
+Anyone with the staff write key can *publish* to the Control Plane, but that
+doesn't make their actions valid. Every edition is checked against the signature
+inside it and the signer's rank in the roster, which traces back to the owner. A
+demoted staff member who kept the write key can only flood the plane, and loses
+even that at the next rotation.
 
-Likewise, a rotation from an unauthorised rotator is dropped, and holding an old
-key is never authority: a removed member can construct a perfectly shaped
-rotation, and every honest client opens the seal, folds the roster, and discards
-it.
+Key rotations are checked the same way. A removed member can still build a
+correctly formed rotation with an old key, but every client checks the signer's
+rank and drops it.
 
-### A member replaying messages across contexts
+### A member replaying messages elsewhere
 
-Every chat message commits its `channel_id` and `epoch` inside the
-author-signed rumor, and receivers check both against the key that opened the
-wrap. No member can re-wrap another's message into a different channel or replay
-it across an epoch.
+Every chat message includes its `channel_id` and `epoch` inside the signed
+rumor, and receivers check both against the key that decrypted it. A member
+can't re-post someone else's message into a different channel or a different
+epoch.
 
-## What Concord does not defend against
+## What Concord doesn't protect against
 
 ### A member who copies what they can read
 
-There is no defence, here or anywhere. Disappearing messages, pins, and kicks are
-all cooperative with respect to people who already hold the keys.
+No messaging system can prevent this. Disappearing messages and kicks rely on
+clients cooperating, and anyone who already has the keys can ignore them.
 
 ### A stolen owner key
 
-The `community_id` commits to the owner's key, which makes ownership unforgeable
-and also makes it terminal. A stolen owner key is stolen supremacy, exactly as
-nsec theft is terminal for any Nostr identity. There is no succession mechanism;
-a voluntary owner-signed succession is noted as possible future work.
+The `community_id` is derived from the owner's key, so ownership can't be
+forged and can't be changed. Whoever steals the owner key has full control of
+the community, just as stealing an nsec gives full control of a Nostr identity.
+There is no way to transfer ownership. A voluntary, owner-signed transfer is
+listed as possible future work.
 
 ### A lost owner key
 
-Cannot be replaced. The clean exit is dissolution — an owner-signed tombstone
-that seals the community read-only, permanently.
+It can't be replaced. The only clean way out is to dissolve the community,
+which leaves it permanently read-only.
 
-### Compromise of past keys
+### Past keys being compromised
 
-Concord is not ratcheted. If an adversary obtains a channel key for a given
-epoch, every message in that epoch is readable to them. Rotation protects the
-*future*, not the past. Disappearing messages are the mitigation for the past,
-since a relay that honoured the expiration tag no longer holds the ciphertext.
+Concord doesn't ratchet keys. Anyone who gets a channel's key for an epoch can
+read every message from that epoch. Rotating keys protects future messages, not
+past ones. Disappearing messages help here, because relays that honour the
+expiration tag will already have deleted the ciphertext.
 
-### An SFU or broker colluding with a member
+### A voice server working with a member
 
-Media attribution rests on SFU identities being broker-assigned and single-use,
-checked against signed presence. That is sound unless a member colludes with the
-broker or SFU. Media confidentiality survives regardless: the SFU only ever sees
-ciphertext.
+Calls rely on the broker assigning each participant a one-time SFU identity,
+which clients check against signed presence messages. If a member works with
+the broker or SFU, they can misattribute who is speaking. They still can't
+decrypt the media, because the SFU only sees ciphertext.
 
-## Named residuals
+## Known weaknesses
 
-These are documented weaknesses that the specification accepts deliberately
-rather than fixes.
+The specification accepts these on purpose.
 
-**Pin replay across communities.** A `channel_id` is client-minted and a chat
-rumor deliberately carries no `community_id`. So a keyholding member of a channel
-who controls another community can mint a same-id channel there and replay the
-first channel's pins with the proof intact. Such an attacker could always have
-leaked the content; what is new is that they can do it with a universally
-verifiable artifact.
+**Pins can be replayed in another community.** A `channel_id` is chosen by the
+client, and chat messages don't include the `community_id`. So a member who
+also controls another community can create a channel with the same id there and
+copy the first channel's pins, with valid proofs. That member could always have
+leaked the messages; what changes is that the copies can be verified by anyone.
 
-**Guestbook tiebreak grinding.** Entries tying on time break by the lower rumor
-id, which an author can grind. The coalesce is per-member, so an author only ever
-grinds ties against their own entries.
+**Guestbook ties can be gamed.** Guestbook entries with the same timestamp are
+ordered by the lower rumor id, which an author can influence by generating many
+candidates. Ties are only compared within one member's entries, so an author
+can only affect the order of their own.
 
-**Rotation membership visibility.** A member can confirm a fellow member's
-presence in a key rotation. This is information members effectively hold anyway —
-the member list, banlist, and guestbook are all member-visible — and the trade
-buys real ergonomics: a locator computes from public keys alone, so a remote
-signer can find its blob without ever touching a raw private key.
+**Members can see who was in a rotation.** A member can confirm that another
+member received a new key. Members can already see the member list, banlist,
+and guestbook, so this reveals little. In return, a member's place in a rotation
+can be found from public keys alone, so remote signers can find their key
+without exposing a private key.
 
-**Broker steering.** The broker hint on voice presence is untrusted input from a
-fellow member. A malicious member can steer a call to a broker and SFU of their
-choosing, which then sees IPs and timing. End-to-end encryption means it can
-never decode the media.
+**A member can steer a call.** The broker named in voice presence messages
+comes from other members and isn't verified. A malicious member can push a call
+onto a broker and SFU they choose, which then sees IP addresses and timing. It
+still can't decrypt the media.
 
-**Voice moderation.** No server checks permissions, so a call carries no
-enforceable mute. Clients can locally silence anyone, but a member determined to
-publish cannot be stopped mid-call by any signed edict. The enforceable lever is
-the one chat already has: kick, ban, and rotate.
+**Calls have no enforceable mute.** No server checks permissions, so clients
+can mute someone locally but can't stop a member from sending audio. To remove
+someone from calls, kick or ban them and rotate the keys, as with chat.
 
-**An inviter's bad `control_pk`.** One field in an invite bundle cannot be
-verified by the joiner, because it derives from a secret they will never hold. A
-wrong one is eclipse-class self-harm by the inviter — the joiner reads a stale or
-empty Control Plane — and never forged authority, because every edition still
-verifies against the owner-rooted roster. The next base rotation re-delivers the
-true key.
+**An inviter can give a wrong `control_pk`.** The joiner can't verify this one
+field in an invite, because it is derived from a secret they don't have. A
+wrong value means the joiner sees an empty or outdated Control Plane. It doesn't
+let anyone forge authority, because every edition is still checked against the
+roster. The next rotation delivers the correct key.
 
-## Hardening requirements on clients
+## What clients have to do
 
-The specification places real obligations on implementations. A few that matter
-most:
+The specification puts real requirements on implementations. The most
+important:
 
-- **Bound attacker-controlled input.** An invite bundle is reached by following a
-  link, so a client must reject an unreasonable channel count and truncate the
-  relay list before allocating. Absent bounds, a hostile link is an
-  unbounded-allocation and connect-storm vector.
-- **Enforce the NIP-44 size cap at every layer.** Libraries are lenient, and a
-  lenient publisher mints events a strict reader cannot decrypt.
-- **Verify the dissolution tombstone's binding.** A tombstone must name the
-  community it kills, and a verifier must check it. Accepting the all-zero
-  placeholder from earlier revisions is the vulnerability: an owner's genuine
-  tombstone could otherwise be lifted and re-wrapped to kill a different
-  community they run, unrecoverably.
-- **Never publish a pin list you could not read.** An empty view and an empty
-  list are indistinguishable, and publishing from the former silently destroys
-  every entry.
+- **Limit attacker-controlled input.** Anyone can send an invite link, so a
+  client must reject invites with an unreasonable number of channels and cut
+  the relay list down before allocating anything. Otherwise one malicious link
+  can exhaust memory or open a flood of connections.
+- **Enforce the NIP-44 size cap at every layer.** Many libraries don't, and a
+  client that publishes oversized events creates messages stricter clients
+  can't decrypt.
+- **Check which community a dissolution notice names.** A notice must name the
+  community it ends, and clients must check it. Earlier versions of the
+  specification used an all-zero placeholder there. Accepting that would let
+  someone copy an owner's real notice from one community into another community
+  the same owner runs, ending it permanently.
+- **Don't publish a pin list you couldn't read.** A list you failed to load
+  looks the same as an empty one, and publishing it would delete every pin.
 
-See the [implementer checklist](/build/checklist/) for the full set.
+See the [implementer checklist](/build/checklist/) for the full list.

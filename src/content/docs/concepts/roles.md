@@ -16,16 +16,15 @@ There are two kinds of permission, enforced two different ways:
 - **Write authority** — who may *manage* the community. Enforced by a member's
   rank in an owner-rooted roster, checked independently by every member.
 
-## Authority is rejection, not prevention
+## Clients ignore invalid actions
 
 There is no server to stop anyone from publishing. Any staff member can put an
-action on the Control Plane; everyone else drops the ones that do not map to a
-qualifying rank.
+action on the Control Plane, and everyone else drops the ones from someone
+without the right rank.
 
-This sounds weaker than server enforcement and is in one specific way: a
-misbehaving member can generate noise. It is stronger in every other way, because
-there is no privileged party who can be compelled, bribed, or breached into
-granting authority that the owner never signed.
+The downside compared to a server is that a misbehaving member can create
+noise. The upside is that there is no server operator who can be forced, paid,
+or hacked into granting authority the owner never signed.
 
 ## Editions
 
@@ -47,8 +46,8 @@ deterministically: authority first, then the lower rumor id — never the
 author-settable timestamp. Every client walks the same chain and lands on the
 same head.
 
-The chain this creates *is* the audit log. Every action names its actor by real
-signature, unforgeable and readable by any member.
+The chain doubles as the audit log. Every action is signed by the person who
+took it, and any member can read it.
 
 ## Entity coordinates are derived
 
@@ -87,9 +86,9 @@ is burned, never renumbered or reused:
 | `MENTION_EVERYONE` | mass mentions |
 | `PIN_MESSAGES` | curating a channel's pin list |
 
-There is deliberately **no all-powerful bit**. An "admin" holds the union of the
-management bits, so a role granted everything today does *not* silently inherit a
-permission added tomorrow.
+There is **no all-powerful bit**. An admin has every management bit set
+individually, so a role granted everything today *doesn't* automatically get a
+permission added later.
 
 ## Position
 
@@ -120,8 +119,9 @@ it can fetch and converges as truth arrives.
 ## The banlist
 
 The banlist is the one *anti*-roster: a signed list of pubkeys, honoured only if
-its signer holds `BAN`. Every honest client drops **every** event from a banned
-member — message, reaction, edit, or authority action — so they vanish entirely.
+its signer has `BAN`. Clients drop **every** event from a banned member
+(messages, reactions, edits, and authority actions), so they disappear
+entirely.
 
 It silences instantly and for free. The cryptographic read-cut is the separate,
 heavier step. Practical ceiling is around 500 entries, because the whole list
@@ -148,12 +148,12 @@ matches this list, and recompute the rumor id. A passing entry proves the author
 signed exactly this ciphertext and this ciphertext opens to exactly this message
 — verifiable forever, by members who joined long after the keys rotated.
 
-Three honest consequences:
+This has three consequences:
 
 - A message is pinnable only by someone who can read it, and only while someone
   holds its epoch's key.
-- A pin makes its message permanently attributable to every future member. That
-  is the point, and it is why `PIN_MESSAGES` is real editorial power.
+- A pin makes its message permanently attributable to every future member,
+  which is why `PIN_MESSAGES` is a significant permission.
 - Self-erasure outranks curation. A member's deletion of their own message
   reaches the pin by identity, and every holder of the bit must ensure the folded
   head no longer carries it.

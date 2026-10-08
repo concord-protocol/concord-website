@@ -64,11 +64,12 @@ Minting a link mints a fresh **link signer**, a keypair used for nothing else an
 kept in the creator's own encrypted invite list. The bundle is posted as an
 addressable event authored by that signer.
 
-Two properties follow from the coordinate being stable and signer-owned:
+Because the address is fixed and tied to that signer:
 
-- **A squatter cannot squat.** A different author is a different coordinate.
-- **A link-holder cannot tamper.** Replacing or tombstoning the bundle requires
-  the signer secret, held only by the creator.
+- **Nobody else can take over the address.** A different author means a
+  different address.
+- **Someone with the link can't change it.** Replacing or revoking the bundle
+  requires the signer's secret key, which only the creator has.
 
 So the creator can **refresh** a link — republish fresh keys behind the same URL
 after a rotation, so a link shared once survives every rekey — or **retire** it by
@@ -76,20 +77,18 @@ replacing the bundle with a revocation tombstone. Unlike a relay deletion, which
 is best-effort and ignorable, the tombstone is exactly as durable as the bundle
 it replaced.
 
-This is the design's real payoff: **revoking a link never requires re-keying the
-community**.
+So **revoking a link doesn't require re-keying the community**.
 
 ## The relay dictionary
 
-Full relay URLs would inflate a link past what length-restricted platforms
-accept. So Concord defines a small, versioned relay dictionary that every client
-knows, letting a community reference a common relay by a single byte — and the
-stock set is selected by one flag, so the common invite carries zero additional
-relay bytes.
+Full relay URLs would make a link too long for platforms that limit length. So
+Concord defines a small, versioned relay dictionary that every client knows,
+which lets an invite name a common relay in one byte. The stock set is selected
+by a single flag, so a typical invite adds no relay bytes at all.
 
-The dictionary is a *default*, not a requirement. Anyone wanting full control
-encodes their own relays inline. Vector and Soapbox ship it identically, so an
-invite minted by either client opens in the other.
+Using the dictionary is optional; an invite can list its own relays in full.
+Vector and Armada ship the same dictionary, so an invite made in either opens in
+the other.
 
 ## The registry, and what makes a community "public"
 
@@ -112,9 +111,9 @@ links exist without being able to use one.
 
 ## Direct invites
 
-Everything above is armour for a hostile journey: a link rides plaintext
-channels, so its keys hide behind an off-network token and stay revocable because
-anyone along the way may have copied the URL.
+Everything above exists because links get shared in the open. Anyone along the
+way might copy the URL, so the keys sit behind a token that never touches the
+network, and the link can be revoked.
 
 When the invitee is a known identity, none of that is necessary. Nostr already
 has an encrypted, authenticated lane to a specific person, so a **direct invite**
@@ -130,11 +129,11 @@ A direct invite is a key handoff, not a standing door:
 - **It cannot be revoked.** The recipient holds the keys the moment it lands.
   Regretting one is what rekeys are for, the same as regretting any member.
 - **It grants exactly what it carries.** No refresh, no tombstone.
-- **It appears in no registry and never flips the community public** — which is
-  precisely what makes it a private community's way to grow: membership by
-  personal handoff, one identity at a time, with no live link ever existing.
-- **No permission gates it,** because none could. Any keyholder can whisper keys;
-  that is the ungateable floor the design already accepts.
+- **It isn't listed in any registry and doesn't make the community public.**
+  That makes it how a private community grows: one person at a time, with no
+  live link ever existing.
+- **No permission controls it,** because none could. Anyone with the keys can
+  pass them on privately, and the design already accepts that.
 
 The wrap carries one identifying outer tag so a recipient can index their
 invites directly rather than decrypting their whole giftwrap inbox. An observer

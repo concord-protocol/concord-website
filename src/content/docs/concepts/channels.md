@@ -18,15 +18,15 @@ A public channel's key is **derived** from the `community_root`. Nothing is ever
 delivered, it adds nothing to an invite, every member can compute it, and it
 rotates for free whenever the base does.
 
-A public channel is not a separate mechanism — it is just "a channel whose key
-derives from the community root".
+A public channel isn't a separate mechanism, just a channel whose key derives
+from the community root.
 
 ## Private channels
 
 A private channel's key is an **independent random secret**, delivered on grant
-and rotated on removal. That independence is the point: a leaked private channel
-key exposes only that one channel, and it can be rotated without touching
-anything else.
+and rotated on removal. Because it is independent, a leaked private channel key
+exposes only that channel, and it can be rotated without touching anything
+else.
 
 Private channels also carry their own epoch, separate from the community's.
 

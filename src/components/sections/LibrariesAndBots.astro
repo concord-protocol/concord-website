@@ -1,20 +1,7 @@
 ---
 /*
- * The lists for what else runs on the protocol, one group per call: `bridges`
- * for the services that join a community to one on another network, `bots`
- * for the helpers you invite into one, `libraries` for what a client or a bot
- * is built with. The page draws the section around each,
- * heading and all, so the two read as their own destinations rather than
- * further rows of the client list.
- *
- * Bridges are drawn as lit cards rather than rows. A bridge is joined and
- * granted exactly like a bot, but what it does is the reason a whole Discord
- * or Matrix community can try Concord without anyone moving first, so it is
- * the one group on the page that gets to stand out.
- *
- * `Private Events` is in TOOLS and deliberately not here: it is an application
- * built on Concord rather than a library or a bot, and it keeps its place in
- * the build section on that page.
+ * One group of TOOLS per call. Bridges render as highlighted cards; bots,
+ * libraries, and apps render as ruled rows. The caller supplies the heading.
  */
 import { TOOLS } from '../../data/site';
 import Discord from '../../assets/icons/discord.svg';
@@ -27,28 +14,28 @@ const NETWORKS = { discord: Discord, matrix: Matrix } as const;
 const BRIDGE_ICON = ['M4 8h13', 'm13 4 4 4-4 4', 'M20 16H7', 'm11 12-4 4 4 4'];
 
 interface Props {
-  group: 'bridges' | 'bots' | 'libraries';
+  group: 'bridges' | 'bots' | 'libraries' | 'apps';
 }
 
 const { group } = Astro.props;
 
-const KINDS = {
+const KINDS: Record<Props['group'], string[]> = {
   bridges: ['Bridge'],
   bots: ['Bot'],
   libraries: ['SDK', 'Library'],
+  apps: ['App'],
 };
 
 const tools = TOOLS.filter((tool) => KINDS[group].includes(tool.kind));
 
-/* A crate: the thing you add to a manifest. */
+/* A crate. */
 const LIBRARY_ICON = [
   'M12 3 3 7.5v9L12 21l9-4.5v-9L12 3Z',
   'm3 7.5 9 4.5 9-4.5',
   'M12 12v9',
 ];
 
-/* A head with an antenna, two eyes, and a pair of ears. `h.01` with a round
-   linecap is how the eyes are drawn as dots without a second stroke rule. */
+/* A robot head. `h.01` with a round linecap draws the eyes as dots. */
 const BOT_ICON = [
   'M8.5 7h7A2.5 2.5 0 0 1 18 9.5v6a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6 15.5v-6A2.5 2.5 0 0 1 8.5 7Z',
   'M12 4.5V7',
@@ -60,7 +47,16 @@ const BOT_ICON = [
   'M20.5 11.5v2',
 ];
 
-const icon = group === 'libraries' ? LIBRARY_ICON : BOT_ICON;
+/* An app window. */
+const APP_ICON = ['M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z', 'M3 9h18', 'M6 7h.01', 'M8.5 7h.01'];
+
+/* A magnifying glass. */
+const SEARCH_ICON = ['M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z', 'm15.5 15.5 5 5'];
+
+/* GitWorkshop's search matches names, descriptions, and `t` tags. */
+const MORE = 'https://gitworkshop.dev/search?q=concord';
+
+const icon = { libraries: LIBRARY_ICON, apps: APP_ICON }[group as string] ?? BOT_ICON;
 ---
 
 {group === 'bridges' && (
@@ -72,11 +68,7 @@ const icon = group === 'libraries' ? LIBRARY_ICON : BOT_ICON;
           rel="noopener"
           class="cx-card cx-card-lit cx-card-link group flex h-full gap-5 p-6 sm:p-7"
         >
-          {/*
-            The two-way arrows and the far network's mark, both in mint on one
-            tile: a bridge, and where it goes. Hidden from screen readers, since
-            the name beside it says the same.
-          */}
+          {/* Two-way arrows plus the far network's mark. */}
           <span
             class="flex h-11 shrink-0 items-center gap-1.5 rounded-[13%] border border-mint/30 bg-mint/10 px-2.5 text-mint"
             aria-hidden="true"
@@ -116,12 +108,7 @@ const icon = group === 'libraries' ? LIBRARY_ICON : BOT_ICON;
   </ul>
 )}
 
-{/*
-  Two columns of hairline-ruled rows rather than a grid of boxes: the boxes
-  wrapped to a lone card at the end of each grid, and a border around every
-  three lines of text was most of what the eye saw. A whole row is the link —
-  a library or a bot has one place to go — and its name lights on hover.
-*/}
+{/* Two columns of ruled rows; the whole row is the link. */}
 {group !== 'bridges' && (
   <ul class="grid gap-x-12 border-b border-hairline sm:grid-cols-2">
     {
@@ -159,5 +146,34 @@ const icon = group === 'libraries' ? LIBRARY_ICON : BOT_ICON;
         </li>
       ))
     }
+    {/* Fills the empty cell an odd-length list leaves in the second column. */}
+    {tools.length % 2 === 1 && (
+      <li class="border-t border-hairline">
+        <a href={MORE} rel="noopener" class="group flex gap-4 py-5">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mt-0.5 h-5 w-5 shrink-0 text-gray-500 transition-colors group-hover:text-mint"
+            aria-hidden="true"
+          >
+            {SEARCH_ICON.map((d) => (
+              <path d={d} />
+            ))}
+          </svg>
+          <span class="min-w-0">
+            <span class="font-mono text-sm font-semibold text-gray-300 transition-colors group-hover:text-mint">
+              Find more on GitWorkshop &rarr;
+            </span>
+            <span class="mt-1.5 block text-sm leading-relaxed text-gray-400">
+              Search Nostr-hosted repositories for Concord projects.
+            </span>
+          </span>
+        </a>
+      </li>
+    )}
   </ul>
 )}

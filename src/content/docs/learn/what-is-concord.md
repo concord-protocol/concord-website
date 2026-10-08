@@ -1,100 +1,95 @@
 ---
 title: What is Concord?
-description: Concord is a protocol for running end-to-end encrypted, Discord-style communities over Nostr, with no company, no central server, and no intermediary holding your messages or deciding who is in charge.
+description: Concord is a protocol for end-to-end encrypted, Discord-style communities on Nostr, with no company, no central server, and nobody in the middle reading messages or deciding who is in charge.
 sidebar:
   order: 1
 ---
 
 Concord is a protocol for running communities and channels over
-[Nostr](https://github.com/nostr-protocol/nostr), with no company, no central
-server, and no intermediary holding your messages or deciding who is in charge.
+[Nostr](https://github.com/nostr-protocol/nostr). There is no company behind it,
+no central server, and nobody in the middle who can read your messages or
+decide who is in charge.
 
-Think of the familiar structure of a platform like Discord — communities,
-channels, roles — but where the encryption is real and no single entity controls
-the room.
+It has the structure people know from Discord (communities, channels, roles),
+but every message is end-to-end encrypted and no single party controls the
+community.
 
 ## The problem
 
-Every group chat you have ever used has a computer in the middle. It holds every
-message, knows every member, and is the final authority on who can do what.
+Every group chat you've used has a server in the middle. It stores every
+message, knows every member, and has the final say on who can do what.
 
-You trust that computer to stay online, to keep your data private, and to never
-turn on you. It can be subpoenaed, hacked, sold, or switched off. And when it is,
-your community dies with it.
+You have to trust that server to stay online, keep your data private, and not
+turn on you. It can be subpoenaed, hacked, sold, or shut down, and your
+community goes with it.
 
-The usual decentralised answer is to let people run their own copy of that
-computer. That helps with *whose* computer it is, and not at all with the fact
-that there is one: the operator still reads every message, still holds the member
-list, and still decides who is an admin.
+Self-hosting changes who runs the server, but there is still a server. Its
+operator can still read every message, see the member list, and decide who is
+an admin.
 
-## The approach
+## How Concord does it
 
-Concord deletes that computer — not literally, since ordinary Nostr relays still
-carry every message, but in every way that counts. What goes away is the computer
-that could read your messages, hold your member list, and decide who is in
-charge. The three jobs it used to do get split into pieces that need to trust
-nobody.
+Concord still uses servers: ordinary Nostr relays carry every message. But no
+relay can read messages, list members, or decide who is in charge. Those three
+jobs are split up so that none of them depends on trusting anyone.
 
-### Storage and delivery become dumb relays
+### Relays only store and deliver
 
 Messages live on ordinary Nostr relays, which only ever see encrypted blobs
-addressed to rotating, meaningless labels. A relay cannot read a message,
-enumerate a membership, or even tell which community a blob belongs to. If one
-misbehaves, you use the others — a community publishes to several at once.
+sent to addresses that change over time and mean nothing to them. A relay can't
+read a message, list the members, or tell which community a blob belongs to. A
+community publishes to several relays, so if one misbehaves the others still
+work.
 
-### Membership becomes key possession
+### Having the key makes you a member
 
-There is no member list to enforce. A community is, at bottom, a shared key: if
-you can decrypt the room, you are in it. Nobody can be denied entry by a server,
-because no server is asked. Joining means *receiving the key*, which happens
-through an invite.
+There is no member list for a server to check. A community is built on a shared
+key: if you can decrypt it, you're in. You join by receiving that key, which
+happens through an invite.
 
-### Authority becomes a signed roster
+### Authority comes from signatures
 
-Moderation is real — owners, admins, mods, custom roles, kicks, and bans — but it
-is not a permission a server grants. Every grant and every ban is signed, and
-every signature chains back to the owner's own key, which the community's
-identity commits to by construction.
+Concord has owners, admins, moderators, custom roles, kicks, and bans. None of
+it is granted by a server. Every grant and every ban is signed, and every
+signature traces back to the owner's key, which the community's identity is
+derived from.
 
-Each client folds that chain independently and reaches the same verdict. An
-action that does not trace to the owner is not authority, no matter how validly
-it is signed. Enforcement is *rejection*, not prevention: anyone can publish
-anything, and everyone else drops what does not qualify.
+Each client checks that chain itself, and every client reaches the same result.
+An action that doesn't trace back to the owner is ignored, however validly it is
+signed. Anyone can publish anything; everyone else drops what doesn't check
+out.
 
-## What this buys you
+## What you get
 
-- **Nobody can read your conversations.** Not the relays, not their operators,
-  not a network observer, not a future acquirer.
-- **Nobody can take your community away.** There is no account to ban and no
-  server to seize. A community lives wherever its members and its relays are.
-- **Moderation still works.** Bans silence instantly and are verified by every
-  client. Removal is then made real by rotating the keys, so a removed member is
-  cryptographically cut off rather than politely asked to leave.
-- **Your identity is portable.** One key logs you into every Concord client, and
-  your memberships sync across your own devices.
+- **Nobody else can read your conversations.** Not the relays, their
+  operators, someone watching the network, or whoever buys the company later.
+- **Nobody can take your community away.** There is no account to suspend and
+  no server to seize. A community exists wherever its members and relays are.
+- **Moderation works.** Bans take effect immediately and every client enforces
+  them. Rotating the keys afterwards cuts a removed member off for good.
+- **Your identity is portable.** One key signs you in to every Concord client,
+  and your memberships sync across your devices.
 
 ## What it costs
 
-Concord is explicit about its trade-offs, and the specification names them
-rather than hiding them:
+The specification lists its trade-offs. The main ones:
 
-- **Expiry and kicks are cooperative.** An honest client hides and deletes; a
-  member who could read something could always have copied it. The enforceable
-  lever is always a key rotation.
-- **There is no succession.** A community's identity commits to its owner's key,
-  which makes ownership unforgeable and also unrecoverable. A lost owner key
-  cannot be replaced. The clean exit is dissolution.
-- **Forward secrecy is not ratcheted.** Concord trades the per-message
-  guarantees of MLS or Double Ratchet for asynchronous, fold-anytime state that
-  scales to a large, high-churn community. See
-  [the comparison](/learn/comparison/).
+- **Expiry and kicks depend on clients cooperating.** A well-behaved client
+  hides and deletes, but a member could always have copied anything they could
+  read. The only thing that enforces removal is rotating the keys.
+- **Ownership can't be transferred.** A community's identity is derived from
+  its owner's key, so nobody can forge ownership, and nobody can recover it
+  either. If the owner loses their key, the community can't get a new owner.
+- **No ratcheting.** Concord gives up the per-message forward secrecy of MLS or
+  the Double Ratchet. In return, clients can sync state at any time without
+  coordinating, which scales to large communities where people come and go
+  constantly. See [the comparison](/learn/comparison/).
 
 ## Where to go next
 
-- [How it works](/learn/how-it-works/) — the keys, planes, and epochs, in plain
+- [How it works](/learn/how-it-works/): keys, planes, and epochs in plain
   language.
-- [What a relay sees](/learn/what-a-relay-sees/) — exactly what leaks and what
-  does not.
-- [Threat model](/learn/threat-model/) — what Concord defends against, and what
-  it does not.
-- [The specification](/spec/) — the normative CORD documents.
+- [What a relay sees](/learn/what-a-relay-sees/): what leaks and what doesn't.
+- [Threat model](/learn/threat-model/): what Concord protects against, and what
+  it doesn't.
+- [The specification](/spec/): the normative CORD documents.

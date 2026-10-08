@@ -8,9 +8,9 @@ sidebar:
 Voice, video, and screenshare work in any channel, with no host and no roster.
 Normative text: [CORD-07](/spec/cord-07/).
 
-The problem is structural: no server can check membership before handing out
-media tokens, because no server knows the membership. So clients prove
-**possession of the channel's key** instead.
+No server can check membership before handing out media tokens, because no
+server knows who the members are. So clients prove that they **have the
+channel's key** instead.
 
 ## Every channel is callable
 
@@ -44,14 +44,14 @@ Only a holder of the channel's key can derive that signing key, so the broker
 needs no lookup and no community knowledge. **It cannot tell which community a
 room belongs to, and it never learns who is joining.**
 
-Blindness has stated costs, and the specification names them:
+Keeping the broker blind has costs:
 
 - The broker and SFU still see IPs and connection timing. Members who need those
   hidden should use an anonymising transport.
 - A room name is stable for a whole epoch, so one broker serving a long-lived
   channel can link its calls, participant counts, and durations across months
-  under a single meaningless label. A community that finds that intolerable
-  spreads across brokers or rotates deliberately.
+  under a single meaningless label. A community that doesn't want that can use
+  several brokers or rotate keys more often.
 - Blindness makes a broker an **open service**. Anyone can mint a random keypair,
   call its pubkey a room, and pass every check. An operator carries strangers'
   media by design. Abuse is bounded by rate limits, participant caps, and short
@@ -68,15 +68,15 @@ media key and that publisher's broker-assigned SFU identity:
 sender_key = hkdf(voice_media_key, "concord/voice-sender", sha256(identity))
 ```
 
-The reason is specific: two senders colliding on an IV under one shared AEAD key
-is catastrophic, while distinct keys make a collision harmless. Every member can
+If two senders shared one AEAD key and happened to reuse an IV, the encryption
+would break. With separate keys, a repeated IV is harmless. Every member can
 derive every publisher's key from the identity the SFU presents for the track, so
 there is no in-band key exchange at all.
 
 The SFU only ever forwards ciphertext. A frame layer may leave the few codec
 header bytes an SFU needs for routing unencrypted — metadata, never content.
 
-Honest limit: the media layer has **no sender authentication among keyholders**.
+One limit: the media layer **doesn't authenticate senders among keyholders**.
 Any member can derive any sender key. The separation partitions nonces; it never
 proves authorship. Attribution rests on presence, below.
 
@@ -128,6 +128,6 @@ participant, and clients should refuse to render tracks whose identity fails
 presence verification. But a member determined to publish cannot be stopped
 mid-call by any signed edict.
 
-The enforceable lever is the one chat already has. Kick, ban, and rekey rotate
-the room name and media key out from under the target. **Removal from the channel
-is removal from its calls.**
+What does work is the same as for chat. Kicking, banning, and rekeying change
+the room name and media key, so **removing someone from a channel also removes
+them from its calls.**

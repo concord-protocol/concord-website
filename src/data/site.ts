@@ -1,20 +1,11 @@
-/**
- * Single source of truth for outbound links and the client/tooling ecosystem.
- * Every URL here was verified against the upstream project.
- */
+/** Outbound links and the client, bot, and library listings. */
 import type { ImageMetadata } from 'astro';
 
 /*
- * Each client's own app icon, as it ships it — Vector's and Accordion's from
- * their repositories, Armada's from its public/ directory, Amethyst's from its
- * Play listing in fastlane/, Grimoire's and Coinos's from their web manifests,
- * PosterChan's from the icon its Zapstore listing names. Imported rather
- * than dropped in public/ so Astro resizes them to the ~56px the cards draw
- * them at; the sources are 512px, which is 40× the pixels a card needs.
- *
- * Accordion's is the one processed copy: upstream ships it on an opaque white
- * canvas, so its rounded corners arrived as white blocks on a black card and
- * have been cut to transparent at the radius the artwork already uses.
+ * Each client's own icon, taken from its repository, store listing, or web
+ * manifest. Imported rather than placed in public/ so Astro resizes them.
+ * Accordion's upstream icon has an opaque white background; this copy has the
+ * corners cut to transparent.
  */
 import accordionLogo from '../assets/clients/accordion.png';
 import amethystLogo from '../assets/clients/amethyst.png';
@@ -26,7 +17,6 @@ import vectorLogo from '../assets/clients/vector.png';
 import { latestAsset } from './releases';
 
 export const SPEC_REPO = 'https://github.com/concord-protocol/concord';
-export const SPEC_ORG = 'https://github.com/concord-protocol';
 
 export const NAV = [
   { label: 'Docs', href: '/learn/what-is-concord/' },
@@ -38,15 +28,12 @@ export const NAV = [
 export interface Client {
   name: string;
   tagline: string;
-  /** One line. Every card on the site runs on this; there is no long version. */
-  summary: string;
   /** The app's own icon. See the import block above. */
   logo: ImageMetadata;
   href: string;
   /** Absent where the client is closed source; the card then links no repository. */
   source?: string;
   author: string;
-  platforms: string[];
   /** The app's own neon, taken from its icon. Lights its row on the clients page. */
   glow: string;
   /**
@@ -57,10 +44,7 @@ export interface Client {
   links: ClientLink[];
 }
 
-/**
- * See LinkIcon.astro. A page of every build is not one of these: it is a
- * text link, because a glyph can name a system but not "all of them".
- */
+/** See LinkIcon.astro. */
 export type LinkIcon =
   | 'android'
   | 'apple'
@@ -81,12 +65,9 @@ export const CLIENTS: Client[] = [
     name: 'Armada',
     tagline: 'The full Discord-shaped client',
     author: 'Soapbox',
-    summary:
-      'Channels, threads, roles, voice and video, and custom emoji, plus a Discord bridge and server import.',
     logo: armadaLogo,
     href: 'https://armada.buzz',
     source: 'https://gitworkshop.dev/soapbox.pub/armada',
-    platforms: ['Web', 'Android', 'Linux', 'Windows', 'macOS'],
     glow: '#ff3d8b',
     links: [
       { label: 'Open Armada', href: 'https://armada.buzz' },
@@ -124,12 +105,9 @@ export const CLIENTS: Client[] = [
     name: 'Vector',
     tagline: 'Privacy-first messenger, natively encrypted',
     author: 'Vector Privacy',
-    summary:
-      'A standalone Rust desktop messenger: no KYC, encrypted storage, optional Tor. Co-authored Concord.',
     logo: vectorLogo,
     href: 'https://vectorapp.io',
     source: 'https://github.com/VectorPrivacy/Vector',
-    platforms: ['Windows', 'macOS', 'Linux', 'Android'],
     glow: '#59fcb3',
     links: [
       { label: 'Download Vector', href: 'https://vectorapp.io' },
@@ -177,12 +155,9 @@ export const CLIENTS: Client[] = [
     name: 'Amethyst',
     tagline: 'Communities inside a whole Nostr client',
     author: 'Vitor Pamplona',
-    summary:
-      'Concord Channels alongside the feeds, zaps, and streams, on Android and the desktop.',
     logo: amethystLogo,
     href: 'https://amethyst.social',
     source: 'https://github.com/vitorpamplona/amethyst',
-    platforms: ['Android', 'Windows', 'macOS', 'Linux'],
     glow: '#4f7cff',
     links: [
       { label: 'Get Amethyst', href: 'https://amethyst.social' },
@@ -227,12 +202,9 @@ export const CLIENTS: Client[] = [
     name: 'PosterChan',
     tagline: 'A self-hosted personal cloud on Nostr',
     author: 'verita84',
-    summary:
-      'Communities next to notes, files, calls, and AI, on a node you run yourself.',
     logo: posterchanLogo,
     href: 'https://poster.place',
     source: 'https://github.com/loblawbob873-svg/posterchanai',
-    platforms: ['Web', 'Android', 'Windows', 'macOS', 'Linux'],
     glow: '#ff8a1f',
     links: [
       { label: 'Open PosterChan', href: 'https://poster.place' },
@@ -251,12 +223,9 @@ export const CLIENTS: Client[] = [
     name: 'Grimoire',
     tagline: 'A tiling workspace for Nostr',
     author: 'purrgrammer',
-    summary:
-      'Communities as one pane among many, opened from a command palette. A client for keyboard people.',
     logo: grimoireLogo,
     href: 'https://grimoire.rocks',
     source: 'https://github.com/purrgrammer/grimoire',
-    platforms: ['Web'],
     glow: '#e879f9',
     links: [{ label: 'Open Grimoire', href: 'https://grimoire.rocks' }],
   },
@@ -264,12 +233,9 @@ export const CLIENTS: Client[] = [
     name: 'Accordion',
     tagline: 'A lightweight web client',
     author: 'hzrd149',
-    summary:
-      'A compact browser client with no backend, and proof of how little it takes to speak the protocol.',
     logo: accordionLogo,
     href: 'https://accordion.chat',
     source: 'https://github.com/hzrd149/accordion.chat',
-    platforms: ['Web'],
     glow: '#a855f7',
     links: [{ label: 'Open Accordion', href: 'https://accordion.chat' }],
   },
@@ -277,12 +243,9 @@ export const CLIENTS: Client[] = [
     name: 'Coinos',
     tagline: 'Communities inside a Bitcoin wallet',
     author: 'Adam Soltys',
-    summary:
-      'A self-custody wallet that runs in the browser, with Concord community chat beside the balance.',
     logo: coinosLogo,
     href: 'https://v3.coinos.io',
     source: 'https://github.com/coinos/coinosv3',
-    platforms: ['Web', 'Android'],
     glow: '#f7b21a',
     links: [
       { label: 'Open Coinos', href: 'https://v3.coinos.io' },
@@ -297,17 +260,12 @@ export const CLIENTS: Client[] = [
 
 export interface Tool {
   name: string;
-  /**
-   * 'SDK' and 'Library' are drawn as libraries; 'Bot' and 'Bridge' as bots.
-   * See LibrariesAndBots.astro.
-   */
-  kind: string;
+  /** See LibrariesAndBots.astro for how each kind is grouped. */
+  kind: 'SDK' | 'Library' | 'Bot' | 'Bridge' | 'App';
   author: string;
   description: string;
   href: string;
   language: string;
-  /** API documentation, where it is published somewhere other than `href`. */
-  docs?: string;
   /** For a bridge, the network on its far side. Its mark is the bridge's icon. */
   network?: 'discord' | 'matrix';
 }
@@ -321,7 +279,6 @@ export const TOOLS: Tool[] = [
     description:
       'Keys, relays, streams, and encryption handled, so you write handlers instead of cryptography.',
     href: 'https://crates.io/crates/vector_sdk',
-    docs: 'https://docs.rs/vector-sdk',
   },
   /*
    * Its README installs from JSR, but nothing is published there or on npm
@@ -346,22 +303,22 @@ export const TOOLS: Tool[] = [
     href: 'https://github.com/CentauriAgent/concord-bots',
   },
   {
+    name: 'Sentire',
+    kind: 'Bot',
+    author: 'Vector Privacy',
+    language: 'Rust',
+    description:
+      'A full-time moderator: screens text as it lands, judges media with a vision model you pick, and contains raids.',
+    href: 'https://github.com/VectorPrivacy/Sentire',
+  },
+  {
     name: 'Shanty',
     kind: 'Bot',
     author: 'Derek Ross',
     language: 'Python',
     description:
-      'A 24/7 generative lo-fi radio bot for live channels, with a Wavlake and Fountain jukebox.',
+      'A 24/7 generative lo-fi radio bot that plays in a channel\'s call, with a Wavlake and Fountain jukebox.',
     href: 'https://github.com/derekross/shanty',
-  },
-  {
-    name: 'concord-automod',
-    kind: 'Bot',
-    author: 'Derek Ross',
-    language: 'Rust',
-    description:
-      'Auto-moderation with exactly the rank its Grant gives it, and no server privileges to hand out.',
-    href: 'https://github.com/derekross/concord-automod',
   },
   {
     name: 'Private Events',
@@ -380,15 +337,6 @@ export const TOOLS: Tool[] = [
     description:
       'Per-coin price, charts, and market stats. A compact worked example of the SDK’s command handling.',
     href: 'https://github.com/JSKitty/price-bot',
-  },
-  {
-    name: 'Sentire',
-    kind: 'Bot',
-    author: 'Vector Privacy',
-    language: 'Rust',
-    description:
-      'A full-time moderator: screens text as it lands, judges media with a vision model you pick, and contains raids.',
-    href: 'https://github.com/VectorPrivacy/Sentire',
   },
   {
     name: 'Vector LLM',
@@ -430,8 +378,8 @@ export const TOOLS: Tool[] = [
       'Answers !ask and @mentions with web-grounded replies, as an ordinary member with no staff role.',
     href: 'https://gitworkshop.dev/npub1ulnt22mynj7juw3j5nnr75euewq6ejesa0yhsnwvwmn48nq2j95q2k0z88/git.hanshan.io/concord-qa-bot',
   },
-  /* Its announcement still says "design plans"; the repository is a working
-     bridge, with a setup portal, and that is what this describes. */
+  /* Its announcement says "design plans", but the repository is a working
+     bridge with a setup portal. */
   {
     name: 'armada-discord-bridge',
     kind: 'Bridge',

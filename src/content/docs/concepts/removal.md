@@ -5,8 +5,8 @@ sidebar:
   order: 5
 ---
 
-What a user sees as "remove this member" is *three* mechanisms with three
-guarantees, composed deliberately, in order. Normative text:
+What a user sees as "remove this member" is *three* mechanisms with different
+guarantees, applied in order. Normative text:
 [CORD-04 §6](/spec/cord-04/) and [CORD-06](/spec/cord-06/).
 
 ## The three removals
@@ -22,8 +22,8 @@ their pending authority citations die with the revoked grant.
 An authorised directive on the Guestbook marks the target as departed and asks
 their client to leave.
 
-*Cooperative* is the honest word. A compliant client tears the community down
-locally; a defiant one still holds every key. A kick alone never enforces
+It only works if the target's client cooperates. A well-behaved client removes
+the community locally; a modified one still has every key. A kick alone never enforces
 anything — it is the polite removal, and a kicked member may be re-invited or
 simply re-join.
 
@@ -60,8 +60,8 @@ Public channels have no independent rekey — they derive from the
 In both cases the rotator must strictly outrank every removed target, and the
 rotation cites the grant it acts under like any authority action. Holding a key
 is never authority: a removed member still holding the prior root can *construct*
-a perfectly shaped rotation, and every honest member opens the seal, folds the
-roster, and drops it.
+a correctly formed rotation, and every client opens the seal, checks the roster,
+and drops it.
 
 ## How keys reach the people who stay
 
@@ -98,8 +98,8 @@ currently holds and requires it to match the rotation's stated one.
 - **Anything else** is a fork or garbage, and is rejected.
 
 This is a convergence check, not a secrecy mechanism. Post-removal secrecy rests
-entirely on the removed member receiving no blob; continuity just keeps honest
-members advancing along one shared chain.
+entirely on the removed member not receiving a blob; continuity just keeps the
+remaining members on one shared chain.
 
 ## Refounding in practice
 
@@ -122,8 +122,8 @@ events.
 Finally, the new epoch's guestbook is seeded with a membership snapshot. That
 step is best-effort — a refounding succeeds with or without it — and a member who
 finds their own state missing simply publishes a fresh join, self-signed and
-unsuppressable. A refounder omitting someone creates a blip, never a
-disappearance.
+can't be suppressed. If a refounder leaves someone out, they drop off the list
+briefly and then reappear.
 
 ## Races
 
@@ -136,6 +136,5 @@ Both forks' keys are retained, so messages sent into the losing fork stay
 readable. And the heal is **down-only** — a held epoch re-converges solely to a
 strictly lower sibling — so a flaky fetch can never re-fork a settled epoch.
 
-Channel rekeys during a refounding are sealed under the **prior** root rather
-than the freshly minted one, precisely so they stay openable on either branch if
-the base forks.
+Channel rekeys during a refounding are sealed under the **previous** root, not
+the new one, so they can be opened on either branch if the base forks.

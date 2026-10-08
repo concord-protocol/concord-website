@@ -7,9 +7,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
 ---
 
 <!--
-  Deliberately quiet: no bottom rule and only enough backdrop to keep the links
-  legible over scrolled content, so the full-height hero below it reads as the
-  first thing on the page.
+  No bottom border and a light backdrop, so the nav sits quietly over the hero.
 -->
 <header class="sticky top-0 z-40 bg-black/40 backdrop-blur-xl">
   <nav
@@ -17,22 +15,15 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     aria-label="Primary"
   >
     {/*
-      Near enough to no gap at all, because the pair is spaced optically: the
-      "C" opens toward the word and leaves the right quarter of the mark's
-      viewBox empty, which together with the wordmark's own sidebearing already
-      comes to about 8px. Any real gap on top of that reads as a hole.
+      1px gap: the empty right side of the mark's viewBox plus the wordmark's
+      sidebearing already give about 8px of space.
     */}
     <a
       href="/"
       class="flex items-center gap-px transition-opacity hover:opacity-80"
     >
       <Logo size={22} />
-      {/*
-        The display face, as in the hero. It has one weight, so this stays at
-        400 rather than the medium the rest of the nav uses — a synthesised bold
-        would smear a face this geometric. Bruno Ace is wide and reads small for
-        its size, so it takes a nudge up and a little tracking.
-      */}
+      {/* Bruno Ace has one weight, so no font-weight class here. */}
       <span
         class="cx-brand-word font-display text-[0.9375rem] tracking-[0.01em] text-gray-300"
         >Concord</span

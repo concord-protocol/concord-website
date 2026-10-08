@@ -7,10 +7,16 @@ sidebar:
 
 ## Banlist
 
-A single Community-wide entity listing banned pubkeys, honoured only if its
-signer holds `BAN`. Honest clients drop **every** event from a banned member, so
-they vanish entirely. Silencing is instant and free; cutting off *access* is a
-separate, heavier step (a refounding).
+A single community-wide entity listing banned pubkeys, valid only if its signer
+has `BAN`. Clients drop **every** event from a banned member, so they disappear
+from the community immediately. Cutting off their *access* is a separate step (a
+refounding).
+
+## Broker
+
+A small service that issues SFU tokens for voice and video calls. It has no
+community secrets and can't tell which community a room belongs to. See
+[voice and video](/concepts/voice/).
 
 ## Chat Plane
 
@@ -51,9 +57,9 @@ member syncs it in full; only staff can write to it.
 
 ## `control_root`
 
-The staff write key. Its derived keypair signs Control Plane wraps. Possession is
-a **spam gate, never authority**: a valid wrap proves only that some staff member
-published, never who or with what right.
+The staff write key. Its derived keypair signs Control Plane wraps. Having it
+only lets you publish there: a valid wrap shows that some staff member posted
+it, not who, and not whether they were allowed to.
 
 ## Direct Invite
 
@@ -64,8 +70,8 @@ community's way to grow.
 
 ## Dissolution
 
-The end of a community: an owner-signed tombstone at a coordinate derived from
-the `community_id` alone. Terminal and one-way. On sight, clients seal the
+The end of a community: an owner-signed tombstone at an address derived from
+the `community_id` alone. It can't be undone. Clients that see it make the
 community read-only.
 
 ## Edition
@@ -98,11 +104,28 @@ One per community, member-writable, carrying only membership motion: self-signed
 joins and leaves, plus authorised kicks and refounder-signed snapshots.
 Off-consensus — nothing else depends on it, so it can lag without harm.
 
+## Invite List
+
+A member's own encrypted record of the invite links they have created, including
+each link's signing key. Only they can read it.
+
+## Link signer
+
+A keypair created for one invite link and used for nothing else. The invite
+bundle is published under it, so only the link's creator can update or revoke
+the link.
+
 ## Locator
 
 The derived value a recipient computes to find their own key blob inside a
 rotation event. Derives from public inputs only, so a remote signer can find its
 blob without touching a raw private key.
+
+## `ms`
+
+A tag carrying milliseconds (`0` to `999`) on top of `created_at`, which only has
+second precision. Every ordering in the protocol uses
+`created_at * 1000 + ms`.
 
 ## Plane
 
@@ -126,6 +149,11 @@ only keyholders can compute.
 A whole-community rekey: roll the `community_root`, mint a fresh `control_root`,
 rekey the relevant private channels, compact the Control Plane, and seed the new
 guestbook with a membership snapshot. This is what makes a ban *enforce*.
+
+## Registry
+
+A Control Plane entity listing the addresses of each member's live invite links,
+never the links themselves. If any live link exists, the community is public.
 
 ## Rekey
 
@@ -156,6 +184,11 @@ when its content is encrypted, kind `20014` when it carries the rumor's
 serialized JSON verbatim. Only the Control Plane uses the plaintext form, because
 compaction must preserve signatures across re-encryption.
 
+## SFU
+
+Selective forwarding unit: the media server that relays a call's audio and
+video between participants. In Concord it only ever sees encrypted media.
+
 ## Staff
 
 Every member holding a permission whose actions land as Control Plane editions —
@@ -165,10 +198,10 @@ Every member holding a permission whose actions land as Control Plane editions �
 
 ## `vac`
 
-The authority citation on an edition: the exact grant the actor claims their rank
-under, pinned by coordinate, version, and content hash. It is a *sync floor*, not
-the verdict — a verifier waits until it holds that grant, then judges the actor
-against its current roster.
+The authority citation on an edition: the exact grant the actor claims their
+rank under, identified by coordinate, version, and content hash. A verifier
+waits until it has that grant, then checks the actor against its current roster,
+not against the cited grant.
 
 ## `vsk`
 

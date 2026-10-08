@@ -1,9 +1,7 @@
 ---
 /**
- * Starlight `SiteTitle` override.
- *
- * Starlight has no built-in top-level nav, so the site links ride here. This
- * keeps the docs header consistent with the marketing pages.
+ * Starlight `SiteTitle` override. Starlight has no top-level nav slot, so the
+ * site nav links are rendered here alongside the brand.
  */
 import Logo from '../Logo.astro';
 import { NAV } from '../../data/site';
@@ -41,9 +39,8 @@ const isActive = (href: string) => path.startsWith(href);
   .concord-brand {
     display: flex;
     align-items: center;
-    /* No gap: the mark's "C" opens toward the word and leaves the right quarter
-       of its viewBox empty, which with the wordmark's sidebearing already comes
-       to ~9px of daylight. Matches the marketing nav. */
+    /* The mark's empty right side and the wordmark's sidebearing already give
+       ~9px of space. Matches Nav.astro. */
     gap: 0;
     font-size: var(--sl-text-lg);
     font-weight: 600;
@@ -51,8 +48,8 @@ const isActive = (href: string) => path.startsWith(href);
     white-space: nowrap;
   }
 
-  /* The display face, matching the marketing nav. One weight only, so this
-     overrides the 600 above rather than letting it be synthesised. */
+  /* Bruno Ace has one weight; 400 overrides the 600 above so it isn't
+     synthesised. */
   .concord-brand span {
     color: var(--sl-color-white);
     font-family: var(--font-display);

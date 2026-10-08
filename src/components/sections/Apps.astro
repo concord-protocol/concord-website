@@ -1,26 +1,12 @@
 ---
 /*
- * Two apps, side by side, immediately under the hero — the first thing after
- * "private communities, open protocol" is what to press.
- *
- * The order and the weight are saying different things on purpose. Vector goes
- * first because the protocol was written there, and the card says so in one
- * line and then gets out of the way. Armada goes second and carries the only
- * filled button on the screen, so the choice is made by the shape of the two
- * cards rather than by any sentence claiming one is better.
- *
- * A bare title and no eyebrow: "Try an App" is an instruction, and the two
- * icons under it are the whole argument, so there is nothing for a standfirst
- * paragraph to add that the cards do not already say.
- *
- * The logos are the apps' own icons rather than redrawn marks, at their
- * shipped sizes.
+ * The two recommended apps, directly under the hero. Armada gets the filled
+ * button; Vector gets a ghost one. Everything else is on /clients/.
  */
 import { Image } from 'astro:assets';
 import { CLIENTS } from '../../data/site';
 import LinkIcon from '../LinkIcon.astro';
 
-/** The entry in {@link CLIENTS}, which owns every outbound URL on the site. */
 function client(name: string) {
   const match = CLIENTS.find((entry) => entry.name === name);
   if (!match) throw new Error(`Apps.astro: no client named ${name} in site.ts`);
@@ -33,25 +19,14 @@ const armada = client('Armada');
 /** Listings that install and update the app, as opposed to files to download. */
 const STORE_ICONS = new Set(['google-play', 'fdroid', 'zapstore']);
 
-/*
- * The cards, in the clients page's dress: lit in each app's own colour, with
- * stores and downloads as mono marks under one-word labels instead of a strip
- * of platform chips. The marks name every platform the chips did, and each one
- * is also a link to it.
- *
- * The recommendation stays where it was. Armada has the filled button, Vector
- * a ghost one; the glow is not a ranking, since every app on the site has one.
- */
 const CARDS = [
   {
     client: vector,
-    byline: 'by JSKitty',
     line: 'Private messaging with no phone number and no email. Concord started here.',
     primary: false,
   },
   {
     client: armada,
-    byline: 'by Soapbox',
     line: 'Everything you use Discord for, from voice rooms to roles, with nobody in the middle.',
     primary: true,
   },
@@ -63,39 +38,26 @@ const CARDS = [
       { label: 'Stores', links: rest.filter((l) => l.icon && STORE_ICONS.has(l.icon)) },
       { label: 'Downloads', links: rest.filter((l) => l.icon && !STORE_ICONS.has(l.icon)) },
     ].filter((group) => group.links.length > 0),
-    /* The page of every build, after the marks: "All" beside the systems. */
+    /* The page of every build, shown as "All" after the platform marks. */
     all: rest.find((l) => !l.icon && l.label === 'Downloads'),
   };
 });
 ---
 
-<section class="overflow-hidden border-b border-hairline">
+{/* The hero's scroll cue points here. */}
+<section id="apps" class="scroll-mt-20 overflow-hidden border-b border-hairline">
   <div class="mx-auto max-w-5xl px-5 py-24">
-    {/*
-      The hero's lockup, quietened and reused: same face, same mint outline,
-      same bloom, centred over the pair the way the wordmark is centred over
-      the mark. One word can carry it — Bruno Ace outlined is unreadable at
-      paragraph length and unmistakable at four letters — and it is set well
-      below the hero's size so the page still has one title.
-    */}
-    <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">APPS</h2>
+    <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">CLIENTS</h2>
 
-    {/*
-      Stretched to a common height, with each card's button pushed to the
-      bottom by `mt-auto`, so the two buttons sit on one line however much
-      each card has to say.
-    */}
+    {/* `mt-auto` on each button keeps the two on one line. */}
     <div class="mt-12 grid gap-4 md:grid-cols-2">
       {
-        CARDS.map(({ client, byline, line, primary, groups, all }, i) => (
+        CARDS.map(({ client, line, primary, groups, all }, i) => (
           <article
             class="cx-app flex flex-col p-7 sm:p-8"
             style={`--glow: ${client.glow}`}
           >
-            {/*
-              The hover field (see app-noise.ts). Side by side, each card
-              spills only outward, so neither paints over the other.
-            */}
+            {/* Hover field (see app-noise.ts). Each card spills outward only. */}
             <canvas
               class:list={[
                 'cx-app-noise',
@@ -105,11 +67,6 @@ const CARDS = [
             />
 
             <div class="flex items-center gap-4">
-              {/*
-                Rounded to roughly the radius Vector's icon already carries in
-                its own artwork, so the two marks sit as a matched pair.
-                `alt=""`: the name is right beside it in the heading.
-              */}
               <Image
                 src={client.logo}
                 alt=""
@@ -122,7 +79,7 @@ const CARDS = [
                 <h2 class="text-2xl font-semibold tracking-tight text-white">
                   {client.name}
                 </h2>
-                <p class="mt-1 font-mono text-xs text-gray-500">{byline}</p>
+                <p class="mt-1 font-mono text-xs text-gray-500">by {client.author}</p>
               </div>
             </div>
 
@@ -180,12 +137,6 @@ const CARDS = [
       }
     </div>
 
-    {/*
-      The pair above is a recommendation rather than the whole list. Not "all
-      three": the count is a fact about this week, and an open protocol that
-      advertises how many clients exist is quietly saying that is the number
-      there is meant to be.
-    */}
     <div class="mt-10 text-center">
       <a
         href="/clients/"

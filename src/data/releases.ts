@@ -1,16 +1,12 @@
 /**
- * Direct download links for clients that only publish versioned filenames.
+ * Direct download links for clients whose asset names include the version
+ * (Vector, Amethyst), so GitHub's `releases/latest/download/<name>` can't be
+ * used. The latest release is looked up at build time; links update on the
+ * next deploy.
  *
- * GitHub's `releases/latest/download/<name>` only works when the asset's name
- * is stable, and Vector and Amethyst both put the version in theirs. So the
- * newest file per platform is looked up once, at build time — the same lookup
- * vectorapp.io does in the browser — and a link goes out of date only as far
- * as the next deploy. An older asset stays downloadable, so a stale link is
- * one version behind, not broken.
- *
- * A build never requires the network: offline, rate-limited, or with an asset
- * renamed upstream, each link falls back to the release page, which is what
- * these cards linked before.
+ * If the lookup fails (offline, rate-limited, asset renamed), the link falls
+ * back to the repo's latest release page. Set GITHUB_TOKEN to raise the rate
+ * limit.
  */
 
 interface Asset {

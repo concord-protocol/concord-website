@@ -1,17 +1,14 @@
 /*
- * The hover field behind each app card (see .cx-app-noise in global.css), on
- * the clients page and the homepage: a grid of tiny digits in the card's
- * `--glow`, flickering on and off like a stream of data.
+ * Hover field behind each app card (see .cx-app-noise in global.css): a grid
+ * of flickering digits in the card's `--glow` colour.
  *
- * Every cell holds a digit and an intensity that decays each frame. While
- * the row is hovered, random cells are struck with a fresh digit at full
- * strength, and a lit cell occasionally changes digit as it fades. Each is
- * drawn multiplied by a mask that keeps the inside of the row faint and
- * fades the gutters to nothing at their far edge, and the brightest burn
- * toward white.
+ * Each cell has a digit and an intensity that decays every frame. While
+ * hovered, random cells are set to a new digit at high intensity. Intensity is
+ * multiplied by a mask that is faint inside the card and fades to zero at the
+ * outer gutter edges.
  *
- * It runs only while a row is hovered and until its last digit has faded,
- * at roughly 30fps. Nothing runs on touch screens or with reduced motion.
+ * Runs at ~30fps while hovered and until the last digit fades. Disabled on
+ * devices without hover and under reduced motion.
  */
 const CELL_W = 7;
 const CELL_H = 10;

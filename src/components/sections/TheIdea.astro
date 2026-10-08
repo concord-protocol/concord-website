@@ -1,21 +1,13 @@
 ---
 /*
- * The argument, directly under the hero, made in one picture.
- *
- * The diagram carries the claim in evidence — lit devices at the points of the
- * star, hex churning on every wire between them, and a relay going dark
- * without anything else moving — and one line under it carries it in words.
- *
- * That line names encryption outright. Decentralisation is what the picture
- * shows first, and it is the weaker half: a community spread over relays that
- * could read it would be no better than a company that can. Mint on that
- * clause, the same way the hero's tagline puts it on "Open protocol."
+ * The relay mesh diagram and one sentence explaining it. The sentence leads
+ * with encryption, because relays that could read the messages would be no
+ * better than a company that can.
  */
 import RelayMesh from '../diagrams/RelayMesh.astro';
 ---
 
-{/* The hero's scroll cue lands here, so this is the id it points at. */}
-<section id="the-idea" class="scroll-mt-20 border-b border-hairline">
+<section class="border-b border-hairline">
   <div class="mx-auto max-w-5xl px-5 py-24">
     <h2 class="cx-outline-title text-center text-3xl sm:text-4xl">THE IDEA</h2>
 
@@ -25,13 +17,7 @@ import RelayMesh from '../diagrams/RelayMesh.astro';
       class="mx-auto mt-10 max-w-3xl text-balance text-center text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
     >
       Concord <span class="text-mint">encrypts every message on your device</span
-      >, then scatters it across {/*
-        The one place on the page where the word "Nostr" is worth a click: a
-        reader who does not know what it is has just been told their messages
-        end up there. Dotted rather than solid, so it reads as a definition to
-        look up rather than as the next thing to press — the line is a claim,
-        not a call to action.
-      */}<a
+      >, then scatters it across {/* Dotted underline: a definition to look up, not a call to action. */}<a
         href="https://soapbox.pub/blog/nostr101"
         rel="noopener"
         class="underline decoration-mint decoration-dotted decoration-2 underline-offset-[6px] transition-colors hover:text-mint"

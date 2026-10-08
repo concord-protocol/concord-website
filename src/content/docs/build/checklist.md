@@ -9,7 +9,7 @@ This page collects requirements scattered across the CORD documents. It is a
 convenience, not a substitute: [the specification](/spec/) is normative.
 
 Failures in Concord are usually **silent**. A wrong derivation produces an empty
-room, not an error. Check these deliberately.
+community, not an error, so check each of these on purpose.
 
 ## Encoding
 

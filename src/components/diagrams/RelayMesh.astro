@@ -1,25 +1,11 @@
 ---
 /**
- * Six devices, three relays, and hex on every wire.
+ * Devices wired to relays, with hex packets moving along each wire and one
+ * relay going offline in rotation. The wide SVG is shown from `md` up; a
+ * stacked version replaces it on phones.
  *
- * Every coordinate below is hand-placed and none of them is on a ring. An
- * earlier version generated the positions — six points on an ellipse, relays
- * on the interior crossings — and the wires promptly drew a perfect hexagram,
- * which is what regular geometry does whether or not you asked it to. A real
- * network is lumpy: relays where somebody happened to run one, devices wherever
- * their owners are, and no two of the twelve wires the same length. Irregular
- * is both the truth and the only reliable way to avoid drawing a symbol.
- *
- * The endpoints are phones and laptops, and the relays are servers, because
- * "member" and "node" are abstractions and a lit screen next to a rack is not.
- * What moves between them is hex, and it churns, so the ciphertext reads as
- * something being computed rather than as a label somebody typed.
- *
- * Nothing in the picture is captioned "encrypted". The screens are lit and
- * each one is holding a padlock, the wires are hex, and the line under the
- * diagram names it once for the reader who wants the word. The lock is on the
- * devices and on nothing else, which is the claim: the message is sealed at
- * the edge, and what the relays hold is what is on the wires.
+ * Coordinates are hand-placed and irregular; evenly spaced positions made the
+ * wires form a hexagram.
  */
 import Lock from './Lock.astro';
 import Packet from './Packet.astro';
@@ -33,12 +19,7 @@ const { class: className = '' } = Astro.props;
 /** Rounded to a tenth of a user unit: sub-pixel at every size this renders at. */
 const round = (n: number) => Math.round(n * 10) / 10;
 
-/*
- * The devices, scattered around the edge of the frame. Which glyph each one
- * gets is fixed here rather than derived from its index, so the phones and
- * laptops are mixed rather than alternating — another regularity nobody needs
- * to see.
- */
+/* Devices around the edge of the 1000×600 view box. */
 const DEVICES = [
   { x: 120, y: 95, kind: 'phone' },
   { x: 520, y: 80, kind: 'laptop' },
@@ -49,23 +30,14 @@ const DEVICES = [
   { x: 155, y: 455, kind: 'laptop' },
 ] as const;
 
-/*
- * Three relays, named after real ones: three identical boxes marked "RELAY"
- * read as generic systems-diagram furniture, and the point is that these are
- * ordinary public Nostr relays that already exist and were not built for this.
- */
+/* Real public Nostr relays. */
 const RELAYS = [
   { x: 300, y: 190, name: 'relay.dreamith.to' },
   { x: 735, y: 195, name: 'relay.ditto.pub' },
   { x: 545, y: 450, name: 'jskitty.com/nostr' },
   { x: 455, y: 295, name: 'asia.vectorapp.io/nostr' },
-  /*
-   * And the rest of the network, drawn as a stack rather than a box and linked
-   * out to the directory that counts them. Three named relays could be read as
-   * three relays somebody set up for this; the fourth node is what says the
-   * infrastructure was already there. It never goes offline — a thousand
-   * relays do not — so it sits out the rotation below.
-   */
+  /* The rest of the network: drawn as a stack, linked to nostr.watch, and
+     excluded from the offline rotation. */
   {
     x: 240,
     y: 320,
@@ -80,28 +52,16 @@ const relays = RELAYS.map((relay, index) => ({
   id: `relay-${index}`,
 }));
 
-/*
- * Ciphertext that has to look like ciphertext without being any: hex, which is
- * what anybody who has seen an event id or a key recognises on sight. Truncated
- * flat, with no ellipsis — a run of hex is obviously longer than the six
- * characters of it that fit, and the dots were three more marks floating in a
- * diagram that has enough going on.
- *
- * A seeded LCG rather than Math.random, so a rebuild doesn't churn the HTML.
- * The script below churns it in the browser instead, which is where it belongs.
- */
+/* Placeholder hex for the packets. Seeded LCG so rebuilds produce identical
+   HTML; the script below randomizes it in the browser. */
 let seed = 0x5eed1e;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
 const HEX = '0123456789abcdef';
 const hex = (n: number) =>
   Array.from({ length: n }, () => HEX[(rand() * HEX.length) | 0]).join('');
 
-/*
- * Each device links to its two nearest relays, which is what makes them
- * interchangeable: losing one costs a device a spare, not a connection. The
- * uneven placement means the relays end up carrying three, four, and five
- * wires, which is also how it goes.
- */
+/* Each device links to its two nearest relays, so it stays connected when
+   one is offline. */
 const links = DEVICES.flatMap((d) =>
   relays
     .map((r) => ({ d, r, dist: Math.hypot(r.x - d.x, r.y - d.y) }))
@@ -111,31 +71,25 @@ const links = DEVICES.flatMap((d) =>
   relay: r.id,
   path: `M ${d.x} ${d.y} L ${r.x} ${r.y}`,
   packet: hex(6),
-  /* Where the packet sits when it is not allowed to move. Short of halfway,
-     so it clears both the device and the relay. */
+  /* Packet position under reduced motion: 42% along the wire, clear of both
+     ends. */
   still: {
     x: round(d.x + (r.x - d.x) * 0.42),
     y: round(d.y + (r.y - d.y) * 0.42),
   },
-  /* Alternating, so the mesh reads as a conversation rather than as an upload,
-     and staggered so it is traffic rather than a metronome. */
+  /* Alternate direction per link, with varied durations and staggered starts. */
   inbound: index % 2 === 1,
   duration: 2.4 + (index % 4) * 0.3,
   delay: round(index * 0.22),
 }));
 
-/*
- * Whichever relay is dark before the script takes over, and the one it stays
- * on for anybody who has turned motion off. Ours, rather than somebody else's.
- */
+/* Offline relay before the script starts, and permanently under reduced
+   motion. */
 const INITIAL_DOWN = 'relay-1';
 ---
 
 <div class:list={[className]}>
-  {/*
-    The wide version. The stacked one below carries the same argument on a
-    phone, where twelve wires would be a smudge.
-  */}
+  {/* Wide version, md and up. */}
   <svg
     viewBox="0 0 1000 600"
     class="hidden w-full md:block"
@@ -156,10 +110,8 @@ const INITIAL_DOWN = 'relay-1';
     }
 
     {/*
-      What is on the wire for a reader who has asked for no motion: the same
-      hex, parked and not churning. The animated group below is hidden in that
-      case rather than frozen, since a packet stopped at an arbitrary point of
-      its flight reads as a rendering bug.
+      Static packets for reduced motion. The animated group below is hidden in
+      that case, since freezing it would leave packets at arbitrary points.
     */}
     {
       links.map((link) => (
@@ -187,19 +139,14 @@ const INITIAL_DOWN = 'relay-1';
           data-down={link.relay === INITIAL_DOWN ? '' : undefined}
         >
           {/*
-            The motion is on a wrapper rather than on the <text> itself. The
-            churn below rewrites the run through `textContent`, which replaces
-            every child node — and an <animateMotion> living inside the text is
-            one of them, so the packet would lose its path on the first tick and
-            drop to the origin.
+            The animation lives on this wrapper, not the <text>: the churn
+            script sets `textContent`, which would delete an <animateMotion>
+            inside the text.
           */}
           <g>
             {/*
-              A negative begin, so every packet is already in flight on the
-              first frame. Positive delays parked twelve of these at the SVG's
-              origin for up to three seconds — a stack of hex churning away in
-              the top-left corner, which is exactly the sort of thing an
-              animation should never have to apologise for.
+              Negative begin so packets are mid-flight on the first frame. A
+              positive delay leaves them at the SVG origin until it elapses.
             */}
             <animateMotion
               dur={`${link.duration}s`}
@@ -210,12 +157,8 @@ const INITIAL_DOWN = 'relay-1';
               keyTimes={link.inbound ? '0;1' : undefined}
               calcMode={link.inbound ? 'linear' : undefined}
             />
-            {/*
-              And a fade at both ends of the run. The motion repeats, so at the
-              end of every cycle the packet is back at the far end of the wire
-              in a single frame; hidden for those frames, what is left is a
-              stream that never visibly restarts.
-            */}
+            {/* Fade at both ends to hide the jump back to the start on each
+                repeat. */}
             <animate
               attributeName="opacity"
               values="0;1;1;0"
@@ -236,10 +179,8 @@ const INITIAL_DOWN = 'relay-1';
     }
 
     {/*
-      The relays, as the racks they are. Drawn after the wires, so a wire that
-      passes one on its way somewhere else goes behind it. Grey throughout:
-      mint is this diagram's colour for your data, and a relay is the one thing
-      here that is not yours.
+      Relays as server racks, drawn after the wires so wires pass behind them.
+      Gray, since mint marks the user's own devices and data.
     */}
     {
       relays.map((relay, index) => (
@@ -249,8 +190,7 @@ const INITIAL_DOWN = 'relay-1';
           data-static={relay.more ? '' : undefined}
           data-down={relay.id === INITIAL_DOWN ? '' : undefined}
         >
-          {/* Two more racks behind the first one, which is all "and a thousand
-              like it" needs to be. */}
+          {/* Two offset racks behind the front one, for the stack. */}
           {relay.more && (
             <>
               <rect
@@ -287,11 +227,10 @@ const INITIAL_DOWN = 'relay-1';
             stroke-width="1.5"
           />
           {/*
-            Three bays, each with a light and a vent. The top light is the
-            fault light: it is the one that turns red when this rack is the one
-            that has gone. Duration and phase come in as custom properties so
-            the nine lights on screen never fall into step — the animations
-            themselves live in the style block, where Astro can scope them.
+            Three bays, each with a light and a vent. The top light turns red
+            when the relay is offline. Per-light duration and phase are passed
+            as custom properties so the lights don't blink in sync; the
+            keyframes are in the scoped style block.
           */}
           {[-16, 0, 16].map((offset, bay) => (
             <>
@@ -342,9 +281,8 @@ const INITIAL_DOWN = 'relay-1';
             {relay.name}
           </text>
 
-          {/* The stack is the only node that goes anywhere. An SVG <a> takes
-              the same href as any other, and the site's middleware gives it the
-              same new-tab treatment. */}
+          {/* Clickable area for the stack. src/middleware.ts adds
+              target="_blank" to SVG anchors too. */}
           {relay.href && (
             <a href={relay.href} rel="noopener" aria-label="Over a thousand more public Nostr relays, counted by nostr.watch">
               <rect
@@ -360,10 +298,7 @@ const INITIAL_DOWN = 'relay-1';
       ))
     }
 
-    {/*
-      The devices, drawn last so the wires end underneath them: a wire reaches
-      the device, and the device is where it stops being hex.
-    */}
+    {/* Devices, drawn last so the wire ends sit underneath them. */}
     {
       DEVICES.map((device) =>
         device.kind === 'phone' ? (
@@ -386,8 +321,8 @@ const INITIAL_DOWN = 'relay-1';
               rx="2"
               fill="rgba(36, 232, 163, 0.4)"
             />
-            {/* A unit above the screen's centre: the lock is taller above its
-                body than below it, so its middle is not its centre. */}
+            {/* Raised one unit to centre the lock optically, since its shackle
+                extends above its origin. */}
             <Lock x={device.x} y={device.y - 1} />
             <circle cx={device.x} cy={device.y + 15} r="2" fill="#24e8a3" />
           </g>
@@ -426,10 +361,7 @@ const INITIAL_DOWN = 'relay-1';
     }
   </svg>
 
-  {/*
-    The phone version: a device, what the wire out of it carries, the relays in
-    between, and a device at the far end.
-  */}
+  {/* Phone version: device, wire, relay list, wire, device. */}
   <div class="md:hidden">
     <svg
       viewBox="0 0 60 52"
@@ -443,11 +375,7 @@ const INITIAL_DOWN = 'relay-1';
       <circle cx="30" cy="40" r="2" fill="#24e8a3"></circle>
     </svg>
 
-    {/*
-      The wire, with what is on it. Same rule as the wide diagram — hex between
-      the devices, nothing at the relay — and without this the middle of the
-      phone version would be three names and no evidence.
-    */}
+    {/* A wire segment with a churning hex packet on it. */}
     <div class="my-3 flex flex-col items-center gap-1.5">
       <span class="h-4 w-px bg-mint/25"></span>
       <span class="flex items-center gap-1.5">
@@ -470,7 +398,7 @@ const INITIAL_DOWN = 'relay-1';
             data-relay={relay.id}
             data-down={relay.id === INITIAL_DOWN ? '' : undefined}
           >
-            {/* The same rack, small enough to sit in a row. */}
+            {/* Small rack icon. */}
             <svg viewBox="0 0 22 18" class="h-4 w-5 shrink-0" aria-hidden="true">
               <rect x="1" y="1" width="20" height="16" rx="2.5" fill="#0e1512" stroke="#2d3d36" stroke-width="1.25" />
               <circle class="cx-node-led cx-node-fault" style="--cx-led-dur: 1.2s" cx="5.5" cy="6" r="1.5" fill="#24e8a3" />
@@ -524,8 +452,7 @@ const INITIAL_DOWN = 'relay-1';
 </div>
 
 <style>
-  /* A relay that is currently dark. One state, described once, for the wide
-     diagram and the stacked list alike. */
+  /* Offline relay (`data-down`), for both layouts. */
   .cx-arc,
   .cx-node,
   .cx-row {
@@ -559,7 +486,7 @@ const INITIAL_DOWN = 'relay-1';
     opacity: 0.55;
   }
 
-  /* The one node you can click. */
+  /* The "1000+ more" stack, which links out. */
   .cx-more {
     cursor: pointer;
   }
@@ -572,14 +499,8 @@ const INITIAL_DOWN = 'relay-1';
     fill: #24e8a3;
   }
 
-  /*
-   * The lights, which are how you can tell a rack is alive from across a room.
-   * Two patterns rather than one, `steps(1, end)` so they snap the way an LED
-   * does rather than fading, and a duration and phase per light so nine of them
-   * on one screen never pulse together. Nothing about them is regular, which is
-   * the point: a steady blink reads as a heartbeat monitor, and disk activity
-   * is not steady.
-   */
+  /* Activity lights: two irregular blink patterns, `steps(1, end)` so they
+     switch instead of fading, with per-light duration and phase. */
   .cx-node-led {
     animation: cx-led-a var(--cx-led-dur, 1.2s) steps(1, end) infinite;
     animation-delay: var(--cx-led-delay, 0s);
@@ -589,10 +510,8 @@ const INITIAL_DOWN = 'relay-1';
     animation-name: cx-led-b;
   }
 
-  /* The top light is the power light, and it is on. Activity lights are dark
-     most of the time by nature, and with all three of them flickering a live
-     rack spent most of its life looking as dead as the one that had actually
-     gone. */
+  /* The top light is a power light: mostly on, with a brief dip. Without a
+     steady light a live rack looked as dark as an offline one. */
   .cx-node-fault {
     animation-name: cx-led-power;
   }
@@ -686,12 +605,7 @@ const INITIAL_DOWN = 'relay-1';
     }
   }
 
-  /*
-   * A rack that has gone: every light out except the fault light, which is the
-   * only red on the site and is doing the job red is actually for. It replaces
-   * the strikethrough and the OFFLINE caption — a machine tells you it is in
-   * trouble with a light, not with a word.
-   */
+  /* Offline rack: all lights off except the top one, which blinks red. */
   .cx-node[data-down] .cx-node-led,
   .cx-row[data-down] .cx-node-led {
     fill: #2d3d36;
@@ -719,23 +633,10 @@ const INITIAL_DOWN = 'relay-1';
 
 <script>
   /*
-   * Two loops, both of which exist to keep the diagram from reading as a
-   * drawing of one moment.
-   *
-   * The first is the hex, churning. It is the hero tagline's trick with the
-   * resolve taken out: there the ciphertext settles into a sentence because the
-   * reader holds the key, and here it never settles, because nothing on these
-   * wires ever will. Characters are replaced a couple at a time rather than the
-   * whole run at once, which reads as computation instead of as a flicker.
-   *
-   * The second is which relay is offline. Relays go down; that is the ordinary
-   * condition of the network rather than an incident, and a diagram where the
-   * same one is always dark invites the reader to think that one is broken.
-   * Rotating it says the thing the picture is for: any of them can go, and
-   * every device still has a wire.
-   *
-   * Both are off under `prefers-reduced-motion`, which leaves a still diagram
-   * that says everything except how often it changes.
+   * Two loops, both off under `prefers-reduced-motion`:
+   * - churn the hex in every `[data-hex]` element, two characters per tick;
+   * - rotate which relay is offline (`data-down`), with one all-up beat per
+   *   cycle.
    */
   const GLYPHS = '0123456789abcdef';
   const CHURN_MS = 45;
@@ -751,8 +652,6 @@ const INITIAL_DOWN = 'relay-1';
         for (const chip of chips) {
           const run = (chip.textContent ?? '').split('');
           if (!run.length) continue;
-          /* Two positions a tick: enough to never look static, few enough that
-             a glance can still tell it is the same kind of thing. */
           for (let i = 0; i < 2; i++) {
             run[(Math.random() * run.length) | 0] = glyph();
           }
@@ -761,16 +660,13 @@ const INITIAL_DOWN = 'relay-1';
       }, CHURN_MS);
     }
 
-    /* Every element with an opinion about a relay carries `data-relay`, so both
-       layouts change together and nothing here needs to know which is on
-       screen. */
+    /* Every relay-related element in both layouts carries `data-relay`. */
     const parts = document.querySelectorAll<HTMLElement>('[data-relay]');
 
     if (parts.length) {
-      /* The stack of "1000+ more" sits it out: a thousand relays do not go
-         offline together, and drawing that would be a lie about the network.
-         It is marked once, on the node, and the wires and packets that belong
-         to it are excluded by id rather than by carrying the flag themselves. */
+      /* Relays marked `data-static` (the "1000+ more" stack) never go offline.
+         Only the node carries the flag; its wires and packets are excluded by
+         relay id. */
       const fixed = new Set(
         [...document.querySelectorAll<HTMLElement>('[data-static]')].map(
           (part) => part.dataset.relay
@@ -781,8 +677,7 @@ const INITIAL_DOWN = 'relay-1';
         (name) => name && !fixed.has(name)
       );
 
-      /* One beat with everything up, so the mesh is not permanently missing a
-         relay and the recovery is as visible as the outage. */
+      /* `null` is a turn with every relay up. */
       const turns: Array<string | null> = [...names, null];
       let turn = turns.indexOf(
         document.querySelector('[data-down]')?.getAttribute('data-relay') ?? null

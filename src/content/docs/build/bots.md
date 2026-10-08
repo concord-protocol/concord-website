@@ -1,93 +1,61 @@
 ---
 title: Bots
-description: Bots on Concord are members holding keys, not integrations holding API tokens — what that changes, and the bots that already exist.
+description: A Concord bot is a member with a key, not an integration with an API token. What that means for permissions, access, and removal.
 sidebar:
   order: 2
 ---
 
-On a centralised platform, a bot is an integration: it registers with the
-platform, receives a token, and is granted capabilities the platform decides to
-expose.
+On a centralised platform, a bot registers with the platform, receives a token,
+and gets whatever capabilities the platform chooses to expose.
 
-On Concord there is no platform to register with. A bot holds a key, joins
-through an invite like anyone else, and reads and writes on the channels it has
-keys for.
+Concord has no platform to register with. A bot has its own key, joins through
+an invite like anyone else, and reads and writes in the channels it has keys
+for.
 
 ## What that changes
 
-**A bot's permissions are just a role.** Grant it a role and it moderates with
-exactly the rank that role gives it — no more, and no special case. Because
-authority is checked by every client against the same roster, a bot cannot
-exceed its rank even if it tries, and its actions carry its signature in the same
-audit chain as everyone else's.
+**A bot's permissions are a role.** Grant it a role and it can act with that
+role's rank. Every client checks its actions against the same roster as
+everyone else's, so it can't exceed that rank, and its actions are signed and
+show up in the audit log.
 
-**A bot is as trusted as a member, and no less.** It holds real keys. A bot in a
-private channel can read that channel, and a compromised bot leaks exactly what a
-compromised member would. Scope its access with private channels, and remove it
-the way you would remove a member: strip its roles, then rotate.
+**A bot is trusted like a member.** It has real keys. A bot in a private channel
+can read that channel, and a compromised bot leaks whatever a compromised member
+would. Use private channels to limit what it can see.
 
-**Nobody can cut off your bot.** There is no API to be deprecated, rate-limited,
-or revoked. The flip side is that nobody maintains compatibility for you either —
-the frozen derivations are the compatibility guarantee.
+**Removing a bot means rotating keys.** Stripping its role takes away its
+authority, but it can keep reading until a rekey or refounding cuts it off, the
+same as for a person. See [removal and rotation](/concepts/removal/).
 
-**Removal applies to bots too.** A rekey rotates the keys out from under a bot
-exactly as it would a person. If you remove a bot's role but never rotate, it
-keeps reading.
+**There is no API to lose.** Nobody can deprecate, rate-limit, or revoke your
+bot's access. Nobody maintains compatibility for you either; the frozen
+derivations in the specification are what stays stable.
 
-## Bots that exist today
+## Getting started
 
-### Shanty
+[concord-bots](https://github.com/CentauriAgent/concord-bots) is a Rust bot
+template on [`vector_sdk`](/build/sdks/). You write the command handlers, and it
+runs the connection, routing, and scheduling.
+[price-bot](https://github.com/JSKitty/price-bot) is a small working example of
+the SDK's command handling.
 
-A 24/7 generative lo-fi radio bot for Concord live channels, with a Wavlake and
-Fountain jukebox. It is a good demonstration that a Concord channel is a place a
-service can *live in*, not merely a log to post into.
-
-Python, AGPL-3.0, by Derek Ross.
-[github.com/derekross/shanty](https://github.com/derekross/shanty)
-
-### concord-automod
-
-A standalone auto-moderation bot for Concord communities — the clearest worked
-example of a bot acting under a granted role rather than a platform privilege.
-
-Rust, MIT, by Derek Ross. The repository is archived, so treat it as a reference
-implementation to read rather than a maintained dependency.
-[github.com/derekross/concord-automod](https://github.com/derekross/concord-automod)
-
-### price-bot
-
-Per-coin price, charts, and market stats, built on the `vector_sdk` crate. A
-compact example of the SDK's command handling.
-
-Rust, MIT, by JSKitty.
-[github.com/JSKitty/price-bot](https://github.com/JSKitty/price-bot)
-
-## Beyond bots
-
-Not everything that joins a community is a chat bot. **Private Events** is a full
-application built over Concord — event details, sign-up boards, and encrypted
-group chat, packaged as an installable PWA — using the protocol as private,
-serverless application infrastructure rather than as a messenger.
-
-TypeScript, AGPL-3.0, by Derek Ross.
-[github.com/derekross/concord-private-events](https://github.com/derekross/concord-private-events)
+Every published bot and bridge is listed on the [clients page](/clients/).
 
 ## Practical notes
 
-**Key storage.** A bot's key is its identity and its membership. Losing it means
-re-inviting; leaking it means rotating the community.
+**Key storage.** A bot's key is both its identity and its membership. If you
+lose it, the bot has to be invited again. If it leaks, the community has to
+rotate.
 
-**Remote signing.** Concord is deliberately friendly to remote signers. Rekey
-blob locators derive from *public* keys alone, and both rekey blobs and the staff
-key handoff are encrypted under a pairwise conversation key computable from
-either side. A bunker account can find and open its material with a single
-decrypt, never touching a raw private key.
+**Remote signing.** Rekey blob locators derive from public keys only, and rekey
+blobs and the staff key handoff are encrypted under a pairwise conversation key
+either side can compute. A bot using a remote signer (a bunker) can find and
+open its material with one decrypt, without exposing its private key.
 
-**Rotations.** Precompute the next rekey address and subscribe to it, or your bot
-will silently stop working the first time somebody is banned. And remember: a
-missing chunk is never a removal — only a complete set that omits your locator
-is.
+**Rotations.** Precompute the next rekey address and subscribe to it. Otherwise
+the bot will stop receiving messages the first time someone is banned, with no
+error. A missing chunk does not mean the bot was removed; only a complete set
+of chunks without its locator does.
 
-**Rate limits.** Chat planes are member-writable, so flooding is possible and is
-handled by moderation rather than by the protocol. Be a good citizen; a bot that
-floods is a bot that gets banned, and the ban works.
+**Rate limits.** Anyone with a channel's key can post to it, so the protocol
+can't stop a bot from flooding. Moderators can, by banning it.

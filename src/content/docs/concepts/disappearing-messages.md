@@ -8,17 +8,18 @@ sidebar:
 A community can make its conversation ephemeral: one timer, set by staff, after
 which every chat message expires. Normative text: [CORD-08](/spec/cord-08/).
 
-Two properties anchor the design.
+Two rules shape the design.
 
-**The timer is community state, never a per-message choice.** It is a single
+**The timer is set for the community, not per message.** It is a single
 field in the community metadata entity, edited and folded like any versioned
 edition, so every member converges on one policy and every channel applies it.
 
-**Expiry is cooperative,** as in every disappearing-message scheme. An honest
-client hides and deletes, an honest relay purges — but a member could always have
-copied what they could read. The guarantee is hygiene against the future: a
-seized device, a compromised key, an archived relay. It is not protection from
-the people in the room with you.
+**Expiry depends on cooperation,** as in every disappearing-message scheme. A
+well-behaved client hides and deletes, and a well-behaved relay purges, but a
+member could always have copied what they could read. Disappearing messages
+protect against what happens later, such as a seized device, a stolen key, or a
+relay's archive. They don't protect you from the other people in the
+conversation.
 
 ## The timer
 
@@ -72,8 +73,8 @@ still blends with giftwrap traffic — NIP-17 DM wraps carry the same tag — bu
 tag does reveal the timer's value to relays and marks those wraps as chat rather
 than control.
 
-That leak is the price of real deletion. A community unwilling to pay it turns
-the timer off.
+A community that doesn't want that can turn the timer off, at the cost of relays
+keeping the ciphertext.
 
 ## Enforcement
 
@@ -87,7 +88,7 @@ A reader:
   a seized device surrenders.
 
 Clock skew is absorbed by NIP-40's semantics. The shortest timer a client should
-offer — a day — dwarfs any honest skew.
+offer, one day, is far longer than any normal skew.
 
 ## Changing the timer is not retroactive
 
@@ -102,14 +103,14 @@ sender attaches *next*, never what an existing rumor means.
 
 ## The timer notice
 
-A policy change deserves a line in the conversation, not just a diff in the fold.
-After publishing the metadata edition, the actor should post one notice into each
+Changing the timer should be visible in the conversation itself. After
+publishing the metadata edition, the actor should post one notice into each
 channel whose key they hold, and clients render it as an inline row — "Alice set
 disappearing messages to 30 days" — timestamped and attributed like any message.
 
-The notice is informational but **gated like an authority claim**: a reader
-displays it only if its author holds `MANAGE_METADATA` in the fold, and drops it
-otherwise. Anyone can spell a tag; only staff can be believed about policy.
+The notice is informational, but it **is checked like an authority action**: a
+reader shows it only if its author has `MANAGE_METADATA`, and drops it
+otherwise. Anyone can write the tag, so only staff are believed.
 
 A missing notice changes nothing — a private channel whose key the actor does not
 hold simply gets none, and its members still see the fold. The metadata fold is

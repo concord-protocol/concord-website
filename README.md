@@ -14,7 +14,12 @@ npm run build    # syncs the specs, then builds to dist/
 npm run preview
 ```
 
-## Before deploying
+## Deploying
+
+`npm run deploy` builds the site and publishes it to Nostr as an nsite. See
+[`AGENTS.md`](AGENTS.md) for how it is configured and how to confirm a deploy.
+
+### Production domain
 
 > [!IMPORTANT]
 > Set the real production domain. It is a single constant, `SITE`, at the top of
@@ -80,9 +85,8 @@ To add a new CORD document, add an entry to `DOCUMENTS` in
 The palette is near-black surfaces with a mint-green signal, defined once in the
 `@theme` block of [`src/styles/global.css`](src/styles/global.css).
 
-Because the accent and gray ramps are consumed by `@astrojs/starlight-tailwind`,
-Starlight derives its own theme from the same values — so the docs and the
-marketing pages stay in lockstep.
+`@astrojs/starlight-tailwind` reads the accent and gray ramps from there, so the
+docs and the marketing pages share one theme.
 
 > [!NOTE]
 > Use the generated named utilities (`border-hairline`, `text-mint`,
@@ -92,27 +96,16 @@ marketing pages stay in lockstep.
 
 ## The logo
 
-The mark is a broken outer ring — a long green "C" and a short white segment
-facing it — around a mint inner ring, defined as inline SVG in
-[`src/components/Logo.astro`](src/components/Logo.astro) and again in
-[`public/favicon.svg`](public/favicon.svg).
+The mark is an outer ring split into a long green "C" and a short white
+segment, around a mint inner ring. It is inline SVG in
+[`src/components/Logo.astro`](src/components/Logo.astro) and
+[`public/favicon.svg`](public/favicon.svg), traced from
+`src/assets/concord-logo-source.png`. The geometry and colours are listed in
+`Logo.astro`.
 
 > [!NOTE]
-> **The white segment is part of the mark.** In the source artwork, kept at
-> `src/assets/concord-logo-source.png` for provenance, it is white on white and
-> so invisible; it was missed on the first trace and read as a filled opening.
-> It is not — it sits in the same ring band as the "C", with a real gap at each
-> end. Anything that puts the mark on a light background loses it.
-
-The SVG is a measured trace of that raster rather than a redraw: centre 63.5,
-outer ring r49 stroke 12 with the "C" running from +56° to −56.5° and the white
-segment from +43.5° to −43.5°, inner ring r27.3 stroke 12.5, colours `#1DA57A`,
-`#5AFDB2` and `#FFFFFF` sampled from the source. The parameters were fitted by
-rendering candidates and maximising pixel overlap against the original, reaching
-an IoU of 0.936 over the whole mark — the remainder being antialiasing at the
-coverage threshold. The two outer arcs measure to the same ring (mean radius
-49.5, width 12.3) and are drawn with identical `r` and `stroke-width`, which is
-worth more than fitting each one separately.
+> The white segment is part of the mark, so the logo doesn't work on a light
+> background. In the source PNG it is white on white and easy to miss.
 
 `public/apple-touch-icon.png` is generated from `public/favicon.svg`:
 
@@ -120,8 +113,8 @@ worth more than fitting each one separately.
 node -e "require('sharp')('public/favicon.svg').resize(180,180).png().toFile('public/apple-touch-icon.png')"
 ```
 
-The mark carries fixed brand colours rather than `currentColor`, so it does not
-inherit text colour from its container.
+The mark uses fixed brand colours, not `currentColor`, so it doesn't pick up the
+surrounding text colour.
 
 ## Checking links
 

@@ -18,8 +18,8 @@ Creating a community mints three things:
 - the **`control_root`**, the write key only the owner and staff will hold.
 
 **Genesis** is exactly two owner-signed editions: the community's metadata and
-one public channel named `#general`. No default roles, no scaffolding — the
-creator shapes everything else.
+one public channel named `#general`. There are no default roles; the creator
+sets up everything else.
 
 ## Identity is a commitment to the owner
 
@@ -32,15 +32,15 @@ different owner on an existing id would require a second-preimage attack on
 SHA-256. The salt is not secret and rides inside invites, so any member can
 recompute the id and confirm the founder.
 
-The price of this design is that there is **no succession**. A lost owner key
-cannot be replaced; a stolen one is stolen supremacy. A voluntary owner-signed
-succession is noted as possible future work.
+The downside is that ownership **can't be transferred**. A lost owner key can't
+be replaced, and whoever steals it has full control. A voluntary, owner-signed
+transfer is listed as possible future work.
 
 ## Access is separate from identity
 
-The `community_root` is deliberately *not* derived from the `community_id`. That
-separation is the whole point: access can rotate while identity stays fixed, so a
-community can cut off a removed member without becoming a different community.
+The `community_root` is *not* derived from the `community_id`. That way access
+can rotate while identity stays fixed, so a community can cut off a removed
+member without becoming a different community.
 
 Holding the current `community_root` *is* membership. There is no list to check.
 
@@ -55,10 +55,10 @@ So the plane's write capability is split off into the `control_root`. Every
 member holds the derived *pubkey*, which is all reading takes; only staff hold
 the secret.
 
-This is a spam gate and never a verdict. A verifying wrap proves only that *a*
-`control_root` holder published it — never who, and never with what right. A
-demoted staffer who kept the secret retains the power to flood and nothing else,
-until the next rotation takes it away.
+This only controls who can publish. A valid wrap shows that *some*
+`control_root` holder posted it, not who, and not whether they were allowed to.
+A demoted staff member who kept the secret can flood the plane and do nothing
+else, until the next rotation takes the key away.
 
 ## The three planes
 
@@ -125,10 +125,10 @@ from the `community_id` alone — no key and no epoch involved, so every member
 past or present resolves the same address, and a refounding can never strand the
 grave.
 
-Death wins every race. A refounding cannot cross a tombstone, and the seal is
-one-way. One carve-out survives it: a member's deletion of their own past message
-is always honoured, because a self-scrub cannot inject content and a departing
-member deserves to erase themselves.
+A tombstone always wins. A refounding can't undo it, and it can't be reversed.
+One thing still works afterwards: members can delete their own past messages,
+since a deletion can't add content and members should be able to remove what
+they wrote.
 
 :::danger[The tombstone must name its community]
 Everything about the dissolution coordinate is public — anyone holding the

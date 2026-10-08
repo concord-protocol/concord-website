@@ -1,76 +1,71 @@
 ---
 title: Compared to alternatives
-description: How Concord relates to NIP-17, NIP-29, Marmot, and Iris Chat — and why it makes different trade-offs for large, Discord-style communities.
+description: How Concord relates to NIP-17, NIP-29, Marmot, and Iris Chat, and why it makes different trade-offs for large, Discord-style communities.
 sidebar:
   order: 5
 ---
 
-Concord is not the only way to do private messaging on Nostr. It is built for one
-specific shape — large, Discord-style communities — that the others do not
-target. Each alternative below is genuinely better at something.
+Concord isn't the only way to do private messaging on Nostr. It is designed for
+large, Discord-style communities, which the others don't target. Each
+alternative below is a better fit for something.
 
 ## NIP-17: private direct messages
 
 [NIP-17](https://github.com/nostr-protocol/nips/blob/master/17.md) is the
-standard for encrypted DMs on Nostr, and it is the right tool for one-to-one
-conversation.
+standard for encrypted DMs on Nostr, and it is the right choice for one-to-one
+conversations.
 
-It cannot do communities. Multi-member rooms are an afterthought in the design,
-and the recipient-addressed model is vulnerable to denial-of-service issues:
-because everything is `p`-tagged at you, your client must decrypt your whole
-giftwrap inbox to find anything.
+It isn't built for communities. Group rooms were added on top, and because
+every message is `p`-tagged to its recipient, a client has to decrypt the whole
+giftwrap inbox to find anything, which also makes it easy to flood.
 
-Concord's stream inversion — fixed author, ephemeral `p` tag — is precisely what
-makes a room subscribable with one filter instead of a full inbox scan.
+Concord reverses this: a fixed author and a one-time `p` tag. That lets a
+client subscribe to a room with one filter instead of scanning an inbox.
 
 ## NIP-29: relay-based groups
 
-[NIP-29](https://github.com/nostr-protocol/nips/blob/master/29.md) puts groups on
-a relay that enforces membership and moderation.
+[NIP-29](https://github.com/nostr-protocol/nips/blob/master/29.md) puts groups
+on a relay that enforces membership and moderation.
 
-Two consequences follow. You have to self-host an entire server just to start a
-community, and messages are not end-to-end encrypted — the relay reads
-everything, because it has to in order to enforce anything.
+That means someone has to run a relay to host a community, and messages aren't
+end-to-end encrypted: the relay has to read everything to enforce anything.
 
-Concord needs no server: relays see only noise, and authority is a signed roster
-every member verifies for themselves. The cost is that enforcement is by
-rejection rather than prevention, so a misbehaving member can always *publish*;
-they just cannot be *obeyed*.
+Concord doesn't need a dedicated server. Relays only see encrypted data, and
+authority is a signed roster that every member checks. The trade-off is that a
+misbehaving member can always *publish*; clients just ignore them.
 
 ## Marmot: MLS on Nostr
 
 [Marmot](https://github.com/marmot-protocol/marmot) uses
 [MLS](https://www.rfc-editor.org/rfc/rfc9420.html) for forward secrecy and
-post-compromise security. For small, high-stakes groups this is the stronger
-choice, and Concord does not try to match it.
+post-compromise security. For small groups with a lot at stake, it is the
+stronger choice, and Concord doesn't try to match it.
 
-MLS advances in lockstep: ordered commits, per-device key packages, and a cost
-per membership change that grows with the group. That is exactly the wrong shape
-for a large, casual, high-churn public room where people join and leave
-constantly and half the members are offline at any moment.
+MLS keeps every member in lockstep: commits have to be applied in order, every
+device needs a key package, and each membership change costs more as the group
+grows. That works badly for a large public room where people join and leave
+constantly and many members are offline at any given moment.
 
-Concord trades those ratcheting guarantees for asynchronous, fold-anytime state.
-A member who has been offline for a month opens their client and converges
-without a coordinated commit from anyone.
+Concord gives up ratcheting so that clients can sync state at any time, in any
+order. A member who has been offline for a month opens their client and catches
+up without anyone else having to do anything.
 
 ## Iris Chat: Double Ratchet
 
 [Iris Chat](https://irischat.org/) applies the Double Ratchet to Nostr
-conversations, for much the same reasons as Marmot. It aims to replace Signal
-more than Discord: pairwise ratcheted chats rather than owner-rooted communities.
+conversations, for similar reasons to Marmot. It is closer to a Signal
+replacement than a Discord one: ratcheted chats between people rather than
+communities with an owner and roles.
 
-## The summary
+## Which to use
 
-NIP-17 is for DMs. NIP-29 trusts the relay. Marmot and Iris Chat secure the small
-ratcheted group. Concord is built for the scale and shape of a public community.
+NIP-17 is for DMs. NIP-29 trusts the relay. Marmot and Iris Chat protect small
+groups with ratcheting. Concord is for large communities.
 
-If your group is six people planning something sensitive, use a ratcheted
-protocol. If it is six hundred people with channels, roles, and moderators, that
-is what Concord is for.
+For six people planning something sensitive, use a ratcheted protocol. For six
+hundred people with channels, roles, and moderators, use Concord.
 
-## Interoperability
+## Using more than one
 
-These are not mutually exclusive choices for a client. Armada, for example,
-speaks Concord alongside NIP-29 and Buzz communities, so one key logs you in
-across the ecosystem and your communities come with you where clients share
-protocols.
+A client can support several of these. Armada, for example, supports Concord
+alongside NIP-29 and Buzz communities, so one key signs you in to all of them.
