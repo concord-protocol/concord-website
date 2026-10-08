@@ -18,12 +18,16 @@ import { latestAsset } from './releases';
 
 export const SPEC_REPO = 'https://github.com/concord-protocol/concord';
 
+/** `match` lists the path prefixes the link is current for. */
 export const NAV = [
-  { label: 'Docs', href: '/learn/what-is-concord/' },
-  { label: 'Specification', href: '/spec/' },
-  { label: 'Clients', href: '/clients/' },
-  { label: 'Build', href: '/build/' },
+  { label: 'Docs', href: '/learn/what-is-concord/', match: ['/learn/', '/concepts/'] },
+  { label: 'Specification', href: '/spec/', match: ['/spec/'] },
+  { label: 'Clients', href: '/clients/', match: ['/clients/'] },
+  { label: 'Build', href: '/build/', match: ['/build/'] },
 ];
+
+export const isCurrent = (item: (typeof NAV)[number], path: string) =>
+  item.match.some((prefix) => path.startsWith(prefix));
 
 export interface Client {
   name: string;
@@ -34,7 +38,7 @@ export interface Client {
   /** Absent where the client is closed source; the card then links no repository. */
   source?: string;
   author: string;
-  /** The app's own neon, taken from its icon. Lights its row on the clients page. */
+  /** The app's own neon, taken from its icon. Tints its card, row, and button. */
   glow: string;
   /**
    * The install and about links. The first is the one a card fills in; after
@@ -176,7 +180,15 @@ export const CLIENTS: Client[] = [
         href: 'https://zapstore.dev/apps/com.vitorpamplona.amethyst',
         icon: 'zapstore',
       },
-      /* Every desktop asset carries the version; see releases.ts. */
+      /*
+       * Every asset carries the version; see releases.ts. The APK is the
+       * universal Google Play build, which runs on any ABI.
+       */
+      {
+        label: 'Android APK',
+        href: await latestAsset('vitorpamplona/amethyst', /^amethyst-googleplay-universal-v.*\.apk$/),
+        icon: 'android',
+      },
       {
         label: 'Windows',
         href: await latestAsset('vitorpamplona/amethyst', /^amethyst-desktop-.*-windows-x64\.msi$/),

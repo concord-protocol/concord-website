@@ -63,22 +63,18 @@
   --concord-grid: rgba(36, 232, 163, 0.06);
 }
 
-/* Darker than Starlight's default dark theme. */
+/* The docs are dark only (see components/starlight/ThemeProvider.astro), on
+   the same black and hairlines as the marketing pages. */
 :root[data-theme='dark'] {
-  --sl-color-bg: #050807;
-  --sl-color-bg-nav: rgba(5, 8, 7, 0.82);
-  --sl-color-bg-sidebar: #050807;
+  --sl-color-bg: var(--color-ink);
+  --sl-color-bg-nav: var(--color-ink);
+  --sl-color-bg-sidebar: var(--color-ink);
   --sl-color-bg-inline-code: #121a16;
-  --sl-color-hairline: #16201c;
-  --sl-color-hairline-light: #1d2a25;
-  --sl-color-hairline-shade: #101815;
+  --sl-color-hairline: var(--color-hairline);
+  --sl-color-hairline-light: var(--color-hairline);
+  --sl-color-hairline-shade: var(--color-hairline);
   --sl-color-text-accent: var(--color-accent-300);
   --sl-color-white: #e7f1ec;
-}
-
-:root[data-theme='light'] {
-  --sl-color-bg: #ffffff;
-  --sl-color-text-accent: var(--color-accent-700);
 }
 
 /* --------------------------------------------------------------------------
@@ -131,6 +127,10 @@ body {
     box-sizing: border-box;
     /* Width 0 with a real style, so `border-b` only has to set a width. */
     border: 0 solid var(--color-hairline);
+  }
+
+  .cx-page :where(body) {
+    margin: 0;
   }
 
   .cx-page :where(h1, h2, h3, h4, h5, h6) {
@@ -621,15 +621,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* A card shown in its hover state permanently, to mark the recommended one in
-   a row. */
-.cx-card-lit {
-  border-color: rgba(36, 232, 163, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(36, 232, 163, 0.08),
-    0 18px 50px -24px rgba(36, 232, 163, 0.35);
-}
-
 /* An app card, tinted with the app's colour (`--glow`, set inline): a left
    edge tab, a horizontal wash, and a shadow. `isolation` makes it a stacking
    context, so the hover field's negative z-index puts it above the card's
@@ -667,6 +658,19 @@ body {
   border-radius: 0 3px 3px 0;
   background: var(--glow);
   box-shadow: 0 0 14px 2px var(--glow);
+}
+
+/* A button in the card's own colour, for the clients page's rows. */
+.cx-btn-glow {
+  border: 1px solid color-mix(in srgb, var(--glow) 55%, transparent);
+  background: color-mix(in srgb, var(--glow) 10%, transparent);
+  color: #fff;
+  box-shadow: 0 0 22px -8px color-mix(in srgb, var(--glow) 80%, transparent);
+}
+
+.cx-btn-glow:hover {
+  border-color: var(--glow);
+  background: color-mix(in srgb, var(--glow) 20%, transparent);
 }
 
 /* Hover canvas of flickering digits, drawn by src/scripts/app-noise.ts. It
@@ -717,6 +721,8 @@ body {
   font-size: 0.925rem;
   font-weight: 600;
   line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
@@ -742,6 +748,14 @@ body {
 .cx-btn-ghost:hover {
   border-color: rgba(36, 232, 163, 0.45);
   color: var(--color-mint-soft);
+}
+
+/* Header and row-sized button. */
+.cx-btn-sm {
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 /* Gradient rule used between sections */
@@ -775,6 +789,15 @@ body {
 
 :root[data-theme='dark'] .sl-markdown-content blockquote {
   border-inline-start-color: var(--color-accent-700);
+}
+
+/* The current page in the sidebar is marked like the current nav link: mint
+   text, not Starlight's solid accent block. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  color: var(--color-mint);
+  background-color: rgba(36, 232, 163, 0.08);
 }
 
 /* Spec pages are dense tables of derivations; keep them readable. */

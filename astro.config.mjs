@@ -55,16 +55,15 @@ export default defineConfig({
       customCss: ['./src/styles/global.css'],
       // The marketing 404 in src/pages owns this route.
       disable404Route: true,
+      // Overrides that make the docs chrome match the marketing pages.
       components: {
+        Header: './src/components/starlight/Header.astro',
         SiteTitle: './src/components/starlight/SiteTitle.astro',
+        MobileMenuFooter: './src/components/starlight/MobileMenuFooter.astro',
+        Footer: './src/components/starlight/Footer.astro',
+        ThemeProvider: './src/components/starlight/ThemeProvider.astro',
+        ThemeSelect: './src/components/starlight/ThemeSelect.astro',
       },
-      social: [
-        {
-          icon: 'github',
-          label: 'GitHub',
-          href: 'https://github.com/concord-protocol/concord',
-        },
-      ],
       editLink: {
         baseUrl: 'https://github.com/concord-protocol/concord-website/edit/main/',
       },

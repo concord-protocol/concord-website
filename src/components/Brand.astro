@@ -1,0 +1,20 @@
+---
+/**
+ * The mark and the wordmark, linking home. Shared by the marketing nav, the
+ * docs header, and both footers so they all match.
+ */
+import Logo from './Logo.astro';
+---
+
+{/*
+  No gap: the empty right side of the mark's viewBox plus the wordmark's
+  sidebearing already give about 8px of space. Bruno Ace has one weight, so
+  there is no font-weight class.
+*/}
+<a
+  href="/"
+  class="concord-brand flex shrink-0 items-center whitespace-nowrap no-underline transition-opacity hover:opacity-80"
+>
+  <Logo size={24} />
+  <span class="cx-brand-word font-display text-base tracking-[0.01em] text-gray-100">Concord</span>
+</a>

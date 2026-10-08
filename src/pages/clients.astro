@@ -1,7 +1,8 @@
 ---
 /*
  * Every client, listed as equals (the homepage is where the site recommends
- * one), followed by bridges, bots, libraries, and apps built on Concord.
+ * one), then what they share, then the bridges, bots, libraries, and apps
+ * built on Concord.
  */
 import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
@@ -12,56 +13,78 @@ import { CLIENTS, type LinkIcon as Icon } from '../data/site';
 /** Listings that install and update the app, as opposed to files to download. */
 const STORE_ICONS = new Set<Icon>(['google-play', 'fdroid', 'zapstore']);
 
-/** Shared by every client. */
+/** Shared by every client. Icon paths are from Lucide (ISC). */
 const SHARED = [
   {
     term: 'One identity',
     detail: 'Sign in to any of them with the same Nostr key.',
+    /* A key. */
+    icon: [
+      'M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4Z',
+      'M16.5 7.5h.01',
+    ],
   },
   {
     term: 'Your communities',
     detail: 'Join in one client and the community shows up in the others.',
+    /* Two people. */
+    icon: [
+      'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2',
+      'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+      'M22 21v-2a4 4 0 0 0-3-3.87',
+      'M16 3.13a4 4 0 0 1 0 7.75',
+    ],
   },
   {
     term: 'Invites',
     detail: 'An invite link from any client opens in every other.',
+    /* A chain link. */
+    icon: [
+      'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71',
+      'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
+    ],
   },
   {
     term: 'Roles and moderation',
     detail: 'Channels, roles, bans, and pins are the same everywhere you look.',
+    /* A shield with a check. */
+    icon: [
+      'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z',
+      'm9 12 2 2 4-4',
+    ],
   },
 ];
 ---
 
 <Marketing
-  title="Clients · Concord"
+  title="Clients | Concord"
   description="Clients that speak the Concord protocol, plus the bridges, bots, and libraries built on it. Sign in to any of them with the same Nostr key."
 >
-  <section class="relative overflow-hidden border-b border-hairline">
-    <div class="cx-radial pointer-events-none absolute inset-0"></div>
-    <div class="relative mx-auto max-w-6xl px-5 py-20">
-      <p class="cx-eyebrow">Clients</p>
-      <h1
-        class="mt-4 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
-      >
-        Many clients, all in concord.
-      </h1>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-gray-300">
-        Built by different people, speaking the same language.
-      </p>
-    </div>
-  </section>
-
+  {/*
+    The heading and the list are one section on one background, like the
+    homepage hero: the glow shows through the grid lines (`.cx-grid-bg-center`).
+  */}
   <section class="relative overflow-hidden">
-    <div class="cx-grid-bg pointer-events-none absolute inset-0 opacity-60"></div>
-    <div class="cx-radial pointer-events-none absolute inset-0"></div>
-    <div class="relative mx-auto max-w-6xl px-5 py-16">
+    <div class="cx-grid-bg cx-grid-bg-center pointer-events-none absolute inset-0"></div>
+    <div class="relative mx-auto max-w-6xl px-5 pb-24 pt-20">
+      <div class="text-center">
+        <p class="cx-outline-title text-2xl uppercase">Clients</p>
+        <h1
+          class="mx-auto mt-4 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
+        >
+          Many clients, all in concord.
+        </h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-300">
+          Built by different people, speaking the same language.
+        </p>
+      </div>
+
       {/*
         One row per client on shared columns, with the column labels in a single
         header. Below `lg` each row stacks and the header is hidden.
       */}
       <div
-        class="hidden px-6 pb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-gray-500 lg:grid lg:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_12rem_10rem] lg:gap-x-8"
+        class="mt-16 hidden px-6 pb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-gray-500 lg:grid lg:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_12rem_10rem] lg:gap-x-8"
         aria-hidden="true"
       >
         <span>Client</span>
@@ -71,7 +94,7 @@ const SHARED = [
         <span></span>
       </div>
 
-      <ul class="space-y-3">
+      <ul class="mt-16 space-y-3 lg:mt-0">
         {
           CLIENTS.map((client) => {
             /*
@@ -147,7 +170,7 @@ const SHARED = [
                 <a
                   href={client.links[0].href}
                   rel="noopener"
-                  class="cx-btn cx-btn-primary w-full whitespace-nowrap px-4 py-2.5 text-sm"
+                  class="cx-btn cx-btn-glow cx-btn-sm w-full"
                 >
                   {client.links[0].label}
                 </a>
@@ -159,9 +182,59 @@ const SHARED = [
     </div>
   </section>
 
-  <section class="border-t border-hairline bg-raised/40">
-    <div class="mx-auto max-w-6xl px-5 py-20">
-      <p class="cx-eyebrow">Bridges &amp; bots</p>
+  {/*
+    The lower sections share one opening: a mint rule fading out at both ends
+    and a faint glow under it, echoing the hero above.
+  */}
+  <section class="relative overflow-hidden">
+    <div class="cx-rule absolute inset-x-0 top-0"></div>
+    <div class="cx-radial pointer-events-none absolute inset-0 opacity-50"></div>
+    <div class="relative mx-auto max-w-6xl px-5 py-24">
+      <p class="cx-outline-title origin-left text-2xl uppercase">Interoperability</p>
+      <h2
+        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+      >
+        Switch clients. Keep everything.
+      </h2>
+
+      <dl class="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          SHARED.map((item) => (
+            <div>
+              <span
+                class="grid h-11 w-11 place-items-center rounded-[13%] border border-mint/30 bg-mint/10 text-mint"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-5 w-5"
+                >
+                  {item.icon.map((d) => (
+                    <path d={d} />
+                  ))}
+                </svg>
+              </span>
+              <dt class="mt-5 text-sm font-semibold text-white">{item.term}</dt>
+              <dd class="mt-2 text-sm leading-relaxed text-gray-400">
+                {item.detail}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="relative overflow-hidden">
+    <div class="cx-rule absolute inset-x-0 top-0"></div>
+    <div class="cx-radial pointer-events-none absolute inset-0 opacity-50"></div>
+    <div class="relative mx-auto max-w-6xl px-5 py-24">
+      <p class="cx-outline-title origin-left text-2xl uppercase">Bridges &amp; bots</p>
       <h2
         class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
       >
@@ -189,15 +262,17 @@ const SHARED = [
           Moderation, answers, music, and lookups.
         </p>
         <div class="mt-6">
-          <LibrariesAndBots group="bots" />
+          <LibrariesAndBots group="bots" more />
         </div>
       </div>
     </div>
   </section>
 
-  <section class="border-t border-hairline">
-    <div class="mx-auto max-w-6xl px-5 py-20">
-      <p class="cx-eyebrow">Build</p>
+  <section class="relative overflow-hidden">
+    <div class="cx-rule absolute inset-x-0 top-0"></div>
+    <div class="cx-radial pointer-events-none absolute inset-0 opacity-50"></div>
+    <div class="relative mx-auto max-w-6xl px-5 py-24">
+      <p class="cx-outline-title origin-left text-2xl uppercase">Build</p>
       <h2
         class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
       >
@@ -222,33 +297,9 @@ const SHARED = [
           chat.
         </p>
         <div class="mt-6">
-          <LibrariesAndBots group="apps" />
+          <LibrariesAndBots group="apps" more />
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="border-t border-hairline">
-    <div class="mx-auto max-w-6xl px-5 py-20">
-      <p class="cx-eyebrow">Interoperability</p>
-      <h2
-        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
-      >
-        Switch clients. Keep everything.
-      </h2>
-
-      <dl class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {
-          SHARED.map((item) => (
-            <div class="border-t border-hairline pt-5">
-              <dt class="text-sm font-medium text-gray-100">{item.term}</dt>
-              <dd class="mt-2 text-sm leading-relaxed text-gray-400">
-                {item.detail}
-              </dd>
-            </div>
-          ))
-        }
-      </dl>
 
       <a
         href="/build/"
@@ -258,7 +309,6 @@ const SHARED = [
       </a>
     </div>
   </section>
-
 </Marketing>
 
 <script>

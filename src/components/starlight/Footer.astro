@@ -1,0 +1,11 @@
+---
+/**
+ * Starlight `Footer` override: Starlight's edit link and pagination, then the
+ * site footer, so docs pages end the way the marketing pages do.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+import SiteFooter from '../Footer.astro';
+---
+
+<Default />
+<SiteFooter compact />

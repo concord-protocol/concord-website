@@ -1,0 +1,50 @@
+---
+/**
+ * Starlight `MobileMenuFooter` override. The header hides the site links on
+ * narrow screens, so the mobile menu carries them, with GitHub and Install
+ * Apps as in the header.
+ */
+import { NAV, SPEC_REPO, isCurrent } from '../../data/site';
+
+const path = Astro.url.pathname;
+---
+
+<div class="mobile-site-nav">
+  <nav aria-label="Site">
+    {
+      NAV.map((item) => (
+        <a href={item.href} aria-current={isCurrent(item, path) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))
+    }
+    <a href={SPEC_REPO} rel="noopener">GitHub</a>
+  </nav>
+  <a href="/clients/" class="cx-btn cx-btn-ghost">Install Apps</a>
+</div>
+
+<style>
+  .mobile-site-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid var(--color-hairline);
+    padding-block: 1rem;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  nav a {
+    color: var(--color-gray-400);
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  nav a[aria-current] {
+    color: var(--color-mint);
+  }
+</style>

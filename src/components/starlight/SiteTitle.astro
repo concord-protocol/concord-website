@@ -1,25 +1,21 @@
 ---
 /**
  * Starlight `SiteTitle` override. Starlight has no top-level nav slot, so the
- * site nav links are rendered here alongside the brand.
+ * site nav links are rendered here alongside the brand, styled like Nav.astro.
  */
-import Logo from '../Logo.astro';
-import { NAV } from '../../data/site';
+import Brand from '../Brand.astro';
+import { NAV, isCurrent } from '../../data/site';
 
 const path = Astro.url.pathname;
-const isActive = (href: string) => path.startsWith(href);
 ---
 
 <div class="concord-site-title">
-  <a href="/" class="concord-brand">
-    <Logo size={24} />
-    <span class="cx-brand-word">Concord</span>
-  </a>
+  <Brand />
 
   <nav class="concord-top-nav" aria-label="Site">
     {
       NAV.map((item) => (
-        <a href={item.href} data-active={isActive(item.href) ? 'true' : undefined}>
+        <a href={item.href} aria-current={isCurrent(item, path) ? 'page' : undefined}>
           {item.label}
         </a>
       ))
@@ -36,28 +32,6 @@ const isActive = (href: string) => path.startsWith(href);
     overflow: hidden;
   }
 
-  .concord-brand {
-    display: flex;
-    align-items: center;
-    /* The mark's empty right side and the wordmark's sidebearing already give
-       ~9px of space. Matches Nav.astro. */
-    gap: 0;
-    font-size: var(--sl-text-lg);
-    font-weight: 600;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  /* Bruno Ace has one weight; 400 overrides the 600 above so it isn't
-     synthesised. */
-  .concord-brand span {
-    color: var(--sl-color-white);
-    font-family: var(--font-display);
-    font-size: var(--sl-text-base);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-  }
-
   .concord-top-nav {
     display: none;
     align-items: center;
@@ -65,22 +39,26 @@ const isActive = (href: string) => path.startsWith(href);
   }
 
   .concord-top-nav a {
-    padding: 0.35rem 0.6rem;
+    padding: 0.375rem 0.625rem;
     border-radius: 0.375rem;
-    color: var(--sl-color-gray-2);
-    font-size: var(--sl-text-sm);
+    color: var(--color-gray-400);
+    font-size: 0.875rem;
     text-decoration: none;
     white-space: nowrap;
     transition: color 0.2s ease;
   }
 
-  .concord-top-nav a:hover,
-  .concord-top-nav a[data-active] {
-    color: var(--color-mint, #24e8a3);
+  .concord-top-nav a:hover {
+    color: var(--color-gray-200);
   }
 
-  /* Only show the inline nav where the header has room for it. */
-  @media (min-width: 72rem) {
+  .concord-top-nav a[aria-current] {
+    color: var(--color-mint);
+  }
+
+  /* Starlight's mobile layout ends at 50rem. Below it the links are in the
+     menu; see MobileMenuFooter.astro. */
+  @media (min-width: 50rem) {
     .concord-top-nav {
       display: flex;
     }

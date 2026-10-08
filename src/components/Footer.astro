@@ -1,6 +1,16 @@
 ---
-import Logo from './Logo.astro';
+/*
+ * The site footer. `compact` drops the link columns, for the docs, where the
+ * sidebar already lists every page.
+ */
+import Brand from './Brand.astro';
 import { SPEC_REPO } from '../data/site';
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
 
 const columns = [
   {
@@ -34,14 +44,16 @@ const columns = [
 ];
 ---
 
-<footer class="border-t border-hairline bg-black">
-  <div class="mx-auto max-w-6xl px-5 py-16">
-    <div class="grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+<footer
+  class:list={[
+    'border-t border-hairline',
+    compact ? 'mt-16 pt-10' : 'bg-black',
+  ]}
+>
+  <div class:list={[!compact && 'mx-auto max-w-6xl px-5 py-16']}>
+    <div class:list={['grid gap-12', !compact && 'md:grid-cols-[1.4fr_repeat(3,1fr)]']}>
       <div>
-        <a href="/" class="flex items-center gap-2.5">
-          <Logo size={26} />
-          <span class="text-[15px] font-semibold text-gray-100">Concord</span>
-        </a>
+        <Brand />
         <p class="mt-4 max-w-xs text-sm leading-relaxed text-gray-400">
           End-to-end encrypted communities and channels, built on open
           infrastructure. No company, no central server, no intermediary.
@@ -52,45 +64,49 @@ const columns = [
       </div>
 
       {
-        columns.map((column) => (
-          <div>
-            <h2 class="text-sm font-semibold text-gray-100">{column.title}</h2>
-            <ul class="mt-4 space-y-2.5">
-              {column.links.map((link) => (
-                <li>
-                  <a
-                    href={link.href}
-                    class="text-sm text-gray-400 transition-colors hover:text-mint"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
+        !compact &&
+          columns.map((column) => (
+            <div>
+              <h2 class="text-sm font-semibold text-gray-100">{column.title}</h2>
+              <ul class="mt-4 space-y-2.5">
+                {column.links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      class="text-sm text-gray-400 transition-colors hover:text-mint"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
       }
     </div>
 
     <div
-      class="mt-14 flex flex-col gap-4 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between"
+      class:list={[
+        'flex flex-col gap-4 border-t border-hairline sm:flex-row sm:items-center sm:justify-between',
+        compact ? 'mt-10 pt-6' : 'mt-14 pt-8',
+      ]}
     >
       <p class="font-mono text-xs text-gray-500">
         Concord is an evolving specification. Contributions and review are
         welcome.
       </p>
-      <div class="flex gap-5">
+      <div class="flex shrink-0 gap-5">
         <a
           href={SPEC_REPO}
           rel="noopener"
-          class="text-sm text-gray-400 transition-colors hover:text-mint"
+          class="text-sm text-gray-400 no-underline transition-colors hover:text-mint"
         >
           Specification repository
         </a>
         <a
           href="https://github.com/nostr-protocol/nostr"
           rel="noopener"
-          class="text-sm text-gray-400 transition-colors hover:text-mint"
+          class="text-sm text-gray-400 no-underline transition-colors hover:text-mint"
         >
           Nostr
         </a>

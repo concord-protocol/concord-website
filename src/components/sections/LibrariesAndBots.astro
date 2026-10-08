@@ -1,6 +1,6 @@
 ---
 /*
- * One group of TOOLS per call. Bridges render as highlighted cards; bots,
+ * One group of TOOLS per call. Bridges render as cards; bots,
  * libraries, and apps render as ruled rows. The caller supplies the heading.
  */
 import { TOOLS } from '../../data/site';
@@ -15,9 +15,11 @@ const BRIDGE_ICON = ['M4 8h13', 'm13 4 4 4-4 4', 'M20 16H7', 'm11 12-4 4 4 4'];
 
 interface Props {
   group: 'bridges' | 'bots' | 'libraries' | 'apps';
+  /** End with the GitWorkshop search row. Set on the last group in a section. */
+  more?: boolean;
 }
 
-const { group } = Astro.props;
+const { group, more = false } = Astro.props;
 
 const KINDS: Record<Props['group'], string[]> = {
   bridges: ['Bridge'],
@@ -66,7 +68,7 @@ const icon = { libraries: LIBRARY_ICON, apps: APP_ICON }[group as string] ?? BOT
         <a
           href={tool.href}
           rel="noopener"
-          class="cx-card cx-card-lit cx-card-link group flex h-full gap-5 p-6 sm:p-7"
+          class="cx-card cx-card-link group flex h-full gap-5 p-6 sm:p-7"
         >
           {/* Two-way arrows plus the far network's mark. */}
           <span
@@ -108,12 +110,12 @@ const icon = { libraries: LIBRARY_ICON, apps: APP_ICON }[group as string] ?? BOT
   </ul>
 )}
 
-{/* Two columns of ruled rows; the whole row is the link. */}
+{/* Two columns of rows ruled between, not above or below; the whole row is the link. */}
 {group !== 'bridges' && (
-  <ul class="grid gap-x-12 border-b border-hairline sm:grid-cols-2">
+  <ul class="grid gap-x-12 sm:grid-cols-2">
     {
       tools.map((tool) => (
-        <li class="border-t border-hairline">
+        <li class="border-t border-hairline first:border-t-0 sm:nth-2:border-t-0">
           <a href={tool.href} rel="noopener" class="group flex gap-4 py-5">
             <svg
               viewBox="0 0 24 24"
@@ -146,9 +148,8 @@ const icon = { libraries: LIBRARY_ICON, apps: APP_ICON }[group as string] ?? BOT
         </li>
       ))
     }
-    {/* Fills the empty cell an odd-length list leaves in the second column. */}
-    {tools.length % 2 === 1 && (
-      <li class="border-t border-hairline">
+    {more && (
+      <li class="border-t border-hairline first:border-t-0 sm:nth-2:border-t-0">
         <a href={MORE} rel="noopener" class="group flex gap-4 py-5">
           <svg
             viewBox="0 0 24 24"
