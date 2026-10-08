@@ -12,10 +12,12 @@ const path = Astro.url.pathname;
 
 <!--
   No bottom border and a light backdrop, so the nav sits quietly over the hero.
+  The docs header's 1px border comes out of its 4rem, so pb-px keeps the row
+  centred at the same height.
 -->
 <header class="sticky top-0 z-40 bg-black/40 backdrop-blur-xl">
   <nav
-    class="flex h-16 items-center justify-between gap-6 px-4 min-[50rem]:px-6"
+    class="flex h-16 items-center justify-between gap-6 px-4 pb-px min-[50rem]:px-6"
     aria-label="Primary"
   >
     <div class="flex items-center gap-6">
