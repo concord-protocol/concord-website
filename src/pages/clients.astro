@@ -12,33 +12,37 @@
  */
 import { Image } from 'astro:assets';
 import Marketing from '../layouts/Marketing.astro';
+import LinkIcon from '../components/LinkIcon.astro';
 import LibrariesAndBots from '../components/sections/LibrariesAndBots.astro';
-import { CLIENTS } from '../data/site';
+import { CLIENTS, type LinkIcon as Icon } from '../data/site';
+
+/** Listings that install and update the app, as opposed to files to download. */
+const STORE_ICONS = new Set<Icon>(['google-play', 'fdroid', 'zapstore']);
 
 /** What every client agrees on, which is the reason there can be more of them. */
 const SHARED = [
   {
-    term: 'Your identity',
-    detail: 'One key logs you in everywhere, across Concord and the wider Nostr network.',
+    term: 'One identity',
+    detail: 'Sign in to any of them with the same Nostr key.',
   },
   {
-    term: 'Your memberships',
-    detail: 'The Community List syncs across your devices and across clients.',
+    term: 'Your communities',
+    detail: 'Join in one app and the community shows up in the others.',
   },
   {
-    term: 'Invite links',
-    detail: 'An invite minted by one client opens in another.',
+    term: 'Invites',
+    detail: 'An invite link from any app opens in every other.',
   },
   {
-    term: 'The community itself',
-    detail: 'Roles, channels, bans, and pins are protocol state, folded identically.',
+    term: 'Roles and moderation',
+    detail: 'Channels, roles, bans, and pins are the same everywhere you look.',
   },
 ];
 ---
 
 <Marketing
-  title="Clients — Concord"
-  description="Armada, Vector, Accordion, Amethyst, and Grimoire are independent applications that speak the Concord protocol. A community created in one opens in the others."
+  title="Clients · Concord"
+  description="Armada, Vector, Amethyst, PosterChan, Grimoire, Accordion, and Coinos are independent applications that speak the Concord protocol. A community created in one opens in the others."
 >
   <section class="relative overflow-hidden border-b border-hairline">
     <div class="cx-radial pointer-events-none absolute inset-0"></div>
@@ -55,104 +59,195 @@ const SHARED = [
     </div>
   </section>
 
-  <section>
-    <div class="mx-auto max-w-6xl px-5 py-20">
-      <div class="grid gap-4 lg:grid-cols-3">
+  <section class="relative overflow-hidden">
+    <div class="cx-grid-bg pointer-events-none absolute inset-0 opacity-60"></div>
+    <div class="cx-radial pointer-events-none absolute inset-0"></div>
+    <div class="relative mx-auto max-w-6xl px-5 py-16">
+      {/*
+        One panel per app, stacked, every panel sharing the same columns. The
+        panel keeps what the old cards had — each app is an object you can
+        point at — without what made them noise: seven boxes each repeating
+        their own "Stores" and "Downloads" labels and wrapping their links
+        onto as many lines as they needed. Here each label is said once, in
+        the header, and the eye runs down a column to find its own system.
+
+        Below `lg` the columns fold into a stack per row, and the header goes,
+        since there are no columns left for it to name.
+      */}
+      <div
+        class="hidden px-6 pb-3 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-gray-500 lg:grid lg:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_12rem_10rem] lg:gap-x-8"
+        aria-hidden="true"
+      >
+        <span>App</span>
+        <span>Stores</span>
+        <span>Downloads</span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <ul class="space-y-3">
         {
           CLIENTS.map((client) => {
             /*
-             * The first link is the install, and gets the button. The rest are
-             * small text beneath it — Armada's two Android stores, Vector's
-             * handbook — with the repository appended once. Some of them
-             * already carry their source in `links`, so it is filtered out
-             * before being added back, and none of them prints it twice.
+             * The first link is the install, and gets the button. Stores and
+             * files are bare marks, named on hover and in the accessible
+             * label; the few pages worth a word — a page of every build, an
+             * about page, a handbook, the repository — stay text.
+             *
+             * A closed-source client has no repository to append.
              */
-            const extras = client.links
-              .slice(1)
-              .filter((link) => link.href !== client.source);
+            const rest = client.links.slice(1);
+            const stores = rest.filter((link) => link.icon && STORE_ICONS.has(link.icon));
+            const files = rest.filter((link) => link.icon && !STORE_ICONS.has(link.icon));
+            const pages = rest.filter((link) => !link.icon);
+            if (client.source) pages.push({ label: 'Source', href: client.source });
 
             return (
-              <article class="cx-card flex flex-col p-7 sm:p-8">
-                <div class="flex items-center gap-4">
+              <li
+                class="cx-app grid items-center gap-x-8 gap-y-4 p-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_12rem_10rem]"
+                style={`--glow: ${client.glow}`}
+              >
+                {/* The hover field; see .cx-app-noise and the script below. */}
+                <canvas class="cx-app-noise" aria-hidden="true" />
+                <div class="flex min-w-0 items-center gap-4">
                   {/*
                     Clipped to roughly the radius the icons already draw
                     themselves at, so marks from as many teams sit as a set.
-                    `alt=""` because the name is in the heading beside it.
+                    `alt=""` because the name is right beside it.
                   */}
                   <Image
                     src={client.logo}
                     alt=""
-                    width={56}
-                    height={56}
+                    width={44}
+                    height={44}
                     densities={[2]}
-                    class="h-14 w-14 shrink-0 rounded-[13%]"
+                    class="cx-app-logo h-11 w-11 shrink-0 rounded-[13%]"
                   />
                   <div class="min-w-0">
-                    <h2 class="text-2xl font-semibold tracking-tight text-white">
+                    <h2 class="text-lg font-semibold tracking-tight text-white">
                       {client.name}
+                      <span class="ml-2 font-mono text-xs font-normal text-gray-500">
+                        {client.author}
+                      </span>
                     </h2>
-                    <p class="mt-1 font-mono text-xs text-gray-500">
-                      by {client.author}
-                    </p>
+                    <p class="mt-0.5 text-sm text-gray-400">{client.tagline}</p>
                   </div>
                 </div>
 
-                <p class="mt-6 text-sm text-mint">{client.tagline}</p>
-
-                <p class="mt-3 text-sm leading-relaxed text-gray-400">
-                  {client.summary}
-                </p>
-
-                <ul class="mt-6 flex flex-wrap gap-1.5">
-                  {client.platforms.map((platform) => (
-                    <li class="rounded-md border border-hairline px-2 py-1 font-mono text-[0.65rem] text-gray-400">
-                      {platform}
-                    </li>
+                {/*
+                  On a phone the two mark groups share one line, with a gap
+                  between them standing in for the header's column break.
+                */}
+                <div class="hidden flex-wrap items-center gap-x-6 gap-y-2 has-[li]:flex lg:contents lg:has-[li]:contents">
+                  {[stores, files].map((links) => (
+                    <ul class="-ml-1.5 flex flex-wrap empty:hidden lg:empty:block">
+                      {links.map((link) => (
+                        <li>
+                          <a
+                            href={link.href}
+                            rel="noopener"
+                            title={link.label}
+                            aria-label={`${client.name}: ${link.label}`}
+                            class="grid h-8 w-8 place-items-center text-gray-300 transition-colors hover:text-white"
+                          >
+                            <LinkIcon icon={link.icon!} size={18} />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
                   ))}
-                </ul>
-
-                <div class="mt-auto pt-8">
-                  <a
-                    href={client.links[0].href}
-                    rel="noopener"
-                    class="cx-btn cx-btn-primary w-full"
-                  >
-                    {client.links[0].label}
-                  </a>
-
-                  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                    {[...extras, { label: 'Source', href: client.source }].map(
-                      (link) => (
-                        <a
-                          href={link.href}
-                          rel="noopener"
-                          class="text-sm text-gray-400 transition-colors hover:text-gray-100"
-                        >
-                          {link.label}
-                        </a>
-                      ),
-                    )}
-                  </div>
                 </div>
-              </article>
+
+                <div class="flex flex-wrap gap-x-4 gap-y-1">
+                  {pages.map((link) => (
+                    <a
+                      href={link.href}
+                      rel="noopener"
+                      class="text-sm text-gray-400 transition-colors hover:text-gray-100"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+
+                <a
+                  href={client.links[0].href}
+                  rel="noopener"
+                  class="cx-btn cx-btn-primary w-full whitespace-nowrap px-4 py-2.5 text-sm"
+                >
+                  {client.links[0].label}
+                </a>
+              </li>
             );
           })
         }
-      </div>
+      </ul>
+    </div>
+  </section>
+
+  {/*
+    Bots and libraries each get a section of their own, under a heading, on
+    a ground a shade off the page's. They used to continue the client grid
+    behind a hairline, and read as more of the same list; they are not. A
+    client is where you talk, a bot is something you invite into the room,
+    and a library is what either is made from, so each is a stop on the way
+    down the page rather than a few more rows of the list above.
+  */}
+  <section class="border-t border-hairline bg-raised/40">
+    <div class="mx-auto max-w-6xl px-5 py-20">
+      <p class="cx-eyebrow">Bridges &amp; bots</p>
+      <h2
+        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+      >
+        Invite help into a community.
+      </h2>
+      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-gray-400">
+        Each one joins on an invite like any member, and holds only the role
+        it is granted.
+      </p>
 
       {/*
-        The rest of what is installable, continuing the same grid: the SDK a
-        client is written with, and the bots that already sit in somebody's
-        community. Inside this section rather than after it, because they are
-        further rows of the list above rather than a subject of their own —
-        but behind a rule, because an app you install and a library you build
-        against are not the same kind of thing to be scanning past.
-
-        `mb-12` collapses with the `mt-4` the component opens with, so the
-        rule sits the same distance from both sides.
+        Bridges first, lit, and set apart from the bots under their own label:
+        they are what lets an existing Discord or Matrix community talk to its
+        Concord counterpart before anyone moves.
       */}
-      <hr class="my-12 border-hairline" />
-      <LibrariesAndBots />
+      <div class="mt-12">
+        <h3 class="text-base font-semibold text-white">Bridges</h3>
+        <p class="mt-1 text-sm text-gray-400">
+          Bring an existing community along, both ways, while it moves.
+        </p>
+        <div class="mt-6">
+          <LibrariesAndBots group="bridges" />
+        </div>
+      </div>
+
+      <div class="mt-16">
+        <h3 class="text-base font-semibold text-white">Bots</h3>
+        <p class="mt-1 text-sm text-gray-400">
+          Moderation, answers, music, and lookups.
+        </p>
+        <div class="mt-6">
+          <LibrariesAndBots group="bots" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-hairline">
+    <div class="mx-auto max-w-6xl px-5 py-20">
+      <p class="cx-eyebrow">Libraries</p>
+      <h2
+        class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
+      >
+        Build your own.
+      </h2>
+      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-gray-400">
+        Keys, planes, and encryption are handled for you. Write the client or
+        the bot, not the cryptography.
+      </p>
+      <div class="mt-10">
+        <LibrariesAndBots group="libraries" />
+      </div>
     </div>
   </section>
 
@@ -162,7 +257,7 @@ const SHARED = [
       <h2
         class="mt-4 text-balance text-2xl font-semibold leading-tight tracking-tight text-white sm:text-3xl"
       >
-        What travels between them.
+        Switch apps. Keep everything.
       </h2>
 
       <dl class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -188,3 +283,7 @@ const SHARED = [
   </section>
 
 </Marketing>
+
+<script>
+  import '../scripts/app-noise';
+</script>

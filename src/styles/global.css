@@ -720,6 +720,77 @@ body {
     0 18px 50px -24px rgba(36, 232, 163, 0.35);
 }
 
+/* An app's row on the clients page, lit in the app's own colour (`--glow`,
+   from its icon). A neon edge on the left, a wash that fades out across the
+   row, and a halo under it; the cursor turns all three up. Every row is lit
+   on purpose — this list is the page's centrepiece, and seven colours in a
+   column read as a lineup rather than as seven competing calls to action. */
+/* `isolation` makes the row its own stacking context, so the hover field's
+   negative z-index puts it over the row's background and under everything
+   else in it. */
+.cx-app {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--glow) 16%, transparent),
+      color-mix(in srgb, var(--glow) 4%, transparent) 45%,
+      transparent 75%
+    ),
+    linear-gradient(180deg, rgba(14, 21, 18, 0.95), rgba(8, 13, 11, 0.95));
+  border: 1px solid color-mix(in srgb, var(--glow) 32%, transparent);
+  border-radius: 0.875rem;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--glow) 6%, transparent),
+    0 16px 44px -26px color-mix(in srgb, var(--glow) 70%, transparent);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.cx-app::before {
+  content: '';
+  position: absolute;
+  /* A short tab centred on the edge, not the full height: run from corner to
+     corner it overshot the row's rounding and read as a stripe. */
+  top: 30%;
+  bottom: 30%;
+  left: -1px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--glow);
+  box-shadow: 0 0 14px 2px var(--glow);
+}
+
+/* The hover field: a canvas of tiny flickering digits in the row's own
+   colour, like data streaming off a server. It spills past both sides of the
+   row into the gutters and fades to nothing at its edges; inside the row it
+   shows only faintly, under the content. Drawn by the script in
+   clients.astro, and only while hovered. The section around the list clips
+   the overshoot. */
+.cx-app-noise {
+  --spill: min(18rem, (100vw - 100%) / 2);
+  position: absolute;
+  z-index: -1;
+  top: -1.5rem;
+  left: calc(var(--spill-left, var(--spill)) * -1);
+  /* A canvas keeps its intrinsic size between `left` and `right`, so the
+     box is sized outright: the row, plus a gutter's worth on each side. A
+     card with a neighbour sets that side's spill to 0, so it never paints
+     over the card beside it. */
+  width: calc(100% + var(--spill-left, var(--spill)) + var(--spill-right, var(--spill)));
+  height: calc(100% + 3rem);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.cx-app:hover .cx-app-noise {
+  opacity: 1;
+}
+
 /* Small uppercase mint label */
 .cx-eyebrow {
   font-family: var(--font-mono);

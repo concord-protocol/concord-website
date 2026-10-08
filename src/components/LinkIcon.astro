@@ -1,0 +1,44 @@
+---
+/*
+ * The mark for an install link: a platform or a store.
+ *
+ * Monochrome, taking the link's colour, so a row of them reads as one set of
+ * controls rather than a strip of other people's logos.
+ *
+ * Platform, F-Droid, and Google Play paths are Simple Icons (CC0). Zapstore's
+ * bolt is traced from its app icon, since it ships no flat mark. The Windows
+ * tiles are drawn here.
+ *
+ * Always decorative: the link around it carries the label.
+ */
+import type { LinkIcon } from '../data/site';
+import Android from '../assets/icons/android.svg';
+import Apple from '../assets/icons/apple.svg';
+import FDroid from '../assets/icons/fdroid.svg';
+import GooglePlay from '../assets/icons/google-play.svg';
+import Linux from '../assets/icons/linux.svg';
+import Windows from '../assets/icons/windows.svg';
+import Zapstore from '../assets/icons/zapstore.svg';
+
+interface Props {
+  icon: LinkIcon;
+  /** Edge length in pixels. */
+  size?: number;
+}
+
+const { icon, size = 16 } = Astro.props;
+
+const SVGS = {
+  android: Android,
+  apple: Apple,
+  fdroid: FDroid,
+  'google-play': GooglePlay,
+  linux: Linux,
+  windows: Windows,
+  zapstore: Zapstore,
+} as const;
+
+const Svg = SVGS[icon];
+---
+
+<Svg width={size} height={size} class="shrink-0" aria-hidden="true" />

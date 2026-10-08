@@ -7,7 +7,8 @@ import type { ImageMetadata } from 'astro';
 /*
  * Each client's own app icon, as it ships it — Vector's and Accordion's from
  * their repositories, Armada's from its public/ directory, Amethyst's from its
- * Play listing in fastlane/, Grimoire's from its web manifest. Imported rather
+ * Play listing in fastlane/, Grimoire's and Coinos's from their web manifests,
+ * PosterChan's from the icon its Zapstore listing names. Imported rather
  * than dropped in public/ so Astro resizes them to the ~56px the cards draw
  * them at; the sources are 512px, which is 40× the pixels a card needs.
  *
@@ -18,8 +19,11 @@ import type { ImageMetadata } from 'astro';
 import accordionLogo from '../assets/clients/accordion.png';
 import amethystLogo from '../assets/clients/amethyst.png';
 import armadaLogo from '../assets/clients/armada.png';
+import coinosLogo from '../assets/clients/coinos.png';
 import grimoireLogo from '../assets/clients/grimoire.png';
+import posterchanLogo from '../assets/clients/posterchan.png';
 import vectorLogo from '../assets/clients/vector.png';
+import { latestAsset } from './releases';
 
 export const SPEC_REPO = 'https://github.com/concord-protocol/concord';
 export const SPEC_ORG = 'https://github.com/concord-protocol';
@@ -39,12 +43,37 @@ export interface Client {
   /** The app's own icon. See the import block above. */
   logo: ImageMetadata;
   href: string;
-  source: string;
+  /** Absent where the client is closed source; the card then links no repository. */
+  source?: string;
   author: string;
   platforms: string[];
-  accent: string;
-  /** The install and about links. The first is the one a card fills in. */
-  links: { label: string; href: string }[];
+  /** The app's own neon, taken from its icon. Lights its row on the clients page. */
+  glow: string;
+  /**
+   * The install and about links. The first is the one a card fills in; after
+   * it, a link with an `icon` is drawn as that mark alone and one without as
+   * text. Order them stores, then files, then pages.
+   */
+  links: ClientLink[];
+}
+
+/**
+ * See LinkIcon.astro. A page of every build is not one of these: it is a
+ * text link, because a glyph can name a system but not "all of them".
+ */
+export type LinkIcon =
+  | 'android'
+  | 'apple'
+  | 'fdroid'
+  | 'google-play'
+  | 'linux'
+  | 'windows'
+  | 'zapstore';
+
+export interface ClientLink {
+  label: string;
+  href: string;
+  icon?: LinkIcon;
 }
 
 export const CLIENTS: Client[] = [
@@ -53,20 +82,42 @@ export const CLIENTS: Client[] = [
     tagline: 'The full Discord-shaped client',
     author: 'Soapbox',
     summary:
-      'Channels, threads, roles, voice and video, custom emoji — plus a Discord bridge and server import.',
+      'Channels, threads, roles, voice and video, and custom emoji, plus a Discord bridge and server import.',
     logo: armadaLogo,
     href: 'https://armada.buzz',
     source: 'https://gitworkshop.dev/soapbox.pub/armada',
     platforms: ['Web', 'Android', 'Linux', 'Windows', 'macOS'],
-    accent: 'from-emerald-400/20',
+    glow: '#ff3d8b',
     links: [
       { label: 'Open Armada', href: 'https://armada.buzz' },
-      { label: 'About', href: 'https://soapbox.pub/armada' },
-      { label: 'Zapstore', href: 'https://zapstore.dev/apps/buzz.armada.app' },
       {
         label: 'Google Play',
         href: 'https://play.google.com/store/apps/details?id=buzz.armada.app',
+        icon: 'google-play',
       },
+      /* Soapbox's own F-Droid repository, as Armada's downloads page links it:
+         the fingerprint lets the F-Droid client add the repo in one tap. */
+      {
+        label: 'F-Droid (Soapbox repo)',
+        href: 'https://pkg.soapbox.pub/fdroid/main/repo?fingerprint=CEA02E48815EC61244B5ECB35680B745A7A9A41A9257382F1D8BDDC14E533A17',
+        icon: 'fdroid',
+      },
+      {
+        label: 'Zapstore',
+        href: 'https://zapstore.dev/apps/buzz.armada.app',
+        icon: 'zapstore',
+      },
+      /*
+       * Armada builds its file list in the browser, so there is no fixed URL
+       * per platform. Each mark goes to the downloads page, which picks the
+       * build for the system it is opened on.
+       */
+      { label: 'Android', href: 'https://armada.buzz/downloads', icon: 'android' },
+      { label: 'Windows', href: 'https://armada.buzz/downloads', icon: 'windows' },
+      { label: 'macOS', href: 'https://armada.buzz/downloads', icon: 'apple' },
+      { label: 'Linux', href: 'https://armada.buzz/downloads', icon: 'linux' },
+      { label: 'Downloads', href: 'https://armada.buzz/downloads' },
+      { label: 'About', href: 'https://soapbox.pub/armada' },
     ],
   },
   {
@@ -79,30 +130,47 @@ export const CLIENTS: Client[] = [
     href: 'https://vectorapp.io',
     source: 'https://github.com/VectorPrivacy/Vector',
     platforms: ['Windows', 'macOS', 'Linux', 'Android'],
-    accent: 'from-teal-400/20',
+    glow: '#59fcb3',
     links: [
       { label: 'Download Vector', href: 'https://vectorapp.io' },
       {
-        label: 'Documentation',
+        label: 'Zapstore',
+        href: 'https://zapstore.dev/apps/io.vectorapp',
+        icon: 'zapstore',
+      },
+      /*
+       * The APK is the one asset upstream names without a version, so
+       * `latest/download` points at it directly. The desktop builds carry the
+       * version, and are looked up at build time; see releases.ts.
+       */
+      {
+        label: 'Android APK',
+        href: 'https://github.com/VectorPrivacy/Vector/releases/latest/download/Vector.apk',
+        icon: 'android',
+      },
+      {
+        label: 'Windows',
+        href: await latestAsset('VectorPrivacy/Vector', /_x64-setup\.exe$/),
+        icon: 'windows',
+      },
+      {
+        label: 'macOS (Apple silicon)',
+        href: await latestAsset('VectorPrivacy/Vector', /_aarch64\.dmg$/),
+        icon: 'apple',
+      },
+      {
+        label: 'Linux (AppImage)',
+        href: await latestAsset('VectorPrivacy/Vector', /_amd64\.AppImage$/),
+        icon: 'linux',
+      },
+      {
+        label: 'Downloads',
+        href: 'https://github.com/VectorPrivacy/Vector/releases/latest',
+      },
+      {
+        label: 'Docs',
         href: 'https://vector-privacy.gitbook.io/vector-privacy/vector-messenger',
       },
-      { label: 'Source', href: 'https://github.com/VectorPrivacy/Vector' },
-    ],
-  },
-  {
-    name: 'Accordion',
-    tagline: 'A lightweight web client',
-    author: 'hzrd149',
-    summary:
-      'A compact browser client with no backend — proof of how little you need to speak the protocol.',
-    logo: accordionLogo,
-    href: 'https://accordion.chat',
-    source: 'https://github.com/hzrd149/accordion.chat',
-    platforms: ['Web'],
-    accent: 'from-green-400/20',
-    links: [
-      { label: 'Open Accordion', href: 'https://accordion.chat' },
-      { label: 'Source', href: 'https://github.com/hzrd149/accordion.chat' },
     ],
   },
   {
@@ -110,22 +178,73 @@ export const CLIENTS: Client[] = [
     tagline: 'Communities inside a whole Nostr client',
     author: 'Vitor Pamplona',
     summary:
-      'Concord Channels alongside the feeds, zaps, and streams — in the Android client, and on the desktop.',
+      'Concord Channels alongside the feeds, zaps, and streams, on Android and the desktop.',
     logo: amethystLogo,
     href: 'https://amethyst.social',
     source: 'https://github.com/vitorpamplona/amethyst',
     platforms: ['Android', 'Windows', 'macOS', 'Linux'],
-    accent: 'from-indigo-400/20',
+    glow: '#4f7cff',
     links: [
       { label: 'Get Amethyst', href: 'https://amethyst.social' },
       {
         label: 'Google Play',
         href: 'https://play.google.com/store/apps/details?id=com.vitorpamplona.amethyst',
+        icon: 'google-play',
       },
       {
-        label: 'Desktop downloads',
-        href: 'https://github.com/vitorpamplona/amethyst/releases',
+        label: 'F-Droid',
+        href: 'https://f-droid.org/packages/com.vitorpamplona.amethyst/',
+        icon: 'fdroid',
       },
+      {
+        label: 'Zapstore',
+        href: 'https://zapstore.dev/apps/com.vitorpamplona.amethyst',
+        icon: 'zapstore',
+      },
+      /* Every desktop asset carries the version; see releases.ts. */
+      {
+        label: 'Windows',
+        href: await latestAsset('vitorpamplona/amethyst', /^amethyst-desktop-.*-windows-x64\.msi$/),
+        icon: 'windows',
+      },
+      {
+        label: 'macOS (Apple silicon)',
+        href: await latestAsset('vitorpamplona/amethyst', /^amethyst-desktop-.*-macos-arm64\.dmg$/),
+        icon: 'apple',
+      },
+      {
+        label: 'Linux (AppImage)',
+        href: await latestAsset('vitorpamplona/amethyst', /^amethyst-desktop-.*-x86_64\.AppImage$/),
+        icon: 'linux',
+      },
+      {
+        label: 'Downloads',
+        href: 'https://github.com/vitorpamplona/amethyst/releases/latest',
+      },
+    ],
+  },
+  {
+    name: 'PosterChan',
+    tagline: 'A self-hosted personal cloud on Nostr',
+    author: 'verita84',
+    summary:
+      'Communities next to notes, files, calls, and AI, on a node you run yourself.',
+    logo: posterchanLogo,
+    href: 'https://poster.place',
+    source: 'https://github.com/loblawbob873-svg/posterchanai',
+    platforms: ['Web', 'Android', 'Windows', 'macOS', 'Linux'],
+    glow: '#ff8a1f',
+    links: [
+      { label: 'Open PosterChan', href: 'https://poster.place' },
+      {
+        label: 'Zapstore',
+        href: 'https://zapstore.dev/apps/place.poster.app',
+        icon: 'zapstore',
+      },
+      { label: 'Android APK', href: 'https://poster.place/apk', icon: 'android' },
+      { label: 'Windows', href: 'https://poster.place/desktop/win', icon: 'windows' },
+      { label: 'macOS', href: 'https://poster.place/desktop/mac', icon: 'apple' },
+      { label: 'Linux', href: 'https://poster.place/desktop/linux', icon: 'linux' },
     ],
   },
   {
@@ -133,22 +252,55 @@ export const CLIENTS: Client[] = [
     tagline: 'A tiling workspace for Nostr',
     author: 'purrgrammer',
     summary:
-      'Communities as one pane among many, opened from a command palette — a client for people who like a keyboard.',
+      'Communities as one pane among many, opened from a command palette. A client for keyboard people.',
     logo: grimoireLogo,
     href: 'https://grimoire.rocks',
     source: 'https://github.com/purrgrammer/grimoire',
     platforms: ['Web'],
-    accent: 'from-fuchsia-400/20',
+    glow: '#e879f9',
+    links: [{ label: 'Open Grimoire', href: 'https://grimoire.rocks' }],
+  },
+  {
+    name: 'Accordion',
+    tagline: 'A lightweight web client',
+    author: 'hzrd149',
+    summary:
+      'A compact browser client with no backend, and proof of how little it takes to speak the protocol.',
+    logo: accordionLogo,
+    href: 'https://accordion.chat',
+    source: 'https://github.com/hzrd149/accordion.chat',
+    platforms: ['Web'],
+    glow: '#a855f7',
+    links: [{ label: 'Open Accordion', href: 'https://accordion.chat' }],
+  },
+  {
+    name: 'Coinos',
+    tagline: 'Communities inside a Bitcoin wallet',
+    author: 'Adam Soltys',
+    summary:
+      'A self-custody wallet that runs in the browser, with Concord community chat beside the balance.',
+    logo: coinosLogo,
+    href: 'https://v3.coinos.io',
+    source: 'https://github.com/coinos/coinosv3',
+    platforms: ['Web', 'Android'],
+    glow: '#f7b21a',
     links: [
-      { label: 'Open Grimoire', href: 'https://grimoire.rocks' },
-      { label: 'Source', href: 'https://github.com/purrgrammer/grimoire' },
+      { label: 'Open Coinos', href: 'https://v3.coinos.io' },
+      {
+        label: 'Zapstore',
+        href: 'https://zapstore.dev/apps/io.coinos.app',
+        icon: 'zapstore',
+      },
     ],
   },
 ];
 
 export interface Tool {
   name: string;
-  /** 'SDK' and 'Library' are drawn as libraries; 'Bot' as bots. See LibrariesAndBots.astro. */
+  /**
+   * 'SDK' and 'Library' are drawn as libraries; 'Bot' and 'Bridge' as bots.
+   * See LibrariesAndBots.astro.
+   */
   kind: string;
   author: string;
   description: string;
@@ -156,6 +308,8 @@ export interface Tool {
   language: string;
   /** API documentation, where it is published somewhere other than `href`. */
   docs?: string;
+  /** For a bridge, the network on its far side. Its mark is the bridge's icon. */
+  network?: 'discord' | 'matrix';
 }
 
 export const TOOLS: Tool[] = [
@@ -168,6 +322,28 @@ export const TOOLS: Tool[] = [
       'Keys, relays, streams, and encryption handled, so you write handlers instead of cryptography.',
     href: 'https://crates.io/crates/vector_sdk',
     docs: 'https://docs.rs/vector-sdk',
+  },
+  /*
+   * Its README installs from JSR, but nothing is published there or on npm
+   * yet, so the link is the repository rather than a registry page.
+   */
+  {
+    name: 'applesauce-concord',
+    kind: 'Library',
+    author: 'hzrd149',
+    language: 'TypeScript',
+    description:
+      'CORD-01 to 06 for the applesauce toolkit: protocol helpers, RxJS models, and a reactive client.',
+    href: 'https://gitworkshop.dev/npub1ye5ptcxfyyxl5vjvdjar2ua3f0hynkjzpx552mu5snj3qmx5pzjscpknpr/git.shakespeare.diy/applesauce-concord',
+  },
+  {
+    name: 'concord-bots',
+    kind: 'Library',
+    author: 'CentauriAgent',
+    language: 'Rust',
+    description:
+      'A bot template on vector_sdk: write the handlers, and it runs the connection, routing, and scheduling.',
+    href: 'https://github.com/CentauriAgent/concord-bots',
   },
   {
     name: 'Shanty',
@@ -184,7 +360,7 @@ export const TOOLS: Tool[] = [
     author: 'Derek Ross',
     language: 'Rust',
     description:
-      'Auto-moderation with exactly the rank its Grant gives it — there are no server privileges to hand out.',
+      'Auto-moderation with exactly the rank its Grant gives it, and no server privileges to hand out.',
     href: 'https://github.com/derekross/concord-automod',
   },
   {
@@ -202,8 +378,79 @@ export const TOOLS: Tool[] = [
     author: 'JSKitty',
     language: 'Rust',
     description:
-      'Per-coin price, charts, and market stats — a compact worked example of the SDK’s command handling.',
+      'Per-coin price, charts, and market stats. A compact worked example of the SDK’s command handling.',
     href: 'https://github.com/JSKitty/price-bot',
+  },
+  {
+    name: 'Sentire',
+    kind: 'Bot',
+    author: 'Vector Privacy',
+    language: 'Rust',
+    description:
+      'A full-time moderator: screens text as it lands, judges media with a vision model you pick, and contains raids.',
+    href: 'https://github.com/VectorPrivacy/Sentire',
+  },
+  {
+    name: 'Vector LLM',
+    kind: 'Bot',
+    author: 'Vector Privacy',
+    language: 'Rust',
+    description:
+      'An LLM chatbot with per-channel memory that answers in channels only when mentioned, on any OpenAI-compatible API.',
+    href: 'https://github.com/VectorPrivacy/Vector-LLM',
+  },
+  /*
+   * The rest are announced on ngit (NIP-34) rather than hosted on GitHub, so
+   * they link to gitworkshop.dev, the browsable view of a Nostr repository.
+   */
+  {
+    name: 'manabot',
+    kind: 'Bot',
+    author: 'chad',
+    language: 'Rust',
+    description:
+      'Magic: The Gathering lookups from Scryfall. Write [[card name]] anywhere, or use /card, /price, /ruling.',
+    href: 'https://gitworkshop.dev/npub1scvyzz02ayma34hesz62pdrd5nhsmxp74hjq8msmfs9khh3r3drsnw68d8/relay.ngit.dev/manabot',
+  },
+  {
+    name: 'Gatebot',
+    kind: 'Bot',
+    author: 'Henky',
+    language: 'Rust',
+    description:
+      'A gatekeeper: newcomers pass a captcha on a web page before they stay, and spammers are kicked.',
+    href: 'https://gitworkshop.dev/npub1600yr4qg5vcfp7svf6ysj0008tn7aphnu0gjs6lw5hjn74n0laasjx889v/relay.ngit.dev/Gatebot',
+  },
+  {
+    name: 'concord-qa-bot',
+    kind: 'Bot',
+    author: 'hanshan',
+    language: 'Python',
+    description:
+      'Answers !ask and @mentions with web-grounded replies, as an ordinary member with no staff role.',
+    href: 'https://gitworkshop.dev/npub1ulnt22mynj7juw3j5nnr75euewq6ejesa0yhsnwvwmn48nq2j95q2k0z88/git.hanshan.io/concord-qa-bot',
+  },
+  /* Its announcement still says "design plans"; the repository is a working
+     bridge, with a setup portal, and that is what this describes. */
+  {
+    name: 'armada-discord-bridge',
+    kind: 'Bridge',
+    author: 'Soapbox',
+    language: 'TypeScript',
+    description:
+      'Mirrors a Discord channel and a Concord channel both ways. Anything bridged is plaintext to Discord.',
+    href: 'https://gitworkshop.dev/npub10qdp2fc9ta6vraczxrcs8prqnv69fru2k6s2dj48gqjcylulmtjsg9arpj/relay.ngit.dev/armada-discord-bridge',
+    network: 'discord',
+  },
+  {
+    name: 'armada-matrix-bridge',
+    kind: 'Bridge',
+    author: 'Soapbox',
+    language: 'TypeScript',
+    description:
+      'Mirrors a Matrix room and a Concord channel both ways, each member posting as themselves on each side.',
+    href: 'https://gitworkshop.dev/npub10qdp2fc9ta6vraczxrcs8prqnv69fru2k6s2dj48gqjcylulmtjsg9arpj/git.shakespeare.diy/armada-matrix-bridge',
+    network: 'matrix',
   },
 ];
 

@@ -443,11 +443,12 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
        same effect for free — a drag is a held pointer either way — so this
        half of the script is not gated on a fine pointer. */
     host.addEventListener('pointerdown', (e: PointerEvent) => {
-      /* The mark answers a press itself, with a spin and a flare. A tile
-         lighting under it at the same time is a second effect on the same
-         click, and the two only get in each other's way. */
+      /* The mark answers a press itself, with a spin and a flare, and a link
+         or a button answers by doing what it says. A tile lighting under any
+         of them is a second effect on the same click: under the scroll cue
+         it framed the arrow in a lit box the moment it was pressed. */
       const target = e.target as Element | null;
-      if (target?.closest('[data-mark]')) return;
+      if (target?.closest('[data-mark], a, button')) return;
 
       const p = place(e);
       if (!p) return;
@@ -458,7 +459,7 @@ const wordmark = title.split(' ').map((word) => [...word].map((char) => ({ char,
          off the text, so selecting a line by dragging along it still works,
          and only until the press ends. pointerdown runs ahead of the mousedown
          that would start the selection, so setting it here is in time. */
-      if (!target?.closest('h1, p, a, button')) {
+      if (!target?.closest('h1, p')) {
         host.style.userSelect = 'none';
       }
 
